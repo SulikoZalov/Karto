@@ -8,16 +8,17 @@ CREATE TABLE otp (
     CONSTRAINT user_otp_fk FOREIGN KEY (user_id) REFERENCES user_account(id)
 );
 
-CREATE FUNCTION delete_unused_otp() RETURNS TRIGGER AS $$
+CREATE FUNCTION delete_confirmed_otp() RETURNS TRIGGER AS $$
 BEGIN
     DELETE FROM otp
     WHERE is_confirmed = true
-       OR (is_confirmed = false AND expiration_date <= NOW());
-    RETURN NULL;
+      AND user_id = NEW.user_id
+      AND otp <> NEW.otp;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_delete_unused_otp
+CREATE TRIGGER trigger_delete_verified_otp
 AFTER INSERT OR UPDATE ON otp
 FOR EACH STATEMENT
-EXECUTE FUNCTION delete_unused_otp();
+EXECUTE FUNCTION delete_confirmed_otp();
