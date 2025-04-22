@@ -1,0 +1,58 @@
+package org.project.karto.application.controller;
+
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
+import org.project.karto.application.dto.LateVerificationForm;
+import org.project.karto.application.dto.LoginForm;
+import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.service.AuthService;
+
+@Path("/auth")
+public class AuthResource {
+
+    private final AuthService authService;
+
+    AuthResource(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @POST
+    @Path("/registration")
+    public Response registration(RegistrationForm registrationForm) {
+        authService.registration(registrationForm);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/resend-otp")
+    public Response resendOTP(String phoneNumber) {
+        authService.resendOTP(phoneNumber);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/late-verification")
+    public Response lateVerification(LateVerificationForm lvForm) {
+        authService.lateVerification(lvForm);
+        return Response.accepted().build();
+    }
+
+    @PATCH
+    @Path("/verification")
+    public Response verification(String otp) {
+        authService.verification(otp);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/login")
+    public Response login(LoginForm loginForm) {
+        return Response.ok(authService.login(loginForm)).build();
+    }
+
+    @PATCH
+    @Path("/refresh-token")
+    public Response refresh(@HeaderParam("Refresh-Token") String refreshToken) {
+        return Response.ok(authService.refreshToken(refreshToken)).build();
+    }
+}
