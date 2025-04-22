@@ -10,16 +10,14 @@ import org.project.karto.domain.user.values_objects.Phone;
 @ApplicationScoped
 public class PhoneInteractionService {
 
-    // TODO implement when getting a credentials
-
-    private static final String KARTO_PHONE = "";
+    private static final String KARTO_PHONE = "+15005550006";
 
     public void sendOTP(Phone phone, OTP otp) {
         Log.infof("Sending otp for user: %s".formatted(otp.userID()));
-        //Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), otp.otp()).create();
+        Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), otp.otp()).create();
     }
 
     public void sendMessage(Phone phone, String message) {
-        //Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), message).create();
+        Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), message).create();
     }
 }
