@@ -202,7 +202,7 @@ public class AuthService {
         }
     }
 
-    public Tokens login(String idToken) {
+    public Tokens oidcAuth() {
         try {
             String emailAttribute = securityIdentity.getAttribute("email");
             Email email = new Email(emailAttribute);
