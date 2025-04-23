@@ -9,25 +9,36 @@ import org.project.karto.domain.user.repository.UserRepository;
 import org.project.karto.domain.user.values_objects.Email;
 import org.project.karto.domain.user.values_objects.PersonalData;
 import org.project.karto.infrastructure.security.HOTPGenerator;
+import org.project.karto.infrastructure.security.PasswordEncoder;
+
+import java.util.Objects;
 
 @Singleton
 public class DBManagementUtils {
+
+    private final OTPRepository otpRepository;
 
     private final HOTPGenerator hotpGenerator;
 
     private final UserRepository userRepository;
 
-    private final OTPRepository otpRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    DBManagementUtils(UserRepository userRepository, OTPRepository otpRepository) {
+    DBManagementUtils(
+            UserRepository userRepository,
+            OTPRepository otpRepository,
+            PasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
         this.otpRepository = otpRepository;
+        this.passwordEncoder = passwordEncoder;
         this.hotpGenerator = new HOTPGenerator();
     }
 
     public OTP saveUser(RegistrationForm form) {
+        String encodedPassword = passwordEncoder.encode(form.password());
         User user = User.of(
-                new PersonalData(form.firstname(), form.surname(), form.phone(), form.password(), form.email(), form.birthDate()),
+                new PersonalData(form.firstname(), form.surname(), form.phone(), encodedPassword, form.email(), form.birthDate()),
                 HOTPGenerator.generateSecretKey()
         );
         userRepository.save(user);
@@ -38,7 +49,20 @@ public class DBManagementUtils {
     }
 
     public OTP getUserOTP(String email) {
-        User user = userRepository.findBy(new Email(email)).orElseThrow();
+        User user = Objects.requireNonNull(userRepository.findBy(new Email(email)).orElseThrow());
         return otpRepository.findBy(user.id()).orElseThrow();
+    }
+
+    public void saveVerifiedUser(RegistrationForm form) {
+        OTP otp = saveUser(form);
+        User user = Objects.requireNonNull(userRepository.findBy(new Email(form.email())).orElseThrow());
+
+        user.incrementCounter();
+        otp.confirm();
+        userRepository.updateCounter(user);
+        otpRepository.updateConfirmation(otp);
+
+        user.enable();
+        userRepository.updateVerification(user);
     }
 }

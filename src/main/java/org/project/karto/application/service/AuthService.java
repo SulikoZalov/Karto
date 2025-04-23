@@ -4,10 +4,7 @@ import io.quarkus.logging.Log;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
-import org.project.karto.application.dto.LateVerificationForm;
-import org.project.karto.application.dto.LoginForm;
-import org.project.karto.application.dto.RegistrationForm;
-import org.project.karto.application.dto.Tokens;
+import org.project.karto.application.dto.*;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;
@@ -224,7 +221,7 @@ public class AuthService {
         }
     }
 
-    public String refreshToken(String refreshToken) {
+    public Token refreshToken(String refreshToken) {
         if (refreshToken == null)
             throw responseException(Response.Status.BAD_REQUEST, "Refresh token can`t be null");
 
@@ -247,7 +244,8 @@ public class AuthService {
                     return responseException(Response.Status.NOT_FOUND, "User not found.");
                 });
 
-        return jwtUtility.generateToken(user);
+        String token = jwtUtility.generateToken(user);
+        return new Token(token);
     }
 
     private User registerNonExistedUser(Email email) {
