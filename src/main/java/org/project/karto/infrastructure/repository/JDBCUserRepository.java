@@ -141,7 +141,7 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public void updatePhone(User user) {
-        jdbc.write(UPDATE_PHONE, user.personalData().phone(), user.id().toString())
+        jdbc.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString())
                 .ifFailure(throwable -> Log.errorf("Error update user phone: %s.", throwable.getMessage()));
     }
 
