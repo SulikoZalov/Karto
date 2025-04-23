@@ -1,4 +1,4 @@
-package org.project.karto.features.auth.registration;
+package org.project.karto.features.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,10 +9,8 @@ import io.restassured.http.ContentType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.RegistrationForm;
-import org.project.karto.domain.user.entities.User;
-import org.project.karto.domain.user.repository.UserRepository;
-import org.project.karto.domain.user.values_objects.PersonalData;
-import org.project.karto.infrastructure.security.HOTPGenerator;
+
+import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
 
 import java.time.LocalDate;
@@ -22,14 +20,14 @@ import static io.restassured.RestAssured.given;
 @QuarkusTest
 public class RegistrationTest {
 
-    private final UserRepository userRepository;
+    private final DBManagementUtils dbManagement;
 
     static final ObjectMapper objectMapper = JsonMapper.builder()
             .addModule(new JavaTimeModule())
             .build();
 
-    public RegistrationTest(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    RegistrationTest(DBManagementUtils dbManagementUtils) {
+        this.dbManagement = dbManagementUtils;
     }
 
     @Test
@@ -80,10 +78,7 @@ public class RegistrationTest {
     @Test
     void registrationFailsWhenEmailAlreadyUsed() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        userRepository.save(User.of(
-                new PersonalData(form.firstname(), form.surname(), form.phone(), "encoded", form.email(), form.birthDate()),
-                HOTPGenerator.generateSecretKey()
-        ));
+        dbManagement.saveUser(form);
 
         given()
                 .contentType(ContentType.JSON)
@@ -97,10 +92,7 @@ public class RegistrationTest {
     @Test
     void registrationFailsWhenPhoneAlreadyUsed() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        userRepository.save(User.of(
-                new PersonalData(form.firstname(), form.surname(), form.phone(), "encoded", "other@email.com", form.birthDate()),
-                HOTPGenerator.generateSecretKey()
-        ));
+        dbManagement.saveUser(form);
 
         given()
                 .contentType(ContentType.JSON)
