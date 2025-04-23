@@ -237,10 +237,8 @@ public class AuthService {
 
         var tokenExpiration = LocalDateTime.ofEpochSecond(tokenExpirationDate, 0, ZoneOffset.UTC);
 
-        if (LocalDateTime.now(ZoneOffset.UTC).isAfter(tokenExpiration)) {
-            userRepository.removeRefreshToken(foundedPairResult);
+        if (LocalDateTime.now(ZoneOffset.UTC).isAfter(tokenExpiration))
             throw responseException(Response.Status.BAD_REQUEST, "Refresh token is expired, you need to login.");
-        }
 
         final User user = userRepository
                 .findBy(foundedPairResult.userID())

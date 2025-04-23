@@ -6,6 +6,7 @@ CREATE TABLE user_account (
     email VARCHAR NOT NULL,
     password VARCHAR,
     birth_date TIMESTAMP NOT NULL,
+    is_verified BOOLEAN NOT NULL,
     secret_key VARCHAR NOT NULL,
     counter BIGINT NOT NULL,
     creation_date TIMESTAMP NOT NULL,

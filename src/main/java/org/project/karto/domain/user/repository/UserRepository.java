@@ -14,15 +14,11 @@ public interface UserRepository {
 
     void saveRefreshToken(RefreshToken refreshToken);
 
-    void update(User user);
-
     void updatePhone(User user);
 
     void updateCounter(User user);
 
     void updateVerification(User user);
-
-    void removeRefreshToken(RefreshToken refreshToken);
 
     boolean isEmailExists(Email email);
 
