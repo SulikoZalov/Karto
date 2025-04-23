@@ -9,13 +9,13 @@ public interface OTPRepository {
 
     void save(OTP otp);
 
-    void update(OTP otp);
+    void updateConfirmation(OTP otp);
+
+    void remove(OTP otp);
 
     Result<OTP, Throwable> findBy(OTP otp);
 
     Result<OTP, Throwable> findBy(String otp);
 
     Result<OTP, Throwable> findBy(UUID userID);
-
-    void remove(OTP otp);
 }

@@ -172,7 +172,7 @@ public class AuthService {
             user.incrementCounter();
             otp.confirm();
             userRepository.updateCounter(user);
-            otpRepository.update(otp);
+            otpRepository.updateConfirmation(otp);
 
             user.enable();
             userRepository.updateVerification(user);
