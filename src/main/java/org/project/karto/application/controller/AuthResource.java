@@ -31,14 +31,14 @@ public class AuthResource {
         return Response.ok(authService.oidcAuth()).build();
     }
 
-    @POST
+    @GET
     @Path("/resend-otp")
-    public Response resendOTP(String phoneNumber) {
+    public Response resendOTP(@QueryParam("phoneNumber") String phoneNumber) {
         authService.resendOTP(phoneNumber);
-        return Response.accepted().build();
+        return Response.ok().build();
     }
 
-    @POST
+    @PATCH
     @Path("/late-verification")
     public Response lateVerification(LateVerificationForm lvForm) {
         authService.lateVerification(lvForm);
@@ -47,7 +47,7 @@ public class AuthResource {
 
     @PATCH
     @Path("/verification")
-    public Response verification(String otp) {
+    public Response verification(@QueryParam("otp") String otp) {
         authService.verification(otp);
         return Response.accepted().build();
     }
