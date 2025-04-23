@@ -6,17 +6,26 @@ import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.inject.Singleton;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.user.entities.User;
 
 import java.time.Duration;
-import java.util.Optional;
 
 @Singleton
-public class JwtUtility {
+public class JWTUtility {
 
     private final JWTParser jwtParser;
 
-    public JwtUtility(JWTParser jwtParser) {
+    private static final JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+            .setSkipSignatureVerification()
+            .setSkipAllValidators()
+            .build();
+
+    public JWTUtility(JWTParser jwtParser) {
         this.jwtParser = jwtParser;
     }
 
@@ -41,13 +50,20 @@ public class JwtUtility {
                 .sign();
     }
 
-    public Optional<JsonWebToken> parseJWT(String token) {
+    public Result<JsonWebToken, Throwable> parse(String token) {
         try {
-            return Optional.of(jwtParser.parse(token));
+            return Result.success(jwtParser.parse(token));
         } catch (ParseException e) {
             Log.error("Can`t parse jwt.", e);
+            return Result.failure(e);
         }
+    }
 
-        return Optional.empty();
+    public Result<JwtClaims, Throwable> parseUnverified(String jwt) {
+        try {
+            return Result.success(jwtConsumer.processToClaims(jwt));
+        } catch (InvalidJwtException e) {
+            return Result.failure(e);
+        }
     }
 }

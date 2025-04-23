@@ -1,6 +1,5 @@
 package org.project.karto.application.controller;
 
-import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.project.karto.application.dto.LateVerificationForm;
@@ -26,9 +25,8 @@ public class AuthResource {
 
     @POST
     @Path("/oidc")
-    @Authenticated
-    public Response oidcAuth() {
-        return Response.ok(authService.oidcAuth()).build();
+    public Response oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
+        return Response.ok(authService.oidcAuth(idToken)).build();
     }
 
     @GET

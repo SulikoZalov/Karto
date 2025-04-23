@@ -1,9 +1,9 @@
 package org.project.karto.application.service;
 
 import io.quarkus.logging.Log;
-import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
+import org.jose4j.jwt.JwtClaims;
 import org.project.karto.application.dto.*;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
@@ -11,12 +11,13 @@ import org.project.karto.domain.user.repository.OTPRepository;
 import org.project.karto.domain.user.repository.UserRepository;
 import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
-import org.project.karto.infrastructure.security.JwtUtility;
+import org.project.karto.infrastructure.security.JWTUtility;
 import org.project.karto.infrastructure.security.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 import static org.project.karto.application.util.RestUtil.responseException;
@@ -24,7 +25,7 @@ import static org.project.karto.application.util.RestUtil.responseException;
 @ApplicationScoped
 public class AuthService {
 
-    private final JwtUtility jwtUtility;
+    private final JWTUtility jwtUtility;
 
     private final HOTPGenerator hotpGenerator;
 
@@ -34,20 +35,17 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final SecurityIdentity securityIdentity;
-
     private final EmailInteractionService emailInteractionService;
 
     private final PhoneInteractionService phoneInteractionService;
 
     AuthService(
-            JwtUtility jwtUtility,
+            JWTUtility jwtUtility,
             UserRepository userRepository,
             OTPRepository otpRepository,
             EmailInteractionService emailInteractionService,
             PhoneInteractionService phoneInteractionService,
-            PasswordEncoder passwordEncoder,
-            SecurityIdentity securityIdentity) {
+            PasswordEncoder passwordEncoder) {
 
         this.jwtUtility = jwtUtility;
         this.userRepository = userRepository;
@@ -55,7 +53,6 @@ public class AuthService {
         this.emailInteractionService = emailInteractionService;
         this.phoneInteractionService = phoneInteractionService;
         this.passwordEncoder = passwordEncoder;
-        this.securityIdentity = securityIdentity;
         this.hotpGenerator = new HOTPGenerator();
     }
 
@@ -199,13 +196,16 @@ public class AuthService {
         }
     }
 
-    public Tokens oidcAuth() {
+    public Tokens oidcAuth(String idToken) {
         try {
-            String emailAttribute = securityIdentity.getAttribute("email");
+            JwtClaims claims = jwtUtility.parseUnverified(idToken)
+                    .orElseThrow(() -> responseException(Response.Status.FORBIDDEN, "Invalid id token"));
+
+            String emailAttribute = claims.getClaimValueAsString("email");
             Email email = new Email(emailAttribute);
 
             if (!userRepository.isEmailExists(email)) {
-                User user = registerNonExistedUser(email);
+                User user = registerNonExistedUser(claims, email);
                 Tokens tokens = generateTokens(user);
                 userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
                 return tokens;
@@ -216,7 +216,7 @@ public class AuthService {
             Tokens tokens = generateTokens(user);
             userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
             return tokens;
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DateTimeParseException e) {
             throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
         }
     }
@@ -228,7 +228,7 @@ public class AuthService {
         RefreshToken foundedPairResult = userRepository.findRefreshToken(refreshToken)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "This refresh token is not found."));
 
-        long tokenExpirationDate = jwtUtility.parseJWT(foundedPairResult.refreshToken())
+        long tokenExpirationDate = jwtUtility.parse(foundedPairResult.refreshToken())
                 .orElseThrow(() -> responseException(Response.Status.BAD_REQUEST, "Something went wrong, try again later."))
                 .getExpirationTime();
 
@@ -248,29 +248,29 @@ public class AuthService {
         return new Token(token);
     }
 
-    private User registerNonExistedUser(Email email) {
-        Password.validate(securityIdentity.getAttribute("password"));
-        String encodedPassword = passwordEncoder.encode(securityIdentity.getAttribute("password"));
+    private User registerNonExistedUser(JwtClaims claims, Email email) {
+        String firstname = claims.getClaimValueAsString("firstname");
+        String surname = claims.getClaimValueAsString("lastname");
+        LocalDate birthDate = LocalDate.parse(claims.getClaimValueAsString("birthDate"));
 
-        String firstname = securityIdentity.getAttribute("firstname");
-        String surname = securityIdentity.getAttribute("lastname");
-        String phone = securityIdentity.getAttribute("phone");
-        LocalDate birthDate = securityIdentity.getAttribute("birthDate");
-
-        PersonalData personalData = new PersonalData(
-                firstname,
-                surname,
-                phone,
-                encodedPassword,
-                email.email(),
-                birthDate
-        );
+        PersonalData personalData = getPersonalData(email, firstname, surname, birthDate);
         String secretKey = HOTPGenerator.generateSecretKey();
 
         User user = User.of(personalData, secretKey);
         userRepository.save(user);
         emailInteractionService.sendSoftVerificationMessage(email);
         return user;
+    }
+
+    private static PersonalData getPersonalData(Email email, String firstname, String surname, LocalDate birthDate) {
+        return new PersonalData(
+                firstname,
+                surname,
+                null,
+                null,
+                email.email(),
+                birthDate
+        );
     }
 
     private Tokens generateTokens(User user) {
