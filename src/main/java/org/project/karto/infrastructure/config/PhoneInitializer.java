@@ -1,10 +1,12 @@
 package org.project.karto.infrastructure.config;
 
 import com.twilio.Twilio;
+import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+@Startup
 @ApplicationScoped
 public class PhoneInitializer {
 
