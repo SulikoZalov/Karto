@@ -17,6 +17,19 @@ services:
       timeout: 5s
       retries: 5
 
+  datasource-administration:
+    container_name: karto-administration
+    image: dpage/pgadmin4
+    env_file:
+      - infrastructure.env
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - karto
+    restart: unless-stopped
+
   keycloak:
     container_name: karto-keycloack
     image: quay.io/keycloak/keycloak:26.2

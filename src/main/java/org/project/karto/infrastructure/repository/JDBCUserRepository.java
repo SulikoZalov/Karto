@@ -21,7 +21,7 @@ public class JDBCUserRepository implements UserRepository {
     private final JDBC jdbc;
 
     static final String SAVE_USER = insert()
-            .into("user")
+            .into("user_account")
             .column("id")
             .column("firstname")
             .column("surname")
@@ -29,6 +29,7 @@ public class JDBCUserRepository implements UserRepository {
             .column("email")
             .column("password")
             .column("birth_date")
+            .column("is_verified")
             .column("secret_key")
             .column("counter")
             .column("creation_date")
@@ -46,19 +47,19 @@ public class JDBCUserRepository implements UserRepository {
             .build()
             .sql();
 
-    static final String UPDATE_PHONE = update("user")
+    static final String UPDATE_PHONE = update("user_account")
             .set("phone = ?")
             .where("id = ?")
             .build()
             .sql();
 
-    static final String UPDATE_COUNTER = update("user")
+    static final String UPDATE_COUNTER = update("user_account")
             .set("counter = ?")
             .where("id = ?")
             .build()
             .sql();
 
-    static final String UPDATE_VERIFICATION = update("user")
+    static final String UPDATE_VERIFICATION = update("user_account")
             .set("is_verified = ?")
             .where("id = ?")
             .build()
@@ -66,35 +67,35 @@ public class JDBCUserRepository implements UserRepository {
 
     static final String IS_EMAIL_EXISTS = select()
             .count("email")
-            .from("user")
+            .from("user_account")
             .where("email = ?")
             .build()
             .sql();
 
     static final String IS_PHONE_EXISTS = select()
             .count("phone")
-            .from("user")
+            .from("user_account")
             .where("phone = ?")
             .build()
             .sql();
 
     static final String USER_BY_ID = select()
             .all()
-            .from("user")
+            .from("user_account")
             .where("id = ?")
             .build()
             .sql();
 
     static final String USER_BY_EMAIL = select()
             .all()
-            .from("user")
+            .from("user_account")
             .where("email = ?")
             .build()
             .sql();
 
     static final String USER_BY_PHONE = select()
             .all()
-            .from("user")
+            .from("user_account")
             .where("phone = ?")
             .build()
             .sql();
@@ -120,6 +121,8 @@ public class JDBCUserRepository implements UserRepository {
                         personalData.phone().orElse(null),
                         personalData.email(),
                         personalData.password().orElse(null),
+                        personalData.birthDate(),
+                        user.isVerified(),
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
                         user.creationDate(),
