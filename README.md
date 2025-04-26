@@ -1,66 +1,145 @@
-# Karto
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+---
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+# Auth API Endpoints
 
-## Running the application in dev mode
+Base URL: `/karto/auth`
 
-You can run your application in dev mode that enables live coding using:
+---
 
-```shell script
-./mvnw quarkus:dev
+## POST `/registration`
+
+Registers a new user.
+
+**Request Body (JSON):**
+```json
+{
+  "firstname": "string",
+  "surname": "string",
+  "phone": "string",
+  "email": "string",
+  "password": "string",
+  "passwordConfirmation": "string",
+  "birthDate": "YYYY-MM-DD"
+}
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+**Responses:**
+- `202 Accepted` — Registration accepted.
+- `400 Bad Request` — Invalid input, passwords do not match, or weak password.
+- `409 Conflict` — Email or phone already exists.
 
-## Packaging and running the application
+---
 
-The application can be packaged using:
+## POST `/oidc`
 
-```shell script
-./mvnw package
+Authenticates a user via an OIDC ID token.
+
+**Request Headers:**
+- `X-ID-TOKEN: string`
+
+**Responses:**
+```json
+{
+  "token": "jwt-token",
+  "refreshToken": "refresh-token"
+}
+```
+- `200 OK` — Authentication successful.
+- `400 Bad Request` — Invalid token attributes.
+- `403 Forbidden` — Invalid ID token.
+
+---
+
+## GET `/resend-otp`
+
+Resends the OTP to the user.
+
+**Query Parameters:**
+- `phoneNumber: string`
+
+**Responses:**
+- `200 OK` — OTP resent.
+- `400 Bad Request` — Invalid phone number format.
+- `404 Not Found` — User or OTP not found.
+
+---
+
+## PATCH `/late-verification`
+
+Adds a phone number after initial email registration.
+
+**Request Body (JSON):**
+```json
+{
+  "email": "string",
+  "phone": "string"
+}
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+**Responses:**
+- `202 Accepted` — Phone number accepted for verification.
+- `400 Bad Request` — Invalid email or phone format.
+- `404 Not Found` — User not found.
+- `409 Conflict` — Phone number already used.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+---
 
-If you want to build an _über-jar_, execute the following command:
+## PATCH `/verification`
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+Verifies user registration via OTP.
+
+**Query Parameters:**
+- `otp: string`
+
+**Responses:**
+- `202 Accepted` — Verification successful.
+- `400 Bad Request` — Invalid OTP or already verified.
+- `404 Not Found` — OTP or user not found.
+- `410 Gone` — OTP expired.
+
+---
+
+## POST `/login`
+
+Authenticates using phone number and password.
+
+**Request Body (JSON):**
+```json
+{
+  "phone": "string",
+  "password": "string"
+}
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
+**Responses:**
+```json
+{
+  "token": "jwt-token",
+  "refreshToken": "refresh-token"
+}
 ```
+- `200 OK` — Authentication successful.
+- `400 Bad Request` — Wrong password or invalid input.
+- `404 Not Found` — User not found.
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+---
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+## PATCH `/refresh-token`
+
+Refreshes the JWT using a refresh token.
+
+**Request Headers:**
+- `Refresh-Token: string`
+
+**Responses:**
+```json
+{
+  "token": "new-jwt-token"
+}
 ```
+- `200 OK` — Token refreshed.
+- `400 Bad Request` — Empty or expired refresh token.
+- `404 Not Found` — Refresh token not found.
 
-You can then execute your native executable with: `./target/Karto-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+---
