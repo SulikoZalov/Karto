@@ -5,14 +5,20 @@ import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.inject.Singleton;
+import org.apache.commons.codec.binary.Base64;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.consumer.InvalidJwtException;
-import org.jose4j.jwt.consumer.JwtConsumer;
-import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.user.entities.User;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 
 @Singleton
@@ -20,10 +26,7 @@ public class JWTUtility {
 
     private final JWTParser jwtParser;
 
-    private static final JwtConsumer jwtConsumer = new JwtConsumerBuilder()
-            .setSkipSignatureVerification()
-            .setSkipAllValidators()
-            .build();
+    private static final RSAPublicKey keycloackPublicKey = readX509PublicKey();
 
     public JWTUtility(JWTParser jwtParser) {
         this.jwtParser = jwtParser;
@@ -32,7 +35,7 @@ public class JWTUtility {
     public String generateToken(User user) {
         Duration oneDayAndSecond = Duration.ofDays(1).plusSeconds(1);
 
-        return Jwt.issuer("Chessland")
+        return Jwt.issuer("Karto")
                 .upn(user.personalData().email())
                 .claim("firstname", user.personalData().firstname())
                 .claim("surname", user.personalData().surname())
@@ -44,7 +47,7 @@ public class JWTUtility {
     public String generateRefreshToken(User user) {
         Duration year = Duration.ofDays(365);
 
-        return Jwt.issuer("Chessland")
+        return Jwt.issuer("Karto")
                 .upn(user.personalData().email())
                 .expiresIn(year)
                 .sign();
@@ -59,11 +62,29 @@ public class JWTUtility {
         }
     }
 
-    public Result<JwtClaims, Throwable> parseUnverified(String jwt) {
+    public Result<JsonWebToken, Throwable> verifyAndParse(String jwt) {
         try {
-            return Result.success(jwtConsumer.processToClaims(jwt));
-        } catch (InvalidJwtException e) {
+            JsonWebToken verified = jwtParser.verify(jwt, keycloackPublicKey);
+            return Result.success(verified);
+        } catch (Exception e) {
             return Result.failure(e);
+        }
+    }
+
+    private static RSAPublicKey readX509PublicKey() {
+        try {
+            String key = Files.readString(Path.of("src/main/resources/keycloackPublicKey.pem"), Charset.defaultCharset())
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replaceAll(System.lineSeparator(), "")
+                    .replace("-----END PUBLIC KEY-----", "");
+
+            byte[] encoded = Base64.decodeBase64(key);
+
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+            return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

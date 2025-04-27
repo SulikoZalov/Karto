@@ -3,7 +3,7 @@ package org.project.karto.application.service;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
-import org.jose4j.jwt.JwtClaims;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.*;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
@@ -198,10 +198,10 @@ public class AuthService {
 
     public Tokens oidcAuth(String idToken) {
         try {
-            JwtClaims claims = jwtUtility.parseUnverified(idToken)
+            JsonWebToken claims = jwtUtility.verifyAndParse(idToken)
                     .orElseThrow(() -> responseException(Response.Status.FORBIDDEN, "Invalid id token"));
 
-            String emailAttribute = claims.getClaimValueAsString("email");
+            String emailAttribute = claims.getClaim("email");
             Email email = new Email(emailAttribute);
 
             if (!userRepository.isEmailExists(email)) {
@@ -248,10 +248,10 @@ public class AuthService {
         return new Token(token);
     }
 
-    private User registerNonExistedUser(JwtClaims claims, Email email) {
-        String firstname = claims.getClaimValueAsString("firstname");
-        String surname = claims.getClaimValueAsString("lastname");
-        LocalDate birthDate = LocalDate.parse(claims.getClaimValueAsString("birthDate"));
+    private User registerNonExistedUser(JsonWebToken claims, Email email) {
+        String firstname = claims.getClaim("firstname");
+        String surname = claims.getClaim("lastname");
+        LocalDate birthDate = LocalDate.parse(claims.getClaim("birthDate"));
 
         PersonalData personalData = getPersonalData(email, firstname, surname, birthDate);
         String secretKey = HOTPGenerator.generateSecretKey();
