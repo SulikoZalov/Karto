@@ -1,5 +1,6 @@
 package org.project.karto.util;
 
+import com.hadzhy.jdbclight.jdbc.JDBC;
 import jakarta.inject.Singleton;
 import org.project.karto.application.dto.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
@@ -13,6 +14,9 @@ import org.project.karto.infrastructure.security.PasswordEncoder;
 
 import java.util.Objects;
 
+import static com.hadzhy.jdbclight.sql.SQLBuilder.batchOf;
+import static com.hadzhy.jdbclight.sql.SQLBuilder.delete;
+
 @Singleton
 public class DBManagementUtils {
 
@@ -23,6 +27,25 @@ public class DBManagementUtils {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final JDBC jdbc = JDBC.instance();
+
+    public static final String DELETE_USER = batchOf(
+            delete()
+                    .from("otp")
+                    .where("user_id = (SELECT id FROM user_account WHERE email = ?)")
+                    .build()
+                    .toSQlQuery(),
+            delete()
+                    .from("refresh_token")
+                    .where("user_id = (SELECT id FROM user_account WHERE email = ?)")
+                    .build()
+                    .toSQlQuery(),
+            delete()
+                    .from("user_account")
+                    .where("email = ?")
+                    .build()
+                    .toSQlQuery());
 
     DBManagementUtils(
             UserRepository userRepository,
@@ -64,5 +87,9 @@ public class DBManagementUtils {
 
         user.enable();
         userRepository.updateVerification(user);
+    }
+
+    public void removeUser(String email) {
+        jdbc.write(DELETE_USER, email, email, email);
     }
 }

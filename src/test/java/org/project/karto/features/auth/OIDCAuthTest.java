@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.LateVerificationForm;
+import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
@@ -15,12 +16,19 @@ import static io.restassured.RestAssured.given;
 @QuarkusTest
 public class OIDCAuthTest {
 
+    private final DBManagementUtils dbManagementUtils;
+
     static final ObjectMapper objectMapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
+
+    OIDCAuthTest(DBManagementUtils dbManagementUtils) {
+        this.dbManagementUtils = dbManagementUtils;
+    }
 
     @Test
     void validOpenIDTest() {
         oidcRegistration();
+        removeUser();
     }
 
     @Test
@@ -36,6 +44,8 @@ public class OIDCAuthTest {
                 .then()
                 .assertThat()
                 .statusCode(jakarta.ws.rs.core.Response.Status.ACCEPTED.getStatusCode());
+
+        removeUser();
     }
 
     private static void oidcRegistration() {
@@ -48,6 +58,10 @@ public class OIDCAuthTest {
                 .then()
                 .assertThat()
                 .statusCode(jakarta.ws.rs.core.Response.Status.OK.getStatusCode());
+    }
+
+    private void removeUser() {
+        dbManagementUtils.removeUser("alice@keycloak.org");
     }
 
     private static String idToken() {
