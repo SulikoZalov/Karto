@@ -1,0 +1,10 @@
+package org.project.karto.domain.card.value_objects;
+
+import java.util.UUID;
+
+public record BuyerID(UUID value) {
+    public BuyerID {
+        if (value == null)
+            throw new IllegalStateException("Buyer ID can't be null");
+    }
+}

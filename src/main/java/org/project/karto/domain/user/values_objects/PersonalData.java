@@ -1,6 +1,6 @@
 package org.project.karto.domain.user.values_objects;
 
-import jakarta.annotation.Nullable;
+import org.project.karto.domain.common.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.util.Optional;

@@ -1,3 +1,3 @@
-package org.project.karto.domain.user.values_objects;
+package org.project.karto.domain.common.value_objects;
 
 public record KeyAndCounter(String key, int counter) {}

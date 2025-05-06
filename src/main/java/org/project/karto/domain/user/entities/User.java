@@ -1,6 +1,6 @@
 package org.project.karto.domain.user.entities;
 
-import org.project.karto.domain.user.values_objects.KeyAndCounter;
+import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.user.values_objects.PersonalData;
 import org.project.karto.domain.user.values_objects.Phone;
 
