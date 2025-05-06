@@ -1,12 +1,13 @@
 package org.project.karto.domain.card.entities;
 
+import org.project.karto.domain.card.value_objects.CardID;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class CardVerificationOTP {
     private final String otp;
-    private final UUID userID;
+    private final CardID cardID;
     private boolean isConfirmed;
     private final LocalDateTime creationDate;
     private final LocalDateTime expirationDate;
@@ -15,38 +16,38 @@ public class CardVerificationOTP {
 
     private CardVerificationOTP(
             String otp,
-            UUID userID,
+            CardID cardID,
             boolean isConfirmed,
             LocalDateTime creationDate,
             LocalDateTime expirationDate) {
         this.otp = otp;
-        this.userID = userID;
+        this.cardID = cardID;
         this.creationDate = creationDate;
         this.expirationDate = expirationDate;
     }
 
-    public static CardVerificationOTP of(UUID userID, String otp) {
+    public static CardVerificationOTP of(CardID cardID, String otp) {
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(Duration.ofMinutes(EXPIRATION_TIME));
-        return new CardVerificationOTP(otp, userID, false, creationDate, expirationDate);
+        return new CardVerificationOTP(otp, cardID, false, creationDate, expirationDate);
     }
 
     public static CardVerificationOTP fromRepository(
             String otp,
-            UUID userID,
+            CardID cardID,
             boolean isConfirmed,
             LocalDateTime creationDate,
             LocalDateTime expirationDate) {
 
-        return new CardVerificationOTP(otp, userID, isConfirmed, creationDate, expirationDate);
+        return new CardVerificationOTP(otp, cardID, isConfirmed, creationDate, expirationDate);
     }
 
     public String otp() {
         return otp;
     }
 
-    public UUID userID() {
-        return userID;
+    public CardID cardID() {
+        return cardID;
     }
 
     public boolean isConfirmed() {
