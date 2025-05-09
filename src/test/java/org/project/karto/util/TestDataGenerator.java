@@ -3,7 +3,12 @@ package org.project.karto.util;
 import com.hadzhy.jdbclight.util.Result;
 import net.datafaker.Faker;
 import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.user.values_objects.*;
+import org.project.karto.infrastructure.security.HOTPGenerator;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 public class TestDataGenerator {
 
@@ -68,5 +73,29 @@ public class TestDataGenerator {
             if (!birthdateResult.success()) continue;
             return birthdateResult.value();
         }
+    }
+
+    public static BuyerID generateBuyerID() {
+        return new BuyerID(UUID.randomUUID());
+    }
+
+    public static OwnerID generateOwnerID() {
+        return new OwnerID(UUID.randomUUID());
+    }
+
+    public static StoreID generateStoreID() {
+        return new StoreID(UUID.randomUUID());
+    }
+
+    public static Balance generateBalance() {
+        return new Balance(BigDecimal.valueOf(faker.number().numberBetween(1000, 10000)));
+    }
+
+    public static Amount generateAmount(BigDecimal max) {
+        return new Amount(BigDecimal.valueOf(faker.number().randomDouble(2, 1, max.intValue())));
+    }
+
+    public static String generateSecretKey() {
+        return HOTPGenerator.generateSecretKey();
     }
 }
