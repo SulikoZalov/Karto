@@ -19,6 +19,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_delete_verified_otp
-AFTER INSERT OR UPDATE ON otp
+AFTER UPDATE ON otp
 FOR EACH STATEMENT
 EXECUTE FUNCTION delete_confirmed_otp();

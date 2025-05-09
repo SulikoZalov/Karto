@@ -7,3 +7,18 @@ CREATE TABLE gift_card_otp (
     PRIMARY KEY (otp),
     CONSTRAINT card_otp_fk FOREIGN KEY (card_id) REFERENCES gift_card(id)
 );
+
+CREATE FUNCTION delete_confirmed_gift_card_otp() RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM gift_card_otp
+    WHERE is_confirmed = true
+      AND card_id = NEW.card_id
+      AND otp <> NEW.otp;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_delete_verified_gift_card_otp
+AFTER UPDATE ON gift_card_otp
+FOR EACH STATEMENT
+EXECUTE FUNCTION delete_confirmed_gift_card_otp();
