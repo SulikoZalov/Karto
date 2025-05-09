@@ -7,4 +7,7 @@ public record StoreID(UUID value) {
         if (value == null)
             throw new IllegalStateException("Store ID can't be null");
     }
+    public static StoreID fromString(String uuidStr) {
+        return new StoreID(UUID.fromString(uuidStr));
+    }
 }

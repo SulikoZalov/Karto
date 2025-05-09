@@ -134,6 +134,10 @@ public class GiftCard {
         return giftCardStatus;
     }
 
+    public KeyAndCounter keyAndCounter() {
+        return keyAndCounter;
+    }
+
     public GiftCardType cardType() {
         return storeID == null ? GiftCardType.COMMON : GiftCardType.STORE_SPECIFIC;
     }

@@ -7,4 +7,7 @@ public record BuyerID(UUID value) {
         if (value == null)
             throw new IllegalStateException("Buyer ID can't be null");
     }
+    public static BuyerID fromString(String uuidStr) {
+        return new BuyerID(UUID.fromString(uuidStr));
+    }
 }
