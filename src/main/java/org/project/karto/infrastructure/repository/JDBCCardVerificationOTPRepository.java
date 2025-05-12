@@ -71,7 +71,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
     public void save(CardVerificationOTP otp) {
         jdbc.write(SAVE_OTP,
                         otp.otp(),
-                        otp.cardID().toString(),
+                        otp.cardID().value().toString(),
                         otp.isConfirmed(),
                         Timestamp.valueOf(otp.creationDate()),
                         Timestamp.valueOf(otp.expirationDate()))

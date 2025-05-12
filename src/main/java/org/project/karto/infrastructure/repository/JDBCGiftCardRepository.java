@@ -25,8 +25,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
 
     static final String SAVE_GIFT_CARD = insert()
             .into("gift_card")
-            .columns(
-                    "id",
+            .columns("id",
                     "buyer_id",
                     "owner_id",
                     "store_id",
@@ -37,23 +36,21 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                     "secret_key",
                     "counter",
                     "creation_date",
-                    "expiration_date"
-            )
+                    "expiration_date")
             .values()
             .build()
             .sql();
 
     static final String UPDATE_GIFT_CARD = SQLBuilder.update("gift_card")
             .set("""
-                            gift_card_status = ?,
-                            balance = ?,
-                            count_of_uses = ?,
-                            is_verified = ?,
-                            secret_key = ?,
-                            counter = ?,
-                            expiration_date = ?
-                            """
-            )
+                  gift_card_status = ?,
+                  balance = ?,
+                  count_of_uses = ?,
+                  is_verified = ?,
+                  secret_key = ?,
+                  counter = ?,
+                  expiration_date = ?
+                  """)
             .where("id = ?")
             .build()
             .sql();
@@ -93,10 +90,10 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     @Override
     public void save(GiftCard giftCard) {
         jdbc.write(SAVE_GIFT_CARD,
-                giftCard.id().toString(),
-                giftCard.buyerID().toString(),
-                giftCard.ownerID() != null ? giftCard.ownerID().toString() : null,
-                giftCard.storeID() != null ? giftCard.storeID().toString() : null,
+                giftCard.id().value().toString(),
+                giftCard.buyerID().value().toString(),
+                giftCard.ownerID() != null ? giftCard.ownerID().value().toString() : null,
+                giftCard.storeID() != null ? giftCard.storeID().value().toString() : null,
                 giftCard.giftCardStatus().name(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
@@ -126,25 +123,25 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
 
     @Override
     public Result<GiftCard, Throwable> findBy(CardID cardID) {
-        var result = jdbc.read(FIND_BY_CARD_ID, this::mapGiftCard, cardID.toString());
+        var result = jdbc.read(FIND_BY_CARD_ID, this::mapGiftCard, cardID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<List<GiftCard>, Throwable> findBy(BuyerID buyerID) {
-        var result = jdbc.readListOf(FIND_BY_BUYER_ID, this::mapGiftCard, buyerID.toString());
+        var result = jdbc.readListOf(FIND_BY_BUYER_ID, this::mapGiftCard, buyerID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<List<GiftCard>, Throwable> findBy(OwnerID ownerID) {
-        var result = jdbc.readListOf(FIND_BY_OWNER_ID, this::mapGiftCard, ownerID.toString());
+        var result = jdbc.readListOf(FIND_BY_OWNER_ID, this::mapGiftCard, ownerID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<List<GiftCard>, Throwable> findBy(StoreID storeID) {
-        var result = jdbc.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, storeID.toString());
+        var result = jdbc.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, storeID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
