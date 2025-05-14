@@ -63,7 +63,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
             .build()
             .sql();
 
-    public JDBCCardVerificationOTPRepository() {
+    JDBCCardVerificationOTPRepository() {
         this.jdbc = JDBC.instance();
     }
 

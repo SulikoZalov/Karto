@@ -6,6 +6,7 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
+import org.project.karto.domain.card.enumerations.Store;
 import org.project.karto.domain.card.repositories.GiftCardRepository;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
@@ -83,7 +84,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
             .build()
             .sql();
 
-    public JDBCGiftCardRepository() {
+    JDBCGiftCardRepository() {
         this.jdbc = JDBC.instance();
     }
 
@@ -93,7 +94,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.id().value().toString(),
                 giftCard.buyerID().value().toString(),
                 giftCard.ownerID() != null ? giftCard.ownerID().value().toString() : null,
-                giftCard.storeID() != null ? giftCard.storeID().value().toString() : null,
+                giftCard.store().name(),
                 giftCard.giftCardStatus().name(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
@@ -140,17 +141,18 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     }
 
     @Override
-    public Result<List<GiftCard>, Throwable> findBy(StoreID storeID) {
-        var result = jdbc.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, storeID.value().toString());
+    public Result<List<GiftCard>, Throwable> findBy(Store store) {
+        var result = jdbc.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, store.name());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     private GiftCard mapGiftCard(ResultSet rs) throws SQLException {
+        String ownerId = rs.getString("owner_id");
         return GiftCard.fromRepository(
                 CardID.fromString(rs.getString("id")),
                 BuyerID.fromString(rs.getString("buyer_id")),
-                rs.getString("owner_id") != null ? OwnerID.fromString(rs.getString("owner_id")) : null,
-                rs.getString("store_id") != null ? StoreID.fromString(rs.getString("store_id")) : null,
+                ownerId != null ? OwnerID.fromString(ownerId) : null,
+                Store.valueOf(rs.getString("store_id")),
                 GiftCardStatus.valueOf(rs.getString("gift_card_status")),
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),
