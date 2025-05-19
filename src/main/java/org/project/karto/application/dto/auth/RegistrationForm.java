@@ -1,4 +1,4 @@
-package org.project.karto.application.dto;
+package org.project.karto.application.dto.auth;
 
 import java.time.LocalDate;
 

@@ -3,7 +3,7 @@ package org.project.karto.features.auth;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
-import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 import org.project.karto.util.DBManagementUtils;

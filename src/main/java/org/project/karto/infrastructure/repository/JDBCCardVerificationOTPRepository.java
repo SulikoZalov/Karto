@@ -58,7 +58,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
     static final String FIND_BY_OWNER_ID = select()
             .all()
             .from("gift_card_otp AS o")
-            .joinAs( "gift_card", "c", "o.card_id = c.id")
+            .joinAs("gift_card", "c", "o.card_id = c.id")
             .where("c.owner_id = ?")
             .build()
             .sql();

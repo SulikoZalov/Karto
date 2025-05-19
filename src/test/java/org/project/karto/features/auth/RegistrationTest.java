@@ -8,7 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
-import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
 
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;

@@ -2,7 +2,7 @@ package org.project.karto.util;
 
 import com.hadzhy.jdbclight.jdbc.JDBC;
 import jakarta.inject.Singleton;
-import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;

@@ -2,9 +2,9 @@ package org.project.karto.application.controller;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.project.karto.application.dto.LateVerificationForm;
-import org.project.karto.application.dto.LoginForm;
-import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.dto.auth.LateVerificationForm;
+import org.project.karto.application.dto.auth.LoginForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.application.service.AuthService;
 
 @Path("/auth")

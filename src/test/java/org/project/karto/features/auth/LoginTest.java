@@ -6,10 +6,10 @@ import io.restassured.http.ContentType;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
-import org.project.karto.application.dto.LoginForm;
-import org.project.karto.application.dto.RegistrationForm;
-import org.project.karto.application.dto.Token;
-import org.project.karto.application.dto.Tokens;
+import org.project.karto.application.dto.auth.LoginForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
+import org.project.karto.application.dto.auth.Token;
+import org.project.karto.application.dto.auth.Tokens;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
 

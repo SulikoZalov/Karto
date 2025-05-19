@@ -2,7 +2,7 @@ package org.project.karto.util;
 
 import com.hadzhy.jdbclight.util.Result;
 import net.datafaker.Faker;
-import org.project.karto.application.dto.RegistrationForm;
+import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
@@ -81,10 +81,6 @@ public class TestDataGenerator {
 
     public static OwnerID generateOwnerID() {
         return new OwnerID(UUID.randomUUID());
-    }
-
-    public static StoreID generateStoreID() {
-        return new StoreID(UUID.randomUUID());
     }
 
     public static Balance generateBalance() {

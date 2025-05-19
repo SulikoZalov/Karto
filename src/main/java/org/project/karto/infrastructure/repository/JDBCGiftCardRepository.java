@@ -29,7 +29,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
             .columns("id",
                     "buyer_id",
                     "owner_id",
-                    "store_id",
+                    "store",
                     "gift_card_status",
                     "balance",
                     "count_of_uses",
@@ -80,7 +80,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     static final String FIND_BY_STORE_ID = select()
             .all()
             .from("gift_card")
-            .where("store_id = ?")
+            .where("store = ?")
             .build()
             .sql();
 
@@ -152,7 +152,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 CardID.fromString(rs.getString("id")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 ownerId != null ? OwnerID.fromString(ownerId) : null,
-                Store.valueOf(rs.getString("store_id")),
+                Store.valueOf(rs.getString("store")),
                 GiftCardStatus.valueOf(rs.getString("gift_card_status")),
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),
