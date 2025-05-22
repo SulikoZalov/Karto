@@ -1,4 +1,4 @@
-package org.project.karto.application.service;
+package org.project.karto.infrastructure.emails;
 
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;

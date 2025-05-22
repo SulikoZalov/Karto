@@ -10,6 +10,7 @@ import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;
 import org.project.karto.domain.user.repository.UserRepository;
 import org.project.karto.domain.user.values_objects.*;
+import org.project.karto.infrastructure.emails.EmailInteractionService;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 import org.project.karto.infrastructure.security.JWTUtility;
 import org.project.karto.infrastructure.security.PasswordEncoder;
