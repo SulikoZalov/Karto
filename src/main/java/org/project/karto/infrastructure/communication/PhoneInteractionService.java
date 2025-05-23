@@ -1,4 +1,4 @@
-package org.project.karto.application.service;
+package org.project.karto.infrastructure.communication;
 
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
