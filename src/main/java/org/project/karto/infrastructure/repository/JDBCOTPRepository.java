@@ -1,6 +1,6 @@
 package org.project.karto.infrastructure.repository;
 
-import com.hadzhy.jdbclight.jdbc.JDBC;
+import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
@@ -12,12 +12,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import static com.hadzhy.jdbclight.sql.SQLBuilder.*;
+import static com.hadzhy.jetquerious.sql.QueryForge.*;
 
 @ApplicationScoped
 public class JDBCOTPRepository implements OTPRepository {
 
-    private final JDBC jdbc;
+    private final JetQuerious jet;
 
     static final String SAVE_OTP = insert()
             .into("otp")
@@ -57,12 +57,12 @@ public class JDBCOTPRepository implements OTPRepository {
             .sql();
 
     public JDBCOTPRepository() {
-        jdbc = JDBC.instance();
+        jet = JetQuerious.instance();
     }
 
     @Override
     public void save(OTP otp) {
-        jdbc.write(SAVE_OTP,
+        jet.write(SAVE_OTP,
                         otp.otp(),
                         otp.userID().toString(),
                         otp.isConfirmed(),
@@ -73,13 +73,13 @@ public class JDBCOTPRepository implements OTPRepository {
 
     @Override
     public void updateConfirmation(OTP otp) {
-        jdbc.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp())
+        jet.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp())
                 .ifFailure(throwable -> Log.errorf("Error update otp confirmation: %s.", throwable.getMessage()));
     }
 
     @Override
     public void remove(OTP otp) {
-        jdbc.write(REMOVE_OTP, otp.otp())
+        jet.write(REMOVE_OTP, otp.otp())
                 .ifFailure(throwable -> Log.errorf("Error deleting otp: %s.", otp.otp()));
     }
 
@@ -90,13 +90,13 @@ public class JDBCOTPRepository implements OTPRepository {
 
     @Override
     public Result<OTP, Throwable> findBy(String otp) {
-        var result = jdbc.read(READ_OTP, this::otpMapper, otp);
+        var result = jet.read(READ_OTP, this::otpMapper, otp);
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<OTP, Throwable> findBy(UUID userID) {
-        var result = jdbc.read(OTP_BY_USER_ID, this::otpMapper, userID.toString());
+        var result = jet.read(OTP_BY_USER_ID, this::otpMapper, userID.toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 

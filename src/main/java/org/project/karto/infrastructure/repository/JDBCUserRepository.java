@@ -1,6 +1,6 @@
 package org.project.karto.infrastructure.repository;
 
-import com.hadzhy.jdbclight.jdbc.JDBC;
+import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
@@ -14,12 +14,13 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import static com.hadzhy.jdbclight.sql.SQLBuilder.*;
+import static com.hadzhy.jetquerious.sql.QueryForge.*;
+
 
 @ApplicationScoped
 public class JDBCUserRepository implements UserRepository {
 
-    private final JDBC jdbc;
+    private final JetQuerious jet;
 
     static final String SAVE_USER = insert()
             .into("user_account")
@@ -109,13 +110,13 @@ public class JDBCUserRepository implements UserRepository {
             .sql();
 
     public JDBCUserRepository() {
-        jdbc = JDBC.instance();
+        jet = JetQuerious.instance();
     }
 
     @Override
     public void save(User user) {
         PersonalData personalData = user.personalData();
-        jdbc.write(SAVE_USER,
+        jet.write(SAVE_USER,
                         user.id().toString(),
                         personalData.firstname(),
                         personalData.surname(),
@@ -133,7 +134,7 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public void saveRefreshToken(RefreshToken refreshToken) {
-        jdbc.write(SAVE_REFRESH_TOKEN,
+        jet.write(SAVE_REFRESH_TOKEN,
                         refreshToken.userID().toString(),
                         refreshToken.refreshToken(),
                         refreshToken.refreshToken())
@@ -142,25 +143,25 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public void updatePhone(User user) {
-        jdbc.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString())
+        jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString())
                 .ifFailure(throwable -> Log.errorf("Error update user phone: %s.", throwable.getMessage()));
     }
 
     @Override
     public void updateCounter(User user) {
-        jdbc.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString())
+        jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString())
                 .ifFailure(throwable -> Log.errorf("Error update user phone: %s.", throwable.getMessage()));
     }
 
     @Override
     public void updateVerification(User user) {
-        jdbc.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString())
+        jet.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString())
                 .ifFailure(throwable -> Log.errorf("Error update verification: %s.", throwable.getMessage()));
     }
 
     @Override
     public boolean isEmailExists(Email email) {
-        return jdbc.readObjectOf(IS_EMAIL_EXISTS, Integer.class, email.email())
+        return jet.readObjectOf(IS_EMAIL_EXISTS, Integer.class, email.email())
                 .mapSuccess(count -> count != null && count > 0)
                 .orElseGet(() -> {
                     Log.error("Error checking email existence.");
@@ -170,7 +171,7 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public boolean isPhoneExists(Phone phone) {
-        return jdbc.readObjectOf(IS_PHONE_EXISTS, Integer.class, phone.phoneNumber())
+        return jet.readObjectOf(IS_PHONE_EXISTS, Integer.class, phone.phoneNumber())
                 .mapSuccess(count -> count != null && count > 0)
                 .orElseGet(() -> {
                     Log.error("Error checking phone existence");
@@ -180,25 +181,25 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public Result<User, Throwable> findBy(UUID id) {
-        var result = jdbc.read(USER_BY_ID, this::userMapper, id.toString());
+        var result = jet.read(USER_BY_ID, this::userMapper, id.toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<User, Throwable> findBy(Email email) {
-        var result = jdbc.read(USER_BY_EMAIL, this::userMapper, email.email());
+        var result = jet.read(USER_BY_EMAIL, this::userMapper, email.email());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<User, Throwable> findBy(Phone phone) {
-        var result = jdbc.read(USER_BY_PHONE, this::userMapper, phone.phoneNumber());
+        var result = jet.read(USER_BY_PHONE, this::userMapper, phone.phoneNumber());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<RefreshToken, Throwable> findRefreshToken(String refreshToken) {
-        var result = jdbc.read(REFRESH_TOKEN, this::refreshTokenMapper, refreshToken);
+        var result = jet.read(REFRESH_TOKEN, this::refreshTokenMapper, refreshToken);
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 

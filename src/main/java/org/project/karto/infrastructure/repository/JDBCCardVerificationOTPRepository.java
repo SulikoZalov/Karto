@@ -1,7 +1,7 @@
 package org.project.karto.infrastructure.repository;
 
-import com.hadzhy.jdbclight.jdbc.JDBC;
-import com.hadzhy.jdbclight.sql.SQLBuilder;
+import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import com.hadzhy.jetquerious.sql.QueryForge;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.CardVerificationOTP;
@@ -15,12 +15,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static com.hadzhy.jdbclight.sql.SQLBuilder.*;
+import static com.hadzhy.jetquerious.sql.QueryForge.*;
 
 @ApplicationScoped
 public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRepository {
 
-    private final JDBC jdbc;
+    private final JetQuerious jet;
 
     static final String SAVE_OTP = insert()
             .into("gift_card_otp")
@@ -29,7 +29,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
             .build()
             .sql();
 
-    static final String UPDATE_CONFIRMATION = SQLBuilder.update("gift_card_otp")
+    static final String UPDATE_CONFIRMATION = QueryForge.update("gift_card_otp")
             .set("is_confirmed = ?")
             .where("otp = ?")
             .build()
@@ -64,12 +64,12 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
             .sql();
 
     JDBCCardVerificationOTPRepository() {
-        this.jdbc = JDBC.instance();
+        this.jet = JetQuerious.instance();
     }
 
     @Override
     public void save(CardVerificationOTP otp) {
-        jdbc.write(SAVE_OTP,
+        jet.write(SAVE_OTP,
                         otp.otp(),
                         otp.cardID().value().toString(),
                         otp.isConfirmed(),
@@ -81,7 +81,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
 
     @Override
     public void update(CardVerificationOTP otp) {
-        jdbc.write(UPDATE_CONFIRMATION,
+        jet.write(UPDATE_CONFIRMATION,
                         otp.isConfirmed(),
                         otp.otp())
                 .ifFailure(throwable ->
@@ -90,7 +90,7 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
 
     @Override
     public void remove(CardVerificationOTP otp) {
-        jdbc.write(DELETE_OTP, otp.otp())
+        jet.write(DELETE_OTP, otp.otp())
                 .ifFailure(throwable ->
                         Log.errorf("Error deleting gift card OTP: %s", otp.otp()));
     }
@@ -102,19 +102,19 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
 
     @Override
     public Result<CardVerificationOTP, Throwable> findBy(String otp) {
-        var result = jdbc.read(FIND_BY_OTP, this::mapOtp, otp);
+        var result = jet.read(FIND_BY_OTP, this::mapOtp, otp);
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<CardVerificationOTP, Throwable> findBy(OwnerID ownerID) {
-        var result = jdbc.read(FIND_BY_OWNER_ID, this::mapOtp, ownerID.value().toString());
+        var result = jet.read(FIND_BY_OWNER_ID, this::mapOtp, ownerID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override
     public Result<CardVerificationOTP, Throwable> findBy(CardID cardID) {
-        var result = jdbc.read(FIND_BY_CARD_ID, this::mapOtp, cardID.value().toString());
+        var result = jet.read(FIND_BY_CARD_ID, this::mapOtp, cardID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
