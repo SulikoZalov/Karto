@@ -6,7 +6,6 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
-import org.project.karto.domain.card.enumerations.Store;
 import org.project.karto.domain.card.repositories.GiftCardRepository;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
@@ -30,7 +29,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                     "pan",
                     "buyer_id",
                     "owner_id",
-                    "store",
+                    "store_id",
                     "gift_card_status",
                     "balance",
                     "count_of_uses",
@@ -92,11 +91,11 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     @Override
     public void save(GiftCard giftCard) {
         jet.write(SAVE_GIFT_CARD,
-                giftCard.id().value().toString(),
+                giftCard.id(),
                 giftCard.pan(),
-                giftCard.buyerID().value().toString(),
-                giftCard.ownerID() != null ? giftCard.ownerID().value().toString() : null,
-                giftCard.store().name(),
+                giftCard.buyerID(),
+                giftCard.ownerID(),
+                giftCard.storeID(),
                 giftCard.giftCardStatus().name(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
@@ -143,8 +142,8 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     }
 
     @Override
-    public Result<List<GiftCard>, Throwable> findBy(Store store) {
-        var result = jet.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, store.name());
+    public Result<List<GiftCard>, Throwable> findBy(StoreID storeID) {
+        var result = jet.readListOf(FIND_BY_STORE_ID, this::mapGiftCard, storeID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
@@ -155,7 +154,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 new PAN(rs.getString("pan")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 ownerId != null ? OwnerID.fromString(ownerId) : null,
-                Store.valueOf(rs.getString("store")),
+                StoreID.fromString(rs.getString("store")),
                 GiftCardStatus.valueOf(rs.getString("gift_card_status")),
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),

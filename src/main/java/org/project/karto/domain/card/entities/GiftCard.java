@@ -2,7 +2,6 @@ package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
-import org.project.karto.domain.card.enumerations.Store;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
@@ -16,7 +15,7 @@ public class GiftCard {
     private final PAN pan;
     private final BuyerID buyerID;
     private final @Nullable OwnerID ownerID;
-    private final Store store;
+    private final StoreID storeID;
     private final int maxCountOfUses;
     private final LocalDateTime creationDate;
     private final LocalDateTime expirationDate;
@@ -36,7 +35,7 @@ public class GiftCard {
             CardID id,
             BuyerID buyerID,
             @Nullable OwnerID ownerID,
-            Store store,
+            StoreID storeID,
             int maxCountOfUses,
             PAN pan,
             GiftCardStatus giftCardStatus,
@@ -50,7 +49,7 @@ public class GiftCard {
         this.id = id;
         this.buyerID = buyerID;
         this.ownerID = ownerID;
-        this.store = store;
+        this.storeID = storeID;
         this.maxCountOfUses = maxCountOfUses;
         this.pan = pan;
         this.giftCardStatus = giftCardStatus;
@@ -62,37 +61,37 @@ public class GiftCard {
         this.lastUsage = lastUsage;
     }
 
-    public static GiftCard selfBoughtCard(PAN pan, BuyerID buyerID, Balance balance, Store store,
+    public static GiftCard selfBoughtCard(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
                                           String secretKey, int maxCountOfUses, Period validityPeriod) {
 
-        validateInputs(pan, buyerID, balance, store, secretKey, maxCountOfUses, validityPeriod);
+        validateInputs(pan, buyerID, balance, storeID, secretKey, maxCountOfUses, validityPeriod);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(validityPeriod);
 
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), store, maxCountOfUses, pan,
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses, pan,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
     public static GiftCard boughtAsAGift(PAN pan, BuyerID buyerID, Balance balance, @Nullable OwnerID ownerID,
-                                         Store store, String secretKey, int maxCountOfUses, Period validityPeriod) {
+                                         StoreID storeID, String secretKey, int maxCountOfUses, Period validityPeriod) {
 
-        validateInputs(pan, buyerID, balance, store, secretKey, maxCountOfUses, validityPeriod);
+        validateInputs(pan, buyerID, balance, storeID, secretKey, maxCountOfUses, validityPeriod);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(validityPeriod);
 
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, store, maxCountOfUses, pan,
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, storeID, maxCountOfUses, pan,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
-    private static void validateInputs(PAN pan, BuyerID buyerID, Balance balance, Store store,
+    private static void validateInputs(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
                                        String secretKey, int maxCountOfUses, Period validityPeriod) {
 
         if (pan == null) throw new IllegalArgumentException("PAN cannot be null");
         if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
         if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
-        if (store == null) throw new IllegalArgumentException("Store can`t be null");
+        if (storeID == null) throw new IllegalArgumentException("Store can`t be null");
         if (secretKey == null) throw new IllegalArgumentException("Secret key can`t be null");
         if (validityPeriod == null) throw new IllegalArgumentException("Validity period can`t be null");
         if (!isWithinValidRange(validityPeriod))
@@ -120,7 +119,7 @@ public class GiftCard {
             PAN pan,
             BuyerID buyerID,
             OwnerID ownerID,
-            Store store,
+            StoreID storeID,
             GiftCardStatus giftCardStatus,
             Balance balance,
             int countOfUses,
@@ -130,7 +129,7 @@ public class GiftCard {
             LocalDateTime expirationDate,
             LocalDateTime lastUsage) {
 
-        return new GiftCard(id, buyerID, ownerID, store, maxCountOfUses, pan,
+        return new GiftCard(id, buyerID, ownerID, storeID, maxCountOfUses, pan,
                 giftCardStatus, balance, countOfUses, keyAndCounter, creationDate, expirationDate, lastUsage);
     }
 
@@ -146,8 +145,8 @@ public class GiftCard {
         return ownerID;
     }
 
-    public Store store() {
-        return store;
+    public StoreID storeID() {
+        return storeID;
     }
 
     public PAN pan() {
