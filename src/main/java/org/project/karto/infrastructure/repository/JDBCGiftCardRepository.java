@@ -34,7 +34,6 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                     "balance",
                     "count_of_uses",
                     "max_count_of_uses",
-                    "is_verified",
                     "secret_key",
                     "counter",
                     "creation_date",
@@ -49,7 +48,6 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                   gift_card_status = ?,
                   balance = ?,
                   count_of_uses = ?,
-                  is_verified = ?,
                   secret_key = ?,
                   counter = ?,
                   last_usage = ?
@@ -101,7 +99,6 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
                 giftCard.maxCountOfUses(),
-                giftCard.isVerified(),
                 giftCard.keyAndCounter().key(),
                 giftCard.keyAndCounter().counter(),
                 giftCard.creationDate(),
@@ -117,7 +114,6 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.giftCardStatus().name(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
-                giftCard.isVerified(),
                 giftCard.keyAndCounter().key(),
                 giftCard.keyAndCounter().counter(),
                 giftCard.lastUsage(),
@@ -161,7 +157,6 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),
                 rs.getInt("max_count_of_uses"),
-                rs.getBoolean("is_verified"),
                 new KeyAndCounter(
                         rs.getString("secret_key"),
                         rs.getInt("counter")

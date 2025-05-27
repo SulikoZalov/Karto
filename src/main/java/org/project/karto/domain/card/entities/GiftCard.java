@@ -23,7 +23,6 @@ public class GiftCard {
     private GiftCardStatus giftCardStatus;
     private Balance balance;
     private int countOfUses;
-    private boolean isVerified;
     private KeyAndCounter keyAndCounter;
     private LocalDateTime lastUsage;
 
@@ -41,7 +40,6 @@ public class GiftCard {
             GiftCardStatus giftCardStatus,
             Balance balance,
             int countOfUses,
-            boolean isVerified,
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate,
             LocalDateTime expirationDate,
@@ -55,7 +53,6 @@ public class GiftCard {
         this.giftCardStatus = giftCardStatus;
         this.balance = balance;
         this.countOfUses = countOfUses;
-        this.isVerified = isVerified;
         this.keyAndCounter = keyAndCounter;
         this.creationDate = creationDate;
         this.expirationDate = expirationDate;
@@ -64,24 +61,31 @@ public class GiftCard {
 
     public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, Store store,
                                           String secretKey, int maxCountOfUses, Period validityPeriod) {
-        if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
-        if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
-        if (store == null) throw new IllegalArgumentException("Store can`t be null");
-        if (secretKey == null) throw new IllegalArgumentException("Secret key can`t be null");
-        if (validityPeriod == null) throw new IllegalArgumentException("Validity period can`t be null");
-        if (!isWithinValidRange(validityPeriod))
-            throw new IllegalArgumentException("Invalid validity period range");
-        if (!isWithinValidRange(maxCountOfUses))
-            throw new IllegalArgumentException("Invalid count of uses range");
+
+        validateInputs(buyerID, balance, store, secretKey, maxCountOfUses, validityPeriod);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(validityPeriod);
+
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), store, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, false, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
     public static GiftCard boughtAsAGift(BuyerID buyerID, Balance balance, @Nullable OwnerID ownerID,
                                          Store store, String secretKey, int maxCountOfUses, Period validityPeriod) {
+
+        validateInputs(buyerID, balance, store, secretKey, maxCountOfUses, validityPeriod);
+
+        LocalDateTime creationDate = LocalDateTime.now();
+        LocalDateTime expirationDate = creationDate.plus(validityPeriod);
+
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, store, maxCountOfUses,
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+    }
+
+    private static void validateInputs(BuyerID buyerID, Balance balance, Store store,
+                                       String secretKey, int maxCountOfUses, Period validityPeriod) {
+
         if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
         if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
         if (store == null) throw new IllegalArgumentException("Store can`t be null");
@@ -91,11 +95,6 @@ public class GiftCard {
             throw new IllegalArgumentException("Invalid validity period range");
         if (!isWithinValidRange(maxCountOfUses))
             throw new IllegalArgumentException("Invalid count of uses range");
-
-        LocalDateTime creationDate = LocalDateTime.now();
-        LocalDateTime expirationDate = creationDate.plus(validityPeriod);
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, store, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, false, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
     private static boolean isWithinValidRange(Period period) {
@@ -121,14 +120,13 @@ public class GiftCard {
             Balance balance,
             int countOfUses,
             int maxCountOfUses,
-            boolean isVerified,
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate,
             LocalDateTime expirationDate,
             LocalDateTime lastUsage) {
 
         return new GiftCard(id, buyerID, ownerID, store, maxCountOfUses,
-                giftCardStatus, balance, countOfUses, isVerified, keyAndCounter, creationDate, expirationDate, lastUsage);
+                giftCardStatus, balance, countOfUses, keyAndCounter, creationDate, expirationDate, lastUsage);
     }
 
     public CardID id() {
@@ -175,7 +173,7 @@ public class GiftCard {
     }
 
     public boolean isVerified() {
-        return isVerified;
+        return giftCardStatus == GiftCardStatus.ACTIVE;
     }
 
     public LocalDateTime creationDate() {
@@ -201,10 +199,10 @@ public class GiftCard {
 
     public void activate() {
         if (isExpired()) throw new IllegalStateException("You can`t activate expired card");
-        if (isVerified) throw new IllegalStateException("You can`t enable already active card");
+        if (isVerified()) throw new IllegalStateException("You can`t enable already active card");
         if (giftCardStatus != GiftCardStatus.PENDING)
             throw new IllegalStateException("Only cards in PENDING state can be verified.");
-        isVerified = true;
+
         giftCardStatus = GiftCardStatus.ACTIVE;
         keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
     }
