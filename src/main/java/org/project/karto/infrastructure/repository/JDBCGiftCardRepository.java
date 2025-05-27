@@ -80,7 +80,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     static final String FIND_BY_STORE_ID = select()
             .all()
             .from("gift_card")
-            .where("store = ?")
+            .where("store_id = ?")
             .build()
             .sql();
 
@@ -154,7 +154,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 new PAN(rs.getString("pan")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 ownerId != null ? OwnerID.fromString(ownerId) : null,
-                StoreID.fromString(rs.getString("store")),
+                StoreID.fromString(rs.getString("store_id")),
                 GiftCardStatus.valueOf(rs.getString("gift_card_status")),
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),
