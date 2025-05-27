@@ -27,6 +27,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     static final String SAVE_GIFT_CARD = insert()
             .into("gift_card")
             .columns("id",
+                    "pan",
                     "buyer_id",
                     "owner_id",
                     "store",
@@ -92,6 +93,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     public void save(GiftCard giftCard) {
         jet.write(SAVE_GIFT_CARD,
                 giftCard.id().value().toString(),
+                giftCard.pan(),
                 giftCard.buyerID().value().toString(),
                 giftCard.ownerID() != null ? giftCard.ownerID().value().toString() : null,
                 giftCard.store().name(),
@@ -150,6 +152,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
         String ownerId = rs.getString("owner_id");
         return GiftCard.fromRepository(
                 CardID.fromString(rs.getString("id")),
+                new PAN(rs.getString("pan")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 ownerId != null ? OwnerID.fromString(ownerId) : null,
                 Store.valueOf(rs.getString("store")),

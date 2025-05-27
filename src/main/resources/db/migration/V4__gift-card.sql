@@ -1,5 +1,6 @@
 CREATE TABLE gift_card (
     id CHAR(36) NOT NULL,
+    pan CHAR(16) NOT NULL,
     buyer_id CHAR(36) NOT NULL,
     owner_id CHAR(36),
     store VARCHAR,
