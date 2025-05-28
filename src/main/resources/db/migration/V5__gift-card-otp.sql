@@ -12,8 +12,7 @@ CREATE FUNCTION delete_confirmed_gift_card_otp() RETURNS TRIGGER AS $$
 BEGIN
     DELETE FROM gift_card_otp
     WHERE is_confirmed = true
-      AND card_id = NEW.card_id
-      AND otp <> NEW.otp;
+      AND card_id = NEW.card_id;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
