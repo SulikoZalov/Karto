@@ -125,23 +125,27 @@ public class AuthService {
     }
 
     public void verification(String receivedOTP) {
-        OTP.validate(receivedOTP);
-        OTP otp = otpRepository.findBy(receivedOTP)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-        User user = userRepository.findBy(otp.userID())
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        try {
+            OTP.validate(receivedOTP);
+            OTP otp = otpRepository.findBy(receivedOTP)
+                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+            User user = userRepository.findBy(otp.userID())
+                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-        if (user.isVerified())
-            throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
+            if (user.isVerified())
+                throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
 
-        if (otp.isExpired())
-            throw responseException(Response.Status.GONE, "OTP is gone.");
+            if (otp.isExpired())
+                throw responseException(Response.Status.GONE, "OTP is gone.");
 
-        otp.confirm();
-        otpRepository.updateConfirmation(otp);
+            otp.confirm();
+            otpRepository.updateConfirmation(otp);
 
-        user.enable();
-        userRepository.updateVerification(user);
+            user.enable();
+            userRepository.updateVerification(user);
+        } catch (IllegalStateException e) {
+            throw responseException(Response.Status.FORBIDDEN, e.getMessage());
+        }
     }
 
     public Object login(LoginForm loginForm) {
@@ -191,18 +195,22 @@ public class AuthService {
     }
 
     public Tokens twoFactorAuth(String receivedOTP) {
-        OTP.validate(receivedOTP);
-        OTP otp = otpRepository.findBy(receivedOTP)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-        User user = userRepository.findBy(otp.userID())
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        try {
+            OTP.validate(receivedOTP);
+            OTP otp = otpRepository.findBy(receivedOTP)
+                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+            User user = userRepository.findBy(otp.userID())
+                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-        user.enable2FA();
-        userRepository.update2FA(user);
+            user.enable2FA();
+            userRepository.update2FA(user);
 
-        Tokens tokens = generateTokens(user);
-        userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
-        return tokens;
+            Tokens tokens = generateTokens(user);
+            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+            return tokens;
+        } catch (IllegalStateException e) {
+            throw responseException(Response.Status.FORBIDDEN, e.getMessage());
+        }
     }
 
     public Tokens oidcAuth(String idToken) {
