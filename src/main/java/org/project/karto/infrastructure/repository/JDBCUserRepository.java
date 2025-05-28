@@ -63,7 +63,7 @@ public class JDBCUserRepository implements UserRepository {
             .sql();
 
     static final String UPDATE_2FA = update("user_account")
-            .set("is_2fa_enabled")
+            .set("is_2fa_enabled = ?")
             .where("id = ?")
             .build()
             .sql();
