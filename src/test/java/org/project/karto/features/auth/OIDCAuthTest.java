@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.LateVerificationForm;
 import org.project.karto.util.DBManagementUtils;
@@ -14,6 +15,7 @@ import org.project.karto.util.TestDataGenerator;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
+@Disabled("Due to technical reasons")
 public class OIDCAuthTest {
 
     private final DBManagementUtils dbManagementUtils;

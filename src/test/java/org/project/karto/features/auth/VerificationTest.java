@@ -1,5 +1,6 @@
 package org.project.karto.features.auth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ public class VerificationTest {
     }
 
     @Test
-    void validVerification() {
+    void validVerification() throws JsonProcessingException {
         OTP otp = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
 
         given()
@@ -37,7 +38,7 @@ public class VerificationTest {
     }
 
     @Test
-    void verificationWithInvalidOTP() {
+    void verificationWithInvalidOTP() throws JsonProcessingException {
         OTP ignore = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
 
         given()
@@ -50,7 +51,7 @@ public class VerificationTest {
     }
 
     @Test
-    void verificationWithMismatchOTP() {
+    void verificationWithMismatchOTP() throws JsonProcessingException {
         OTP ignore = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
 
         given()
@@ -63,7 +64,7 @@ public class VerificationTest {
     }
 
     @Test
-    void validVerificationWithResendOTP() {
+    void validVerificationWithResendOTP() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
         OTP ignore = dbManagement.saveUser(form);
 
@@ -86,7 +87,7 @@ public class VerificationTest {
     }
 
     @Test
-    void verificationWhenUseOldOTPAfterResend() {
+    void verificationWhenUseOldOTPAfterResend() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
         OTP old = dbManagement.saveUser(form);
 
