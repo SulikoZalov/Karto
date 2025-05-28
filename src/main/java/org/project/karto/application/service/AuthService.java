@@ -59,143 +59,123 @@ public class AuthService {
     }
 
     public void registration(RegistrationForm registrationForm) {
-        try {
-            if (registrationForm == null)
-                throw responseException(Response.Status.BAD_REQUEST, "Registration for is null");
+        if (registrationForm == null)
+            throw responseException(Response.Status.BAD_REQUEST, "Registration for is null");
 
-            if (!Objects.equals(registrationForm.password(), registrationForm.passwordConfirmation())) {
-                Log.errorf("Registration failure, passwords do not match");
-                throw responseException(Response.Status.BAD_REQUEST, "Passwords do not match");
-            }
-
-            Password.validate(registrationForm.password());
-
-            Email email = new Email(registrationForm.email());
-            if (userRepository.isEmailExists(email))
-                throw responseException(Response.Status.CONFLICT, "Email already used");
-
-            Phone phone = new Phone(registrationForm.phone());
-            if (userRepository.isPhoneExists(phone))
-                throw responseException(Response.Status.CONFLICT, "Phone already used");
-
-            String encodedPassword = passwordEncoder.encode(registrationForm.password());
-
-            PersonalData personalData = new PersonalData(
-                    registrationForm.firstname(),
-                    registrationForm.surname(),
-                    registrationForm.phone(),
-                    encodedPassword,
-                    registrationForm.email(),
-                    registrationForm.birthDate()
-            );
-            String secretKey = HOTPGenerator.generateSecretKey();
-
-            User user = User.of(personalData, secretKey);
-            userRepository.save(user);
-
-            OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-            otpRepository.save(otp);
-
-            phoneInteractionService.sendOTP(phone, otp);
-            emailInteractionService.sendSoftVerificationMessage(email);
-        } catch (IllegalArgumentException e) {
-            throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
+        if (!Objects.equals(registrationForm.password(), registrationForm.passwordConfirmation())) {
+            Log.errorf("Registration failure, passwords do not match");
+            throw responseException(Response.Status.BAD_REQUEST, "Passwords do not match");
         }
+
+        Password.validate(registrationForm.password());
+
+        Email email = new Email(registrationForm.email());
+        if (userRepository.isEmailExists(email))
+            throw responseException(Response.Status.CONFLICT, "Email already used");
+
+        Phone phone = new Phone(registrationForm.phone());
+        if (userRepository.isPhoneExists(phone))
+            throw responseException(Response.Status.CONFLICT, "Phone already used");
+
+        String encodedPassword = passwordEncoder.encode(registrationForm.password());
+
+        PersonalData personalData = new PersonalData(
+                registrationForm.firstname(),
+                registrationForm.surname(),
+                registrationForm.phone(),
+                encodedPassword,
+                registrationForm.email(),
+                registrationForm.birthDate()
+        );
+        String secretKey = HOTPGenerator.generateSecretKey();
+
+        User user = User.of(personalData, secretKey);
+        userRepository.save(user);
+
+        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+        otpRepository.save(otp);
+
+        phoneInteractionService.sendOTP(phone, otp);
+        emailInteractionService.sendSoftVerificationMessage(email);
     }
 
     public void resendOTP(String phoneNumber) {
-        try {
-            Phone phone = new Phone(phoneNumber);
-            User user = userRepository.findBy(phone)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
-            OTP otp = otpRepository.findBy(user.id())
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
+        Phone phone = new Phone(phoneNumber);
+        User user = userRepository.findBy(phone)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        OTP otp = otpRepository.findBy(user.id())
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
 
-            user.incrementCounter();
-            userRepository.updateCounter(user);
-            otpRepository.remove(otp);
+        user.incrementCounter();
+        userRepository.updateCounter(user);
+        otpRepository.remove(otp);
 
-            OTP regeneratedOTP = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-            otpRepository.save(regeneratedOTP);
+        OTP regeneratedOTP = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+        otpRepository.save(regeneratedOTP);
 
-            phoneInteractionService.sendOTP(phone, regeneratedOTP);
-        } catch (IllegalArgumentException e) {
-            throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
-        }
+        phoneInteractionService.sendOTP(phone, regeneratedOTP);
     }
 
     public void lateVerification(LateVerificationForm lvForm) {
-        try {
-            Email email = new Email(lvForm.email());
-            Phone phone = new Phone(lvForm.phone());
+        Email email = new Email(lvForm.email());
+        Phone phone = new Phone(lvForm.phone());
 
-            if (userRepository.isPhoneExists(phone))
-                throw responseException(Response.Status.CONFLICT, "Phone already used.");
+        if (userRepository.isPhoneExists(phone))
+            throw responseException(Response.Status.CONFLICT, "Phone already used.");
 
-            User user = userRepository.findBy(email)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(email)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-            user.incrementCounter();
-            userRepository.updateCounter(user);
+        user.incrementCounter();
+        userRepository.updateCounter(user);
 
-            user.registerPhoneForVerification(phone);
-            userRepository.updatePhone(user);
+        user.registerPhoneForVerification(phone);
+        userRepository.updatePhone(user);
 
-            OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-            otpRepository.save(otp);
+        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+        otpRepository.save(otp);
 
-            phoneInteractionService.sendOTP(phone, otp);
-            emailInteractionService.sendSoftVerificationMessage(email);
-        } catch (IllegalArgumentException e) {
-            throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
-        }
+        phoneInteractionService.sendOTP(phone, otp);
+        emailInteractionService.sendSoftVerificationMessage(email);
     }
 
     public void verification(String receivedOTP) {
-        try {
-            OTP.validate(receivedOTP);
-            OTP otp = otpRepository.findBy(receivedOTP)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-            User user = userRepository.findBy(otp.userID())
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        OTP.validate(receivedOTP);
+        OTP otp = otpRepository.findBy(receivedOTP)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+        User user = userRepository.findBy(otp.userID())
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-            if (user.isVerified())
-                throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
+        if (user.isVerified())
+            throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
 
-            if (otp.isExpired())
-                throw responseException(Response.Status.GONE, "OTP is gone.");
+        if (otp.isExpired())
+            throw responseException(Response.Status.GONE, "OTP is gone.");
 
-            user.incrementCounter();
-            otp.confirm();
-            userRepository.updateCounter(user);
-            otpRepository.updateConfirmation(otp);
+        user.incrementCounter();
+        otp.confirm();
+        userRepository.updateCounter(user);
+        otpRepository.updateConfirmation(otp);
 
-            user.enable();
-            userRepository.updateVerification(user);
-        } catch (IllegalArgumentException e) {
-            throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
-        }
+        user.enable();
+        userRepository.updateVerification(user);
     }
 
     public Tokens login(LoginForm loginForm) {
-        try {
-            Password.validate(loginForm.password());
-            Phone phone = new Phone(loginForm.phone());
+        Password.validate(loginForm.password());
+        Phone phone = new Phone(loginForm.phone());
 
-            User user = userRepository.findBy(phone)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(phone)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-            final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
-                    user.personalData().password().orElseThrow());
-            if (!isValidPasswordProvided)
-                throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
+        final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
+                user.personalData().password().orElseThrow());
+        if (!isValidPasswordProvided)
+            throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
 
-            Tokens tokens = generateTokens(user);
-            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
-            return tokens;
-        } catch (IllegalArgumentException e) {
-            throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
-        }
+        Tokens tokens = generateTokens(user);
+        userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+        return tokens;
     }
 
     public Tokens oidcAuth(String idToken) {
@@ -218,7 +198,7 @@ public class AuthService {
             Tokens tokens = generateTokens(user);
             userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
             return tokens;
-        } catch (IllegalArgumentException | DateTimeParseException e) {
+        } catch (DateTimeParseException e) {
             throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
         }
     }
