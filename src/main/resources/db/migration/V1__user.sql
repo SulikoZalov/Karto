@@ -7,6 +7,7 @@ CREATE TABLE user_account (
     password VARCHAR,
     birth_date TIMESTAMP NOT NULL,
     is_verified BOOLEAN NOT NULL,
+    is_2fa_enabled BOOLEAN NOT NULL,
     secret_key VARCHAR NOT NULL,
     counter BIGINT NOT NULL,
     creation_date TIMESTAMP NOT NULL,

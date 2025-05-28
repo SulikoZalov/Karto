@@ -51,6 +51,20 @@ public class AuthResource {
     }
 
     @POST
+    @Path("/2fA/enable")
+    public Response enable2FA(LoginForm loginForm) {
+        authService.enable2FA(loginForm);
+        return Response.accepted("Confirm the OTP sent to you via SMS to complete the two-factor authentication confirmation")
+                .build();
+    }
+
+    @PATCH
+    @Path("/2fa/verify")
+    public Response verify2FA(@QueryParam("otp") String otp) {
+        return Response.accepted(authService.twoFactorAuth(otp)).build();
+    }
+
+    @POST
     @Path("/login")
     public Response login(LoginForm loginForm) {
         return Response.ok(authService.login(loginForm)).build();

@@ -18,6 +18,8 @@ public interface UserRepository {
 
     void updateCounter(User user);
 
+    void update2FA(User user);
+
     void updateVerification(User user);
 
     boolean isEmailExists(Email email);

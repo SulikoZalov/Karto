@@ -13,6 +13,8 @@ public interface OTPRepository {
 
     void remove(OTP otp);
 
+    boolean contains(UUID user_id);
+
     Result<OTP, Throwable> findBy(OTP otp);
 
     Result<OTP, Throwable> findBy(String otp);

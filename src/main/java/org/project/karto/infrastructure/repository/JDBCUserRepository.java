@@ -32,6 +32,7 @@ public class JDBCUserRepository implements UserRepository {
             .column("password")
             .column("birth_date")
             .column("is_verified")
+            .column("is_2fa_enabled")
             .column("secret_key")
             .column("counter")
             .column("creation_date")
@@ -57,6 +58,12 @@ public class JDBCUserRepository implements UserRepository {
 
     static final String UPDATE_COUNTER = update("user_account")
             .set("counter = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_2FA = update("user_account")
+            .set("is_2fa_enabled")
             .where("id = ?")
             .build()
             .sql();
@@ -125,6 +132,7 @@ public class JDBCUserRepository implements UserRepository {
                         personalData.password().orElse(null),
                         personalData.birthDate(),
                         user.isVerified(),
+                        user.is2FAEnabled(),
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
                         user.creationDate(),
@@ -150,7 +158,13 @@ public class JDBCUserRepository implements UserRepository {
     @Override
     public void updateCounter(User user) {
         jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString())
-                .ifFailure(throwable -> Log.errorf("Error update user phone: %s.", throwable.getMessage()));
+                .ifFailure(throwable -> Log.errorf("Error update user counter: %s.", throwable.getMessage()));
+    }
+
+    @Override
+    public void update2FA(User user) {
+        jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString())
+                .ifFailure(throwable -> Log.errorf("Error update user 2FA: %s.", throwable.getMessage()));
     }
 
     @Override
@@ -222,6 +236,7 @@ public class JDBCUserRepository implements UserRepository {
                 UUID.fromString(rs.getString("id")),
                 personalData,
                 rs.getBoolean("is_verified"),
+                rs.getBoolean("is_2fa_enabled"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
                 rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
                 rs.getObject("last_updated", Timestamp.class).toLocalDateTime());

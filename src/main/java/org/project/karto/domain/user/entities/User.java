@@ -12,6 +12,7 @@ public class User {
     private final UUID id;
     private PersonalData personalData;
     private boolean isVerified;
+    private boolean is2FAEnabled;
     private KeyAndCounter keyAndCounter;
     private final LocalDateTime creationDate;
     private final LocalDateTime lastUpdated;
@@ -20,6 +21,7 @@ public class User {
             UUID id,
             PersonalData personalData,
             boolean isVerified,
+            boolean is2FAEnabled,
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate, LocalDateTime lastUpdated) {
 
@@ -31,6 +33,7 @@ public class User {
         this.id = id;
         this.personalData = personalData;
         this.isVerified = isVerified;
+        this.is2FAEnabled = is2FAEnabled;
         this.keyAndCounter = keyAndCounter;
         this.creationDate = creationDate;
         this.lastUpdated = lastUpdated;
@@ -39,6 +42,7 @@ public class User {
     public static User of(PersonalData personalData, String key) {
         return new User(UUID.randomUUID(),
                 personalData,
+                false,
                 false,
                 new KeyAndCounter(key, 0),
                 LocalDateTime.now(),
@@ -49,6 +53,7 @@ public class User {
             UUID id,
             PersonalData personalData,
             boolean isEnabled,
+            boolean is2FAVerified,
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate,
             LocalDateTime lastUpdated) {
@@ -56,6 +61,7 @@ public class User {
         return new User(id,
                 personalData,
                 isEnabled,
+                is2FAVerified,
                 keyAndCounter,
                 creationDate,
                 lastUpdated);
@@ -96,6 +102,21 @@ public class User {
         if (keyAndCounter.counter() == 0)
             throw new IllegalStateException("It is prohibited to activate an account that has not been verified.");
         this.isVerified = true;
+    }
+
+    public void enable2FA() {
+        if (!isVerified)
+            throw new IllegalStateException("You can`t enable 2FA on not verified account");
+        if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
+            throw new IllegalStateException("Counter need to be incremented");
+        if (is2FAEnabled)
+            throw new IllegalStateException("You can`t activate 2FA twice");
+
+        this.is2FAEnabled = true;
+    }
+
+    public boolean is2FAEnabled() {
+        return is2FAEnabled;
     }
 
     public void disable() {

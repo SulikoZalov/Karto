@@ -8,6 +8,10 @@ CREATE TABLE otp (
     CONSTRAINT user_otp_fk FOREIGN KEY (user_id) REFERENCES user_account(id)
 );
 
+CREATE UNIQUE INDEX unique_active_otp_per_user
+ON otp(user_id)
+WHERE is_confirmed = false AND expiration_date > now();
+
 CREATE FUNCTION delete_confirmed_otp() RETURNS TRIGGER AS $$
 BEGIN
     DELETE FROM otp
@@ -20,5 +24,5 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_delete_verified_otp
 AFTER UPDATE ON otp
-FOR EACH STATEMENT
+FOR EACH ROW
 EXECUTE FUNCTION delete_confirmed_otp();

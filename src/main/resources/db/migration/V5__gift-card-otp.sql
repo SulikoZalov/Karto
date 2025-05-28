@@ -20,5 +20,5 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_delete_verified_gift_card_otp
 AFTER UPDATE ON gift_card_otp
-FOR EACH STATEMENT
+FOR EACH ROW
 EXECUTE FUNCTION delete_confirmed_gift_card_otp();

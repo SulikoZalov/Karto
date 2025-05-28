@@ -60,7 +60,7 @@ public class AuthService {
 
     public void registration(RegistrationForm registrationForm) {
         if (registrationForm == null)
-            throw responseException(Response.Status.BAD_REQUEST, "Registration for is null");
+            throw responseException(Response.Status.BAD_REQUEST, "Registration form is null");
 
         if (!Objects.equals(registrationForm.password(), registrationForm.passwordConfirmation())) {
             Log.errorf("Registration failure, passwords do not match");
@@ -92,10 +92,7 @@ public class AuthService {
         User user = User.of(personalData, secretKey);
         userRepository.save(user);
 
-        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-        otpRepository.save(otp);
-
-        phoneInteractionService.sendOTP(phone, otp);
+        generateAndSendOTP(user);
         emailInteractionService.sendSoftVerificationMessage(email);
     }
 
@@ -106,14 +103,8 @@ public class AuthService {
         OTP otp = otpRepository.findBy(user.id())
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
 
-        user.incrementCounter();
-        userRepository.updateCounter(user);
         otpRepository.remove(otp);
-
-        OTP regeneratedOTP = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-        otpRepository.save(regeneratedOTP);
-
-        phoneInteractionService.sendOTP(phone, regeneratedOTP);
+        generateAndSendOTP(user);
     }
 
     public void lateVerification(LateVerificationForm lvForm) {
@@ -126,16 +117,10 @@ public class AuthService {
         User user = userRepository.findBy(email)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-        user.incrementCounter();
-        userRepository.updateCounter(user);
-
         user.registerPhoneForVerification(phone);
         userRepository.updatePhone(user);
 
-        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-        otpRepository.save(otp);
-
-        phoneInteractionService.sendOTP(phone, otp);
+        generateAndSendOTP(user);
         emailInteractionService.sendSoftVerificationMessage(email);
     }
 
@@ -152,26 +137,68 @@ public class AuthService {
         if (otp.isExpired())
             throw responseException(Response.Status.GONE, "OTP is gone.");
 
-        user.incrementCounter();
         otp.confirm();
-        userRepository.updateCounter(user);
         otpRepository.updateConfirmation(otp);
 
         user.enable();
         userRepository.updateVerification(user);
     }
 
-    public Tokens login(LoginForm loginForm) {
+    public Object login(LoginForm loginForm) {
         Password.validate(loginForm.password());
         Phone phone = new Phone(loginForm.phone());
 
         User user = userRepository.findBy(phone)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
+        if (!user.isVerified())
+            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+
         final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
                 user.personalData().password().orElseThrow());
         if (!isValidPasswordProvided)
             throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
+
+        if (user.is2FAEnabled()) {
+            generateAndSendOTP(user);
+            return TwoFAMessage.defaultMessage();
+        }
+
+        Tokens tokens = generateTokens(user);
+        userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+        return tokens;
+    }
+
+    public void enable2FA(LoginForm loginForm) {
+        Password.validate(loginForm.password());
+        Phone phone = new Phone(loginForm.phone());
+
+        User user = userRepository.findBy(phone)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+
+        if (!user.isVerified())
+            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+
+        final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
+                user.personalData().password().orElseThrow());
+        if (!isValidPasswordProvided)
+            throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
+
+        if (otpRepository.contains(user.id()))
+            throw responseException(Response.Status.BAD_REQUEST, "You can`t request 2FA activation twice");
+
+        generateAndSendOTP(user);
+    }
+
+    public Tokens twoFactorAuth(String receivedOTP) {
+        OTP.validate(receivedOTP);
+        OTP otp = otpRepository.findBy(receivedOTP)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+        User user = userRepository.findBy(otp.userID())
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+
+        user.enable2FA();
+        userRepository.update2FA(user);
 
         Tokens tokens = generateTokens(user);
         userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
@@ -259,5 +286,13 @@ public class AuthService {
         String token = jwtUtility.generateToken(user);
         String refreshToken = jwtUtility.generateRefreshToken(user);
         return new Tokens(token, refreshToken);
+    }
+
+    private void generateAndSendOTP(User user) {
+        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+        otpRepository.save(otp);
+        user.incrementCounter();
+        userRepository.updateCounter(user);
+        phoneInteractionService.sendOTP(new Phone(user.personalData().phone().orElseThrow()), otp);
     }
 }

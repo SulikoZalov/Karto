@@ -56,6 +56,13 @@ public class JDBCOTPRepository implements OTPRepository {
             .build()
             .sql();
 
+    static final String IS_OTP_EXISTS = select()
+            .count("*")
+            .from("otp")
+            .where("user_id = ?")
+            .build()
+            .sql();
+
     public JDBCOTPRepository() {
         jet = JetQuerious.instance();
     }
@@ -81,6 +88,16 @@ public class JDBCOTPRepository implements OTPRepository {
     public void remove(OTP otp) {
         jet.write(REMOVE_OTP, otp.otp())
                 .ifFailure(throwable -> Log.errorf("Error deleting otp: %s.", otp.otp()));
+    }
+
+    @Override
+    public boolean contains(UUID userID) {
+        return jet.readObjectOf(IS_OTP_EXISTS, Integer.class, userID)
+                .mapSuccess(count -> count != null && count > 0)
+                .orElseGet(() -> {
+                    Log.error("Error checking email existence.");
+                    return false;
+                });
     }
 
     @Override
