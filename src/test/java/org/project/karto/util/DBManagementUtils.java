@@ -1,6 +1,6 @@
 package org.project.karto.util;
 
-import com.hadzhy.jdbclight.jdbc.JDBC;
+import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import jakarta.inject.Singleton;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
@@ -14,8 +14,7 @@ import org.project.karto.infrastructure.security.PasswordEncoder;
 
 import java.util.Objects;
 
-import static com.hadzhy.jdbclight.sql.SQLBuilder.batchOf;
-import static com.hadzhy.jdbclight.sql.SQLBuilder.delete;
+import static com.hadzhy.jetquerious.sql.QueryForge.*;
 
 @Singleton
 public class DBManagementUtils {
@@ -28,7 +27,7 @@ public class DBManagementUtils {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final JDBC jdbc = JDBC.instance();
+    private final JetQuerious jetQuerious = JetQuerious.instance();
 
     public static final String DELETE_USER = batchOf(
             delete()
@@ -90,6 +89,6 @@ public class DBManagementUtils {
     }
 
     public void removeUser(String email) {
-        jdbc.write(DELETE_USER, email, email, email);
+        jetQuerious.write(DELETE_USER, email, email, email);
     }
 }

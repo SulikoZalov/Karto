@@ -1,9 +1,9 @@
 package org.project.karto.util;
 
-import com.hadzhy.jdbclight.util.Result;
 import net.datafaker.Faker;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.value_objects.*;
+import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 
