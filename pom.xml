@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.github.HaciHaciyev</groupId>
             <artifactId>JetQuerious</artifactId>
-            <version>v2.0.0</version>
+            <version>v2.0.1</version>
         </dependency>
 
         <dependency>
