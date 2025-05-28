@@ -4,7 +4,7 @@ CREATE TABLE gift_card (
     buyer_id CHAR(36) NOT NULL,
     owner_id CHAR(36),
     store_id CHAR(36),
-    gift_card_status VARCHAR(7) NOT NULL CHECK (gift_card_status IN ('PENDING', 'ACTIVE', 'EXPIRED', 'USED_UP'))
+    gift_card_status VARCHAR(7) NOT NULL CHECK (gift_card_status IN ('PENDING', 'ACTIVE', 'EXPIRED', 'USED_UP')),
     balance BIGINT NOT NULL,
     count_of_uses SMALLINT NOT NULL,
     max_count_of_uses SMALLINT NOT NULL,

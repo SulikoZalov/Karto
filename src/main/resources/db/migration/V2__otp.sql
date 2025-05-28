@@ -1,5 +1,5 @@
 CREATE TABLE otp (
-    otp VARCHAR NOT NULL,
+    otp CHAR(6) NOT NULL,
     user_id CHAR(36) NOT NULL,
     is_confirmed BOOLEAN NOT NULL,
     creation_date TIMESTAMP NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE otp (
 
 CREATE UNIQUE INDEX unique_active_otp_per_user
 ON otp(user_id)
-WHERE is_confirmed = false AND expiration_date > now();
+WHERE is_confirmed = false;
 
 CREATE FUNCTION delete_confirmed_otp() RETURNS TRIGGER AS $$
 BEGIN
