@@ -100,11 +100,14 @@ Verifies user registration via OTP.
 
 ---
 
-## POST `/login`
+---
 
-Authenticates using phone number and password.
+## POST `/2FA/enable`
+
+Enables Two-Factor Authentication (2FA) for a user after verifying phone and password.
 
 **Request Body (JSON):**
+
 ```json
 {
   "phone": "string",
@@ -113,15 +116,100 @@ Authenticates using phone number and password.
 ```
 
 **Responses:**
+
+* **202 Accepted**
+  OTP sent via SMS to confirm 2FA activation. Response message:
+
+  ```json
+  {
+    "message": "Confirm the OTP sent to you via SMS to complete the two-factor authentication confirmation"
+  }
+  ```
+
+* **400 Bad Request**
+
+    * Invalid password
+    * 2FA activation already requested (OTP already exists for user)
+
+* **403 Forbidden**
+  Attempt to enable 2FA for an unverified account.
+
+* **404 Not Found**
+  User with provided phone not found.
+
+---
+
+## PATCH `/2FA/verify?otp={otp}`
+
+Verifies the OTP to complete the Two-Factor Authentication activation.
+
+**Query Parameter:**
+
+* `otp` — the One-Time Password sent via SMS.
+
+**Responses:**
+
+* **202 Accepted**
+  Returns access and refresh tokens after successful OTP verification:
+
+  ```json
+  {
+    "token": "jwt-token",
+    "refreshToken": "refresh-token"
+  }
+  ```
+
+* **403 Forbidden**
+  OTP validation failed (e.g., expired or invalid OTP).
+
+* **404 Not Found**
+  OTP or User not found.
+
+---
+
+---
+
+## POST `/login`
+
+Authenticate a user using phone number and password.
+
+**Request Body (JSON):**
+
 ```json
 {
-  "token": "jwt-token",
-  "refreshToken": "refresh-token"
+  "phone": "string",
+  "password": "string"
 }
 ```
-- `200 OK` — Authentication successful.
-- `400 Bad Request` — Wrong password or invalid input.
-- `404 Not Found` — User not found.
+
+**Responses:**
+
+* **200 OK**
+
+* If Two-Factor Authentication (2FA) is **disabled**, returns JWT access token and refresh token:
+
+  ```json
+  {
+    "token": "jwt-token",
+    "refreshToken": "refresh-token"
+  }
+  ```
+* If 2FA is **enabled**, initiates OTP sending and returns a message indicating that 2FA verification is required:
+
+  ```json
+  {
+    "message": "Two-factor authentication code sent."
+  }
+  ```
+
+* **400 Bad Request**
+  Wrong password or invalid input.
+
+* **403 Forbidden**
+  Attempt to login with an unverified account.
+
+* **404 Not Found**
+  User with provided phone number not found.
 
 ---
 
