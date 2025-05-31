@@ -13,7 +13,7 @@ public class PhoneInteractionService {
     private static final String KARTO_PHONE = "+15005550006";
 
     public void sendOTP(Phone phone, OTP otp) {
-        Log.infof("Sending otp for user: %s".formatted(otp.userID()));
+        // Log.infof("Sending otp for user: %s".formatted(otp.userID()));
         Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), otp.otp()).create();
     }
 
