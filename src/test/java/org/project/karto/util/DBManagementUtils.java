@@ -79,7 +79,7 @@ public class DBManagementUtils {
         return otpRepository.findBy(user.id()).orElseThrow();
     }
 
-    public void saveVerifiedUser(RegistrationForm form) throws JsonProcessingException {
+    public void saveAndVerifyUser(RegistrationForm form) throws JsonProcessingException {
         OTP otp = saveUser(form);
 
         given()

@@ -34,7 +34,7 @@ public class LoginTest {
     @Test
     void validLogin() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        dbManagement.saveVerifiedUser(form);
+        dbManagement.saveAndVerifyUser(form);
 
         Tokens tokens = given()
                 .contentType(ContentType.JSON)
@@ -59,7 +59,7 @@ public class LoginTest {
     @Test
     void loginMismatchPassword() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        dbManagement.saveVerifiedUser(form);
+        dbManagement.saveAndVerifyUser(form);
 
         given()
                 .contentType(ContentType.JSON)
@@ -74,7 +74,7 @@ public class LoginTest {
     @Test
     void refreshToken() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        dbManagement.saveVerifiedUser(form);
+        dbManagement.saveAndVerifyUser(form);
 
         Tokens tokens = given()
                 .contentType(ContentType.JSON)
