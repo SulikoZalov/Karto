@@ -10,7 +10,7 @@ CREATE TABLE companies (
     max_usage_count INTEGER NOT NULL,
     creation_date TIMESTAMP NOT NULL,
     last_updated TIMESTAMP NOT NULL
-)
+);
 
 CREATE UNIQUE INDEX company_email_index ON companies (email);
 
