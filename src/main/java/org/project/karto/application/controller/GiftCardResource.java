@@ -1,6 +1,6 @@
 package org.project.karto.application.controller;
 
-import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
@@ -9,8 +9,8 @@ import org.project.karto.application.dto.gift_card.CardForm;
 import org.project.karto.application.service.GiftCardsService;
 import org.project.karto.domain.user.values_objects.Email;
 
-@Authenticated
 @Path("/gift-card")
+@RolesAllowed("CUSTOMER")
 public class GiftCardResource {
 
     private final JsonWebToken jwt;
@@ -36,3 +36,4 @@ public class GiftCardResource {
         return Response.accepted("Transaction successfully commited.").build();
     }
 }
+

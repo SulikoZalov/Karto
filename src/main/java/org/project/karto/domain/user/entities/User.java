@@ -1,5 +1,6 @@
 package org.project.karto.domain.user.entities;
 
+import org.project.karto.domain.common.enumerations.Role;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.user.values_objects.PersonalData;
 import org.project.karto.domain.user.values_objects.Phone;
@@ -11,6 +12,7 @@ import java.util.UUID;
 public class User {
     private final UUID id;
     private PersonalData personalData;
+    private final Role role;
     private boolean isVerified;
     private boolean is2FAEnabled;
     private KeyAndCounter keyAndCounter;
@@ -32,6 +34,7 @@ public class User {
 
         this.id = id;
         this.personalData = personalData;
+        this.role = Role.CUSTOMER;
         this.isVerified = isVerified;
         this.is2FAEnabled = is2FAEnabled;
         this.keyAndCounter = keyAndCounter;
@@ -73,6 +76,10 @@ public class User {
 
     public PersonalData personalData() {
         return personalData;
+    }
+
+    public Role role() {
+        return role;
     }
 
     public void registerPhoneForVerification(Phone phone) {

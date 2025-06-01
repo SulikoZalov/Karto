@@ -37,6 +37,7 @@ public class JWTUtility {
 
         return Jwt.issuer("Karto")
                 .upn(user.personalData().email())
+                .groups(user.role().name())
                 .claim("firstname", user.personalData().firstname())
                 .claim("surname", user.personalData().surname())
                 .claim("isVerified", user.isVerified())
@@ -49,6 +50,7 @@ public class JWTUtility {
 
         return Jwt.issuer("Karto")
                 .upn(user.personalData().email())
+                .groups(user.role().name())
                 .expiresIn(year)
                 .sign();
     }
