@@ -205,8 +205,14 @@ public class AuthService {
             User user = userRepository.findBy(otp.userID())
                     .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-            user.enable2FA();
-            userRepository.update2FA(user);
+            if (!user.isVerified())
+                throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+
+            if (!user.is2FAEnabled()) {
+                Log.info("Two factor authentication is enabled and verified for user.");
+                user.enable2FA();
+                userRepository.update2FA(user);
+            }
 
             Tokens tokens = generateTokens(user);
             userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
