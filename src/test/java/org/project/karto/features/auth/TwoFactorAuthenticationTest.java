@@ -26,6 +26,8 @@ public class TwoFactorAuthenticationTest {
 
     static final String VERIFY_2FA = "/karto/auth/2FA/verify";
 
+    static final String RESEND_OTP = "/karto/auth/resend-otp";
+
     @Inject
     DBManagementUtils dbManagementUtils;
 
@@ -192,5 +194,38 @@ public class TwoFactorAuthenticationTest {
                 .then()
                 .log().all()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    void _2FA_valid_OTP_resend() throws JsonProcessingException {
+        RegistrationForm form = TestDataGenerator.generateRegistrationForm();
+        dbManagementUtils.saveAndVerifyUser(form);
+
+        LoginForm loginForm = new LoginForm(form.phone(), form.password());
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(objectMapper.writeValueAsString(loginForm))
+                .when()
+                .post(ENABLE_2FA_URL)
+                .then()
+                .log().all()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+        given()
+                .param("phoneNumber", form.phone())
+                .get(RESEND_OTP)
+                .then()
+                .assertThat()
+                .statusCode(Response.Status.OK.getStatusCode());
+
+        OTP otp = dbManagementUtils.getUserOTP(form.email());
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("otp", otp.otp())
+                .when()
+                .patch(VERIFY_2FA)
+                .then()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
     }
 }
