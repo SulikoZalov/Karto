@@ -1,4 +1,4 @@
-package org.project.karto.domain.user.values_objects;
+package org.project.karto.domain.common.value_objects;
 
 import io.quarkus.logging.Log;
 

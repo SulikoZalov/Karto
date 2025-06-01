@@ -4,7 +4,7 @@ import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.user.entities.OTP;
-import org.project.karto.domain.user.values_objects.Phone;
+import org.project.karto.domain.common.value_objects.Phone;
 
 @ApplicationScoped
 public class PhoneInteractionService {

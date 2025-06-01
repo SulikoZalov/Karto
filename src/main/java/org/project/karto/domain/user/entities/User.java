@@ -3,7 +3,7 @@ package org.project.karto.domain.user.entities;
 import org.project.karto.domain.common.enumerations.Role;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.user.values_objects.PersonalData;
-import org.project.karto.domain.user.values_objects.Phone;
+import org.project.karto.domain.common.value_objects.Phone;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

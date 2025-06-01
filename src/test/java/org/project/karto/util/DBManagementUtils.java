@@ -14,8 +14,8 @@ import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;
 import org.project.karto.domain.user.repository.UserRepository;
-import org.project.karto.domain.user.values_objects.Email;
-import org.project.karto.domain.user.values_objects.Phone;
+import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.Phone;
 
 import java.util.Objects;
 

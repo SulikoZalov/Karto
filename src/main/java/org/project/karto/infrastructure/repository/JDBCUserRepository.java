@@ -5,6 +5,8 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
+import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.UserRepository;
 import org.project.karto.domain.user.values_objects.*;

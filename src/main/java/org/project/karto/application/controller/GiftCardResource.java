@@ -7,7 +7,7 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.gift_card.CardForm;
 import org.project.karto.application.service.GiftCardsService;
-import org.project.karto.domain.user.values_objects.Email;
+import org.project.karto.domain.common.value_objects.Email;
 
 @Path("/gift-card")
 @RolesAllowed("CUSTOMER")

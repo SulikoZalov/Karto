@@ -4,7 +4,7 @@ import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
-import org.project.karto.domain.user.values_objects.Email;
+import org.project.karto.domain.common.value_objects.Email;
 
 @ApplicationScoped
 public class EmailInteractionService {

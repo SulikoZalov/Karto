@@ -2,8 +2,8 @@ package org.project.karto.domain.user.repository;
 
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.user.entities.User;
-import org.project.karto.domain.user.values_objects.Email;
-import org.project.karto.domain.user.values_objects.Phone;
+import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.values_objects.RefreshToken;
 
 import java.util.UUID;

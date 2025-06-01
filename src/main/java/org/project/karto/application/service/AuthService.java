@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.auth.*;
+import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;

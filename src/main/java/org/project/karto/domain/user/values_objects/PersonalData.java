@@ -1,6 +1,8 @@
 package org.project.karto.domain.user.values_objects;
 
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.Phone;
 
 import java.time.LocalDate;
 import java.util.Optional;
