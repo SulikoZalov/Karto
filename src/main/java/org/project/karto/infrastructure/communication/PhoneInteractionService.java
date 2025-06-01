@@ -2,7 +2,6 @@ package org.project.karto.infrastructure.communication;
 
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.values_objects.Phone;
@@ -13,7 +12,6 @@ public class PhoneInteractionService {
     private static final String KARTO_PHONE = "+15005550006";
 
     public void sendOTP(Phone phone, OTP otp) {
-        // Log.infof("Sending otp for user: %s".formatted(otp.userID()));
         Message.creator(new PhoneNumber(phone.phoneNumber()), new PhoneNumber(KARTO_PHONE), otp.otp()).create();
     }
 

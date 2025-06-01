@@ -174,9 +174,8 @@ public class AuthService {
     }
 
     public void enable2FA(LoginForm loginForm) {
-        if (loginForm == null) {
-            throw responseException(Response.Status.BAD_REQUEST, "please fill the login form");
-        }
+        if (loginForm == null)
+            throw responseException(Response.Status.BAD_REQUEST, "Please fill the login form.");
 
         Password.validate(loginForm.password());
         Phone phone = new Phone(loginForm.phone());
