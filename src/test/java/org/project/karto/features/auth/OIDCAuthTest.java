@@ -15,7 +15,10 @@ import org.project.karto.util.TestDataGenerator;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@Disabled("Due to technical reasons")
+@Disabled("""
+At the moment it's required to manually start a keycloak server and load realm, but tests by themselves are valid.
+Disabled until load of keycloak server will be automized.
+""")
 public class OIDCAuthTest {
 
     private final DBManagementUtils dbManagementUtils;
