@@ -3,18 +3,25 @@ package org.project.karto.domain.common.value_objects;
 import java.time.Period;
 
 public record CardUsageLimitations(Period expirationPeriod, int maxUsageCount) {
-    public static final Period MIN_EXP_PERIOD = Period.ofMonths(1);
-    public static final Period MAX_EXP_PERIOD = Period.ofMonths(3);
+
+    public static final int MIN_DAYS = 30;
+    public static final int MAX_DAYS = 92;
 
     public CardUsageLimitations {
         if (expirationPeriod == null || expirationPeriod.isZero() || expirationPeriod.isNegative())
             throw new IllegalArgumentException("Expiration period must be a positive non-zero value.");
 
-        if (expirationPeriod.minus(MIN_EXP_PERIOD).isNegative() ||
-                !expirationPeriod.minus(MAX_EXP_PERIOD).isNegative())
-            throw new IllegalArgumentException("Expiration period must be between 1 and 3 months.");
+        if (expirationPeriod.getYears() != 0 || expirationPeriod.getMonths() != 0)
+            throw new IllegalArgumentException("Expiration period must be specified in days only.");
 
-        if (maxUsageCount < 1 || maxUsageCount > 10)
-            throw new IllegalArgumentException("Usage count must be between 1 and 10.");
+        int days = expirationPeriod.getDays();
+        if (days < MIN_DAYS || days > MAX_DAYS)
+            throw new IllegalArgumentException("Expiration period must be between 30 and 92 days.");
+
+        if (maxUsageCount < 1 || maxUsageCount > 10) throw new IllegalArgumentException("Usage count must be between 1 and 10.");
+    }
+
+    public int expirationDays() {
+        return expirationPeriod.getDays();
     }
 }
