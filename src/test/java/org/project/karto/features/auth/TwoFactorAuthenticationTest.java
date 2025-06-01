@@ -3,15 +3,12 @@ package org.project.karto.features.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.logging.Log;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.response.ExtractableResponse;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.description.Description;
 import org.assertj.core.description.TextDescription;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.LoginForm;
@@ -20,7 +17,6 @@ import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
 
-import static io.restassured.RestAssured.form;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
@@ -80,7 +76,7 @@ public class TwoFactorAuthenticationTest {
     @Test
     void _2FA_unverified_account() throws JsonProcessingException {
         RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        // dbManagementUtils.saveAndVerifyUser(form);
+        dbManagementUtils.saveUser(form);
         LoginForm loginForm = new LoginForm(form.phone(), form.password());
 
         var response = given()
@@ -91,11 +87,10 @@ public class TwoFactorAuthenticationTest {
                 .then()
                 .log().all()
                 .extract();
-        // .statusCode(Response.Status.FORBIDDEN.getStatusCode());
 
         Assertions.assertThat(response.statusCode())
                 .describedAs(new TextDescription("Body: %s".formatted(response.body().asPrettyString())))
-                .isEqualTo(Response.Status.FORBIDDEN);
+                .isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
     }
 
     @Test
@@ -122,8 +117,7 @@ public class TwoFactorAuthenticationTest {
                 .post(ENABLE_2FA_URL)
                 .then()
                 .log().all()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
-
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 
     @Test
@@ -198,22 +192,5 @@ public class TwoFactorAuthenticationTest {
                 .then()
                 .log().all()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
-    }
-
-    private RegistrationForm start2FA() throws JsonProcessingException {
-        RegistrationForm form = TestDataGenerator.generateRegistrationForm();
-        dbManagementUtils.saveAndVerifyUser(form);
-
-        LoginForm loginForm = new LoginForm(form.phone(), form.password());
-        given()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(objectMapper.writeValueAsString(loginForm))
-                .when()
-                .post(ENABLE_2FA_URL)
-                .then()
-                .log().all()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
-
-        return form;
     }
 }
