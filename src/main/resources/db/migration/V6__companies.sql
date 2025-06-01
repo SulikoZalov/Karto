@@ -11,3 +11,9 @@ CREATE TABLE companies (
     creation_date TIMESTAMP NOT NULL,
     last_updated TIMESTAMP NOT NULL
 )
+
+CREATE UNIQUE INDEX company_email_index ON companies (email);
+
+CREATE UNIQUE INDEX company_phone_index ON companies (phone);
+
+CREATE UNIQUE INDEX company_registration_number_index ON companies (registration_number);
