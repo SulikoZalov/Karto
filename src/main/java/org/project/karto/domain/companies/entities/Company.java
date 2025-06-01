@@ -17,7 +17,7 @@ public class Company {
     private final Email email;
     private final Phone phone;
     private final LocalDateTime creationDate;
-    private LocalDateTime lastUpdate;
+    private LocalDateTime lastUpdated;
     private Password password;
     private CardUsageLimitations cardUsagesLimitation;
 
@@ -28,7 +28,7 @@ public class Company {
             Email email,
             Phone phone,
             LocalDateTime creationDate,
-            LocalDateTime lastUpdate,
+            LocalDateTime lastUpdated,
             Password password,
             CardUsageLimitations cardUsagesLimitation) {
 
@@ -38,7 +38,7 @@ public class Company {
         if (email == null) throw new IllegalArgumentException("email must not be null");
         if (phone == null) throw new IllegalArgumentException("phone must not be null");
         if (creationDate == null) throw new IllegalArgumentException("creationDate must not be null");
-        if (lastUpdate == null) throw new IllegalArgumentException("lastUpdate must not be null");
+        if (lastUpdated == null) throw new IllegalArgumentException("lastUpdate must not be null");
         if (password == null) throw new IllegalArgumentException("password must not be null");
         if (cardUsagesLimitation == null) throw new IllegalArgumentException("cardUsagesLimitation must not be null");
 
@@ -48,7 +48,7 @@ public class Company {
         this.email = email;
         this.phone = phone;
         this.creationDate = creationDate;
-        this.lastUpdate = lastUpdate;
+        this.lastUpdated = lastUpdated;
         this.password = password;
         this.cardUsagesLimitation = cardUsagesLimitation;
     }
@@ -105,8 +105,8 @@ public class Company {
         return creationDate;
     }
 
-    public LocalDateTime lastUpdate() {
-        return lastUpdate;
+    public LocalDateTime lastUpdated() {
+        return lastUpdated;
     }
 
     public Password password() {
@@ -118,7 +118,7 @@ public class Company {
             throw new IllegalArgumentException("Password can`t be null");
 
         this.password = password;
-        this.lastUpdate = LocalDateTime.now();
+        this.lastUpdated = LocalDateTime.now();
     }
 
     public CardUsageLimitations cardUsagesLimitation() {
@@ -130,6 +130,6 @@ public class Company {
             throw new IllegalArgumentException("Card usage limitations can`t be null");
 
         this.cardUsagesLimitation = cardUsageLimitations;
-        this.lastUpdate = LocalDateTime.now();
+        this.lastUpdated = LocalDateTime.now();
     }
 }
