@@ -15,6 +15,7 @@
         <quarkus.platform.version>3.21.3</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.2</surefire-plugin.version>
+        <groovy.version>4.0.26</groovy.version>
     </properties>
 
     <dependencyManagement>
@@ -23,6 +24,14 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-bom</artifactId>
+                <version>2.3-groovy-4.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -84,7 +93,7 @@
         <dependency>
             <groupId>com.github.HaciHaciyev</groupId>
             <artifactId>JetQuerious</artifactId>
-            <version>v2.0.1</version>
+            <version>v2.0.3</version>
         </dependency>
 
         <dependency>
@@ -114,6 +123,20 @@
             <artifactId>quarkus-mailpit</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.github.AinGrace</groupId>
+            <artifactId>quarkus-spock-graceful</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -168,6 +191,23 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <!-- The gmavenplus plugin is used to compile Groovy code. To learn more about this plugin,
+                visit https://github.com/groovy/GMavenPlus/wiki -->
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>4.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
