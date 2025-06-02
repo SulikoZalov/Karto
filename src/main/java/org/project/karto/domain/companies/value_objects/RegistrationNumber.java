@@ -17,7 +17,7 @@ public record RegistrationNumber(String countryCode, String value) {
         if (countryCode == null || countryCode.isBlank())
             throw new IllegalArgumentException("Country code must be provided.");
 
-        if (countryCode.length() == COUNTRY_CODE_LENGTH)
+        if (countryCode.length() != COUNTRY_CODE_LENGTH)
             throw new IllegalArgumentException("Country code must be 2 letters.");
 
         if (!COUNTRY_CODES.contains(countryCode))
