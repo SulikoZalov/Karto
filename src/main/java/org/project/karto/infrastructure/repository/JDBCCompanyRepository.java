@@ -16,7 +16,6 @@ import org.project.karto.domain.user.values_objects.Password;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Period;
 import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.insert;
@@ -201,7 +200,7 @@ public class JDBCCompanyRepository implements CompanyRepository {
                 rs.getTimestamp("creation_date").toLocalDateTime(),
                 rs.getTimestamp("last_updated").toLocalDateTime(),
                 new Password(rs.getString("password")),
-                new CardUsageLimitations(Period.ofDays(rs.getInt("expiration_period_days")), rs.getInt("max_usage_count"))
+                CardUsageLimitations.of(rs.getInt("expiration_period_days"), rs.getInt("max_usage_count"))
         );
     }
 }

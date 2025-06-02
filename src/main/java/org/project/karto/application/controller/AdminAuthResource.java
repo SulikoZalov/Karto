@@ -8,11 +8,11 @@ import jakarta.ws.rs.core.Response;
 import org.project.karto.application.service.AdminService;
 
 @Path("/admin/auth")
-public class AdminLoginResource {
+public class AdminAuthResource {
 
     private final AdminService adminService;
 
-    AdminLoginResource(AdminService adminService) {
+    AdminAuthResource(AdminService adminService) {
         this.adminService = adminService;
     }
 
