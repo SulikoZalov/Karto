@@ -54,7 +54,6 @@ public class Company {
     }
 
     public static Company of(
-            UUID id,
             RegistrationNumber registrationNumber,
             CompanyName companyName,
             Email email,
@@ -63,7 +62,7 @@ public class Company {
             CardUsageLimitations cardUsagesLimitation) {
 
         LocalDateTime now = LocalDateTime.now();
-        return new Company(id, registrationNumber, companyName, email, phone, now, now, password, cardUsagesLimitation);
+        return new Company(UUID.randomUUID(), registrationNumber, companyName, email, phone, now, now, password, cardUsagesLimitation);
     }
 
     public static Company fromRepository(

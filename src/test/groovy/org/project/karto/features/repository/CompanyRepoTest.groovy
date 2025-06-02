@@ -30,13 +30,13 @@ class CompanyRepoTest extends Specification{
         def phone = TestDataGenerator.generatePhone()
         def password = new Password("12345678abcxyz")
         def card_limits = new CardUsageLimitations(Period.ofDays(44), 9)
-        Company company = Company.of(id, reg_num, name, email, phone, password, card_limits)
+        Company company = Company.of(reg_num, name, email, phone, password, card_limits)
 
         when:
         repo.save(company)
 
         then:
-        def comp = repo.findBy(id)
+        def comp = repo.findBy(company.id())
         print (comp.orElseThrow())
     }
 
