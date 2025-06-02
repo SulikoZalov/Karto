@@ -88,6 +88,27 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .build()
             .sql();
 
+    static final String IS_REGISTRATION_NUMBER_EXISTS = select()
+            .count("registration_number")
+            .from("companies")
+            .where("registration_number = ?")
+            .build()
+            .sql();
+
+    static final String IS_PHONE_EXISTS = select()
+            .count("phone")
+            .from("companies")
+            .where("phone = ?")
+            .build()
+            .sql();
+
+    static final String IS_EMAIL_EXISTS = select()
+            .count("email")
+            .from("companies")
+            .where("email = ?")
+            .build()
+            .sql();
+
     JDBCCompanyRepository() {
         jet = JetQuerious.instance();
     }
@@ -138,6 +159,36 @@ public class JDBCCompanyRepository implements CompanyRepository {
     public Result<Company, Throwable> findBy(Email email) {
         var read = jet.read(FIND_BY_EMAIL, this::companyMapper, email);
         return new Result<>(read.value(), read.throwable(), read.success());
+    }
+
+    @Override
+    public boolean isExists(RegistrationNumber registrationNumber) {
+        return jet.readObjectOf(IS_REGISTRATION_NUMBER_EXISTS, Integer.class, registrationNumber.value())
+                .mapSuccess(count -> count != null && count > 0)
+                .orElseGet(() -> {
+                    Log.error("Error checking registration number existence.");
+                    return false;
+                });
+    }
+
+    @Override
+    public boolean isExists(Phone phone) {
+        return jet.readObjectOf(IS_PHONE_EXISTS, Integer.class, phone)
+                .mapSuccess(count -> count != null && count > 0)
+                .orElseGet(() -> {
+                    Log.error("Error checking phone existence.");
+                    return false;
+                });
+    }
+
+    @Override
+    public boolean isExists(Email email) {
+        return jet.readObjectOf(IS_EMAIL_EXISTS, Integer.class, email)
+                .mapSuccess(count -> count != null && count > 0)
+                .orElseGet(() -> {
+                    Log.error("Error checking email existence.");
+                    return false;
+                });
     }
 
     private Company companyMapper(ResultSet rs) throws SQLException {

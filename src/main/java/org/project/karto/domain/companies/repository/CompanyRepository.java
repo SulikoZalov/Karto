@@ -23,4 +23,10 @@ public interface CompanyRepository {
     Result<Company, Throwable> findBy(Phone phone);
 
     Result<Company, Throwable> findBy(Email email);
+
+    boolean isExists(RegistrationNumber registrationNumber);
+
+    boolean isExists(Phone phone);
+
+    boolean isExists(Email email);
 }
