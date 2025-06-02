@@ -8,6 +8,7 @@ import jakarta.inject.Singleton;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.domain.common.containers.Result;
+import org.project.karto.domain.common.enumerations.Role;
 import org.project.karto.domain.user.entities.User;
 
 import java.io.IOException;
@@ -42,6 +43,13 @@ public class JWTUtility {
                 .claim("surname", user.personalData().surname())
                 .claim("isVerified", user.isVerified())
                 .expiresIn(oneDayAndSecond)
+                .sign();
+    }
+
+    public String generateAdministratorToken() {
+        return Jwt.issuer("Karto")
+                .groups(Role.ADMIN.name())
+                .expiresIn(Duration.ofMinutes(10))
                 .sign();
     }
 
