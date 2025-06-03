@@ -1,6 +1,7 @@
 package org.project.karto.domain.common.value_objects;
 
 import java.time.Period;
+import java.util.Objects;
 
 public class CardUsageLimitations {
     private final Period expirationPeriod;
@@ -43,5 +44,17 @@ public class CardUsageLimitations {
 
     public int maxUsageCount() {
         return maxUsageCount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        CardUsageLimitations that = (CardUsageLimitations) o;
+        return maxUsageCount == that.maxUsageCount && Objects.equals(expirationPeriod, that.expirationPeriod);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expirationPeriod, maxUsageCount);
     }
 }

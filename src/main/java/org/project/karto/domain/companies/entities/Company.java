@@ -8,6 +8,7 @@ import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.user.values_objects.Password;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Company {
@@ -130,5 +131,17 @@ public class Company {
 
         this.cardUsagesLimitation = cardUsageLimitations;
         this.lastUpdated = LocalDateTime.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Company company = (Company) o;
+        return Objects.equals(id, company.id) && Objects.equals(registrationNumber, company.registrationNumber) && Objects.equals(companyName, company.companyName) && Objects.equals(email, company.email) && Objects.equals(phone, company.phone) && Objects.equals(creationDate, company.creationDate) && Objects.equals(password, company.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, registrationNumber, companyName, email, phone, creationDate, password);
     }
 }

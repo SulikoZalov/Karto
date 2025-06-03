@@ -4,17 +4,96 @@ import net.datafaker.Faker;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
+import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.value_objects.CompanyName;
+import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class TestDataGenerator {
 
     private static final Faker faker = new Faker();
+
+    public static Company generateCompany() {
+        return Company.of(
+                generateRegistrationNumber(),
+                generateCompanyName(),
+                generateEmail(),
+                generatePhone(),
+                generatePassword(),
+                generateCardLimits()
+        );
+    }
+
+    public static List<Company> generateCompanies(int count) {
+        List<Company> companies = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            companies.add(generateCompany());
+        }
+
+        return companies;
+    }
+
+    public static CardUsageLimitations generateCardLimits() {
+        int period = faker.random().nextInt(30, 92);
+        int usages = faker.random().nextInt(1, 10);
+
+        return CardUsageLimitations.of(period, usages);
+    }
+
+    private static CompanyName generateCompanyName() {
+        while (true) {
+            var companyName = Result.ofThrowable(() -> new CompanyName(faker.company().name()));
+            if (!companyName.success()) continue;
+            return companyName.value();
+        }
+    }
+
+    public static RegistrationNumber generateRegistrationNumber() {
+        var min = 5;
+        var max = 20;
+
+        var len = faker.random().nextInt(min, max);
+        var buff = new StringBuilder(len);
+
+        for (int i = 0; i < len; i++) {
+            var option = faker.random().nextInt(1, 3);
+
+            switch (option) {
+                case 1 -> buff.append(faker.text().uppercaseCharacter());
+                case 2 -> buff.append(faker.number().numberBetween(0, 9));
+                case 3 -> buff.append('-');
+            }
+        }
+
+        if (buff.length() < max) {
+//            System.out.println("Buff len is " + buff.length());
+//            System.out.printf("Adding %s chars\n", max - buff.length());
+            buff.repeat('-', max - buff.length());
+
+//            System.out.println("new len is " +  buff.length());
+        }
+
+        var number = buff.toString();
+
+        var codes = Locale.getISOCountries();
+        var rand_code = codes[faker.random().nextInt(codes.length)];
+        return new RegistrationNumber(
+                rand_code,
+                number
+        );
+    }
 
     public static RegistrationForm generateRegistrationForm() {
         String password = generatePassword().password();
