@@ -36,15 +36,6 @@ public class TestDataGenerator {
         );
     }
 
-    public static List<Company> generateCompanies(int count) {
-        List<Company> companies = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            companies.add(generateCompany());
-        }
-
-        return companies;
-    }
-
     public static CardUsageLimitations generateCardLimits() {
         int period = faker.random().nextInt(30, 92);
         int usages = faker.random().nextInt(1, 10);
@@ -52,7 +43,7 @@ public class TestDataGenerator {
         return CardUsageLimitations.of(period, usages);
     }
 
-    private static CompanyName generateCompanyName() {
+    public static CompanyName generateCompanyName() {
         while (true) {
             var companyName = Result.ofThrowable(() -> new CompanyName(faker.company().name()));
             if (!companyName.success()) continue;
@@ -78,11 +69,7 @@ public class TestDataGenerator {
         }
 
         if (buff.length() < max) {
-//            System.out.println("Buff len is " + buff.length());
-//            System.out.printf("Adding %s chars\n", max - buff.length());
             buff.repeat('-', max - buff.length());
-
-//            System.out.println("new len is " +  buff.length());
         }
 
         var number = buff.toString();

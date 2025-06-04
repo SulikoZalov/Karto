@@ -9,6 +9,8 @@ import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.temporal.ChronoUnit
+
 @Dependent
 @QuarkusSpockTest
 class CompanyRepoTest extends Specification{
@@ -36,8 +38,7 @@ class CompanyRepoTest extends Specification{
             company_from_repo.email() == company.email()
             company_from_repo.phone() == company.phone()
             company_from_repo.password() == company.password()
-            // creation date differs and retrieving company from repo
-//            company_from_repo.creationDate() == company.creationDate()
+            company_from_repo.creationDate().truncatedTo(ChronoUnit.SECONDS) == company.creationDate().truncatedTo(ChronoUnit.SECONDS)
             company_from_repo.cardUsagesLimitation() == company_from_repo.cardUsagesLimitation()
         }
 
