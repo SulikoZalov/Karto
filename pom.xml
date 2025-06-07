@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
-                <version>1.19.3</version> <!-- use latest -->
+                <version>1.19.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -60,6 +60,11 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
         <dependency>
@@ -72,10 +77,6 @@
             <version>10.7.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-oidc</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-jwt</artifactId>
@@ -99,9 +100,9 @@
             <artifactId>quarkus-flyway</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.HaciHaciyev</groupId>
-            <artifactId>JetQuerious</artifactId>
-            <version>v2.0.3</version>
+            <groupId>io.github.hacihaciyev</groupId>
+            <artifactId>jet-querious</artifactId>
+            <version>1.0.1</version>
         </dependency>
 
         <dependency>
@@ -136,13 +137,11 @@
             <artifactId>spock-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.github.AinGrace</groupId>
             <artifactId>quarkus-spock-graceful</artifactId>
             <version>0.1</version>
         </dependency>
-
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
@@ -204,8 +203,6 @@
             </plugin>
 
             <plugin>
-                <!-- The gmavenplus plugin is used to compile Groovy code. To learn more about this plugin,
-                visit https://github.com/groovy/GMavenPlus/wiki -->
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
                 <version>4.1.1</version>
