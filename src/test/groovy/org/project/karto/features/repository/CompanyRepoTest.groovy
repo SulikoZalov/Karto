@@ -1,10 +1,12 @@
 package org.project.karto.features.repository
 
 import com.aingrace.test.spock.QuarkusSpockTest
+import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.util.TestDataGenerator
+import org.project.karto.util.testResources.ApplicationTestResource
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -13,6 +15,7 @@ import java.time.temporal.ChronoUnit
 
 @Dependent
 @QuarkusSpockTest
+@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
 class CompanyRepoTest extends Specification{
 
     @Inject

@@ -3,6 +3,7 @@ package org.project.karto.features.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
@@ -16,10 +17,12 @@ import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
+import org.project.karto.util.testResources.ApplicationTestResource;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
+@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
 public class TwoFactorAuthenticationTest {
 
     static final String ENABLE_2FA_URL = "/karto/auth/2FA/enable";

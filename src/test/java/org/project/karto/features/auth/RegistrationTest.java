@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.ws.rs.core.Response;
@@ -12,12 +13,14 @@ import org.project.karto.application.dto.auth.RegistrationForm;
 
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
+import org.project.karto.util.testResources.ApplicationTestResource;
 
 import java.time.LocalDate;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
+@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
 public class RegistrationTest {
 
     private final DBManagementUtils dbManagement;

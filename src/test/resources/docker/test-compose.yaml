@@ -1,0 +1,47 @@
+services:
+  datasource:
+    image: postgres:latest
+    volumes:
+      - postgres:/data/postgres
+    networks:
+      - karto
+
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "karto"
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    networks:
+      - karto
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7080/health/ready" ]
+      interval: 15s
+      timeout: 2s
+      retries: 15
+    command: [ "start-dev", "--http-port", "7080", "--https-port", "7443" ]
+
+  mailpit:
+    image: axllent/mailpit
+    networks:
+      - karto
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+
+networks:
+  karto:
+    driver: bridge
+
+volumes:
+  postgres:
