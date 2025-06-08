@@ -80,7 +80,7 @@ class CompanyRepoTest extends Specification{
         when: "update company's card limitations"
         company.specifyCardUsageLimitations(card_limits)
         company.cardUsageLimitation()
-        repo.update(company)
+        repo.updateCardUsageLimitations(company)
 
         then: "retrieve updated company"
         def result = repo.findBy(company.id())

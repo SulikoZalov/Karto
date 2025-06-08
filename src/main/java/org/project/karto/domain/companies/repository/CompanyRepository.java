@@ -12,7 +12,7 @@ public interface CompanyRepository {
 
     void save(Company company);
 
-    void update(Company company);
+    void updateCardUsageLimitations(Company company);
 
     void updatePassword(Company company);
 

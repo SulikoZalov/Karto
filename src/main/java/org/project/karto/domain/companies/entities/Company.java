@@ -146,10 +146,12 @@ public class Company {
             throw new IllegalStateException("It is prohibited to activate an account that has not been verified.");
 
         this.companyStatus = CompanyStatus.ACTIVE;
+        touch();
     }
 
     public void incrementCounter() {
         this.keyAndCounter = new KeyAndCounter(this.keyAndCounter.key(), this.keyAndCounter.counter() + 1);
+        touch();
     }
 
     public void changePassword(Password password) {
@@ -159,7 +161,7 @@ public class Company {
             throw new IllegalArgumentException("Company account is not verified");
 
         this.password = password;
-        this.lastUpdated = LocalDateTime.now();
+        touch();
     }
 
     public CardUsageLimitations cardUsageLimitation() {
@@ -173,6 +175,10 @@ public class Company {
             throw new IllegalArgumentException("Company account is not verified");
 
         this.cardUsageLimitation = cardUsageLimitations;
+        touch();
+    }
+
+    private void touch() {
         this.lastUpdated = LocalDateTime.now();
     }
 
