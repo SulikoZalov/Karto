@@ -9,6 +9,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.enumerations.Role;
+import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.user.entities.User;
 
 import java.io.IOException;
@@ -50,6 +51,16 @@ public class JWTUtility {
         return Jwt.issuer("Karto")
                 .groups(Role.ADMIN.name())
                 .expiresIn(Duration.ofMinutes(10))
+                .sign();
+    }
+
+    public String generateToken(Company company) {
+        Duration oneDayAndSecond = Duration.ofDays(1).plusSeconds(1);
+
+        return Jwt.issuer("Karto")
+                .upn(company.companyName().companyName())
+                .groups(Role.PARTNER.name())
+                .expiresIn(oneDayAndSecond)
                 .sign();
     }
 
