@@ -12,7 +12,8 @@ CREATE TABLE companies (
     expiration_period_days INTEGER NOT NULL,
     max_usage_count INTEGER NOT NULL,
     creation_date TIMESTAMP NOT NULL,
-    last_updated TIMESTAMP NOT NULL
+    last_updated TIMESTAMP NOT NULL,
+    PRIMARY KEY (id)
 );
 
 CREATE UNIQUE INDEX company_name_index ON companies (company_name);
