@@ -102,6 +102,13 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .build()
             .sql();
 
+    static final String FIND_BY_COMPANY_NAME = select()
+            .all()
+            .from("companies")
+            .where("phone = ?")
+            .build()
+            .sql();
+
     static final String IS_REGISTRATION_NUMBER_EXISTS = select()
             .count("registration_number")
             .from("companies")
@@ -166,25 +173,31 @@ public class JDBCCompanyRepository implements CompanyRepository {
     @Override
     public Result<Company, Throwable> findBy(UUID companyID) {
         var read = jet.read(FIND_BY_ID, this::companyMapper, companyID);
-        return new Result<>(read.value(), read.throwable(), read.success());
+        return mapResult(read);
     }
 
     @Override
     public Result<Company, Throwable> findBy(RegistrationNumber registrationNumber) {
         var read = jet.read(FIND_BY_REGISTRATION_NUMBER, this::companyMapper, registrationNumber.value());
-        return new Result<>(read.value(), read.throwable(), read.success());
+        return mapResult(read);
     }
 
     @Override
     public Result<Company, Throwable> findBy(Phone phone) {
         var read = jet.read(FIND_BY_PHONE, this::companyMapper, phone);
-        return new Result<>(read.value(), read.throwable(), read.success());
+        return mapResult(read);
     }
 
     @Override
     public Result<Company, Throwable> findBy(Email email) {
         var read = jet.read(FIND_BY_EMAIL, this::companyMapper, email);
-        return new Result<>(read.value(), read.throwable(), read.success());
+        return mapResult(read);
+    }
+
+    @Override
+    public Result<Company, Throwable> findBy(CompanyName companyName) {
+        var read = jet.read(FIND_BY_COMPANY_NAME, this::companyMapper, companyName);
+        return mapResult(read);
     }
 
     @Override
@@ -231,5 +244,9 @@ public class JDBCCompanyRepository implements CompanyRepository {
                 CompanyStatus.valueOf(rs.getString("status")),
                 CardUsageLimitations.of(rs.getInt("expiration_period_days"), rs.getInt("max_usage_count"))
         );
+    }
+
+    private static Result<Company, Throwable> mapResult(com.hadzhy.jetquerious.util.Result<Company, Throwable> read) {
+        return new Result<>(read.value(), read.throwable(), read.success());
     }
 }

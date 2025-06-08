@@ -4,6 +4,7 @@ import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 
 import java.util.UUID;
@@ -27,6 +28,8 @@ public interface CompanyRepository {
     Result<Company, Throwable> findBy(Phone phone);
 
     Result<Company, Throwable> findBy(Email email);
+
+    Result<Company, Throwable> findBy(CompanyName companyName);
 
     boolean isExists(RegistrationNumber registrationNumber);
 
