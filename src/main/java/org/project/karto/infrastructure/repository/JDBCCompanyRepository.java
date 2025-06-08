@@ -1,14 +1,15 @@
 package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
-import com.hadzhy.jetquerious.sql.QueryForge;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.repository.CompanyRepository;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
@@ -18,8 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import static com.hadzhy.jetquerious.sql.QueryForge.insert;
-import static com.hadzhy.jetquerious.sql.QueryForge.select;
+import static com.hadzhy.jetquerious.sql.QueryForge.*;
 
 @ApplicationScoped
 public class JDBCCompanyRepository implements CompanyRepository {
@@ -35,6 +35,9 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .column("email")
             .column("phone")
             .column("password")
+            .column("secret_key")
+            .column("counter")
+            .column("status")
             .column("expiration_period_days")
             .column("max_usage_count")
             .column("creation_date")
@@ -43,7 +46,7 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .build()
             .sql();
 
-    static final String UPDATE_COMPANY = QueryForge.update("companies")
+    static final String UPDATE_COMPANY = update("companies")
             .set("""
                   expiration_period_days = ?,
                   max_usage_count = ?,
@@ -53,8 +56,20 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .build()
             .sql();
 
-    static final String UPDATE_PASSWORD = QueryForge.update("companies")
+    static final String UPDATE_PASSWORD = update("companies")
             .set("password = ?, last_updated = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_COUNTER = update("companies")
+            .set("counter = ?, last_updated = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_VERIFICATION = update("companies")
+            .set("status = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -115,15 +130,15 @@ public class JDBCCompanyRepository implements CompanyRepository {
     @Override
     public void save(Company company) {
         jet.write(SAVE_COMPANY, company.id(), company.registrationNumber().countryCode(), company.registrationNumber().value(),
-                        company.companyName(), company.email(), company.phone(), company.password(),
-                        company.cardUsagesLimitation().expirationDays(), company.cardUsagesLimitation().maxUsageCount(),
-                        company.creationDate(), company.lastUpdated())
+                        company.companyName(), company.email(), company.phone(), company.password(), company.keyAndCounter().key(),
+                        company.keyAndCounter().counter(), company.cardUsageLimitation().expirationDays(),
+                        company.cardUsageLimitation().maxUsageCount(), company.creationDate(), company.lastUpdated())
                 .ifFailure(throwable -> Log.errorf("Error saving company aggregate: %s.", throwable.getMessage()));
     }
 
     @Override
-    public void update(Company company) {
-        CardUsageLimitations cardUsageLimitations = company.cardUsagesLimitation();
+    public void updateCardUsageLimitations(Company company) {
+        CardUsageLimitations cardUsageLimitations = company.cardUsageLimitation();
 
         jet.write(UPDATE_COMPANY, cardUsageLimitations.expirationDays(),
                         cardUsageLimitations.maxUsageCount(), company.lastUpdated(), company.id())
@@ -132,8 +147,20 @@ public class JDBCCompanyRepository implements CompanyRepository {
 
     @Override
     public void updatePassword(Company company) {
-        jet.write(UPDATE_PASSWORD, company.password(), company.id())
+        jet.write(UPDATE_PASSWORD, company.password(), company.lastUpdated(), company.id())
                 .ifFailure(throwable -> Log.errorf("Error update password: %s.", throwable.getMessage()));
+    }
+
+    @Override
+    public void updateCounter(Company company) {
+        jet.write(UPDATE_COUNTER, company.keyAndCounter().counter(), company.lastUpdated(), company.id())
+                .ifFailure(throwable -> Log.errorf("Error update counter: %s.", throwable.getMessage()));
+    }
+
+    @Override
+    public void updateVerification(Company company) {
+        jet.write(UPDATE_VERIFICATION, company.companyStatus(), company.lastUpdated(), company.id())
+                .ifFailure(throwable -> Log.errorf("Error update verification: %s.", throwable.getMessage()));
     }
 
     @Override
@@ -200,6 +227,8 @@ public class JDBCCompanyRepository implements CompanyRepository {
                 rs.getTimestamp("creation_date").toLocalDateTime(),
                 rs.getTimestamp("last_updated").toLocalDateTime(),
                 new Password(rs.getString("password")),
+                new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
+                CompanyStatus.valueOf(rs.getString("status")),
                 CardUsageLimitations.of(rs.getInt("expiration_period_days"), rs.getInt("max_usage_count"))
         );
     }
