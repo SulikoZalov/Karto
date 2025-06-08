@@ -16,6 +16,10 @@ public interface CompanyRepository {
 
     void updatePassword(Company company);
 
+    void updateCounter(Company company);
+
+    void updateVerification(Company company);
+
     Result<Company, Throwable> findBy(UUID companyID);
 
     Result<Company, Throwable> findBy(RegistrationNumber registrationNumber);

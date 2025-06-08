@@ -42,7 +42,7 @@ class CompanyRepoTest extends Specification{
             company_from_repo.phone() == company.phone()
             company_from_repo.password() == company.password()
             company_from_repo.creationDate().truncatedTo(ChronoUnit.SECONDS) == company.creationDate().truncatedTo(ChronoUnit.SECONDS)
-            company_from_repo.cardUsagesLimitation() == company_from_repo.cardUsagesLimitation()
+            company_from_repo.cardUsageLimitation() == company_from_repo.cardUsageLimitation()
         }
 
         where:
@@ -79,7 +79,7 @@ class CompanyRepoTest extends Specification{
 
         when: "update company's card limitations"
         company.specifyCardUsageLimitations(card_limits)
-        company.cardUsagesLimitation()
+        company.cardUsageLimitation()
         repo.update(company)
 
         then: "retrieve updated company"
@@ -87,7 +87,7 @@ class CompanyRepoTest extends Specification{
         result.success()
 
         and: "verify changes"
-        def limit = result.orElseThrow().cardUsagesLimitation()
+        def limit = result.orElseThrow().cardUsageLimitation()
         limit.expirationDays() == card_limits.expirationDays()
         limit.expirationPeriod() == card_limits.expirationPeriod()
 

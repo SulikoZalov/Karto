@@ -2,7 +2,9 @@ package org.project.karto.domain.companies.entities;
 
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.user.values_objects.Password;
@@ -20,7 +22,9 @@ public class Company {
     private final LocalDateTime creationDate;
     private LocalDateTime lastUpdated;
     private Password password;
-    private CardUsageLimitations cardUsagesLimitation;
+    private KeyAndCounter keyAndCounter;
+    private CompanyStatus companyStatus;
+    private CardUsageLimitations cardUsageLimitation;
 
     private Company(
             UUID id,
@@ -31,7 +35,9 @@ public class Company {
             LocalDateTime creationDate,
             LocalDateTime lastUpdated,
             Password password,
-            CardUsageLimitations cardUsagesLimitation) {
+            KeyAndCounter keyAndCounter,
+            CompanyStatus companyStatus,
+            CardUsageLimitations cardUsageLimitation) {
 
         if (id == null) throw new IllegalArgumentException("id must not be null");
         if (registrationNumber == null) throw new IllegalArgumentException("registrationNumber must not be null");
@@ -41,7 +47,9 @@ public class Company {
         if (creationDate == null) throw new IllegalArgumentException("creationDate must not be null");
         if (lastUpdated == null) throw new IllegalArgumentException("lastUpdate must not be null");
         if (password == null) throw new IllegalArgumentException("password must not be null");
-        if (cardUsagesLimitation == null) throw new IllegalArgumentException("cardUsagesLimitation must not be null");
+        if (keyAndCounter == null) throw new IllegalArgumentException("keyAndCounter must not be null");
+        if (companyStatus == null) throw new IllegalArgumentException("companyStatus must not be null");
+        if (cardUsageLimitation == null) throw new IllegalArgumentException("cardUsagesLimitation must not be null");
 
         this.id = id;
         this.registrationNumber = registrationNumber;
@@ -51,7 +59,9 @@ public class Company {
         this.creationDate = creationDate;
         this.lastUpdated = lastUpdated;
         this.password = password;
-        this.cardUsagesLimitation = cardUsagesLimitation;
+        this.keyAndCounter = keyAndCounter;
+        this.companyStatus = companyStatus;
+        this.cardUsageLimitation = cardUsageLimitation;
     }
 
     public static Company of(
@@ -60,10 +70,12 @@ public class Company {
             Email email,
             Phone phone,
             Password password,
+            String key,
             CardUsageLimitations cardUsagesLimitation) {
 
         LocalDateTime now = LocalDateTime.now();
-        return new Company(UUID.randomUUID(), registrationNumber, companyName, email, phone, now, now, password, cardUsagesLimitation);
+        return new Company(UUID.randomUUID(), registrationNumber, companyName, email, phone,
+                now, now, password, new KeyAndCounter(key, 0), CompanyStatus.PENDING, cardUsagesLimitation);
     }
 
     public static Company fromRepository(
@@ -75,10 +87,12 @@ public class Company {
             LocalDateTime creationDate,
             LocalDateTime lastUpdate,
             Password password,
+            KeyAndCounter keyAndCounter,
+            CompanyStatus companyStatus,
             CardUsageLimitations cardUsagesLimitation) {
 
         return new Company(id, registrationNumber, companyName, email,
-                phone, creationDate, lastUpdate, password, cardUsagesLimitation);
+                phone, creationDate, lastUpdate, password, keyAndCounter, companyStatus, cardUsagesLimitation);
     }
 
     public UUID id() {
@@ -113,23 +127,52 @@ public class Company {
         return password;
     }
 
+    public KeyAndCounter keyAndCounter() {
+        return keyAndCounter;
+    }
+
+    public CompanyStatus companyStatus() {
+        return companyStatus;
+    }
+
+    public boolean isActive() {
+        return companyStatus == CompanyStatus.ACTIVE;
+    }
+
+    public void enable() {
+        if (isActive())
+            throw new IllegalStateException("You can`t active already verified user.");
+        if (keyAndCounter.counter() == 0)
+            throw new IllegalStateException("It is prohibited to activate an account that has not been verified.");
+
+        this.companyStatus = CompanyStatus.ACTIVE;
+    }
+
+    public void incrementCounter() {
+        this.keyAndCounter = new KeyAndCounter(this.keyAndCounter.key(), this.keyAndCounter.counter() + 1);
+    }
+
     public void changePassword(Password password) {
         if (password == null)
             throw new IllegalArgumentException("Password can`t be null");
+        if (companyStatus != CompanyStatus.ACTIVE)
+            throw new IllegalArgumentException("Company account is not verified");
 
         this.password = password;
         this.lastUpdated = LocalDateTime.now();
     }
 
-    public CardUsageLimitations cardUsagesLimitation() {
-        return cardUsagesLimitation;
+    public CardUsageLimitations cardUsageLimitation() {
+        return cardUsageLimitation;
     }
 
     public void specifyCardUsageLimitations(CardUsageLimitations cardUsageLimitations) {
         if (cardUsageLimitations == null)
             throw new IllegalArgumentException("Card usage limitations can`t be null");
+        if (companyStatus != CompanyStatus.ACTIVE)
+            throw new IllegalArgumentException("Company account is not verified");
 
-        this.cardUsagesLimitation = cardUsageLimitations;
+        this.cardUsageLimitation = cardUsageLimitations;
         this.lastUpdated = LocalDateTime.now();
     }
 
@@ -137,7 +180,10 @@ public class Company {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Company company = (Company) o;
-        return Objects.equals(id, company.id) && Objects.equals(registrationNumber, company.registrationNumber) && Objects.equals(companyName, company.companyName) && Objects.equals(email, company.email) && Objects.equals(phone, company.phone) && Objects.equals(creationDate, company.creationDate) && Objects.equals(password, company.password);
+        return Objects.equals(id, company.id) && Objects.equals(registrationNumber, company.registrationNumber) &&
+                Objects.equals(companyName, company.companyName) && Objects.equals(email, company.email) &&
+                Objects.equals(phone, company.phone) && Objects.equals(creationDate, company.creationDate) &&
+                Objects.equals(password, company.password);
     }
 
     @Override
