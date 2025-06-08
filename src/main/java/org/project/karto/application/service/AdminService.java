@@ -9,10 +9,14 @@ import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 import org.project.karto.domain.companies.repository.CompanyRepository;
+import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.user.values_objects.Password;
+import org.project.karto.infrastructure.communication.PhoneInteractionService;
+import org.project.karto.infrastructure.security.HOTPGenerator;
 import org.project.karto.infrastructure.security.JWTUtility;
 import org.project.karto.infrastructure.security.PasswordEncoder;
 
@@ -29,14 +33,25 @@ public class AdminService {
 
     private final JWTUtility jwtUtility;
 
+    private final HOTPGenerator hotpGenerator;
+
     private final PasswordEncoder passwordEncoder;
 
     private final CompanyRepository companyRepository;
 
-    AdminService(JWTUtility jwtUtility, PasswordEncoder passwordEncoder, CompanyRepository companyRepository) {
+    private final PhoneInteractionService phoneInteractionService;
+
+    private final PartnerVerificationOTPRepository otpRepository;
+
+    AdminService(JWTUtility jwtUtility, PasswordEncoder passwordEncoder,
+                 CompanyRepository companyRepository, PhoneInteractionService phoneInteractionService,
+                 PartnerVerificationOTPRepository otpRepository) {
         this.jwtUtility = jwtUtility;
+        this.phoneInteractionService = phoneInteractionService;
+        this.hotpGenerator = new HOTPGenerator();
         this.passwordEncoder = passwordEncoder;
         this.companyRepository = companyRepository;
+        this.otpRepository = otpRepository;
     }
 
     public Token auth(String verificationKey) {
@@ -77,9 +92,21 @@ public class AdminService {
                 email,
                 phone,
                 encodedPassword,
+                HOTPGenerator.generateSecretKey(),
                 CardUsageLimitations.of(registrationForm.cardExpirationDays(), registrationForm.cardMaxUsageCount())
         );
 
         companyRepository.save(company);
+        generateAndResendPartnerOTP(company);
+    }
+
+    private void generateAndResendPartnerOTP(Company company) {
+        PartnerVerificationOTP otp = PartnerVerificationOTP
+                .of(company, hotpGenerator.generateHOTP(company.keyAndCounter().key(), company.keyAndCounter().counter()));
+
+        otpRepository.save(otp);
+        company.incrementCounter();
+        companyRepository.updateCounter(company);
+        phoneInteractionService.sendOTP(company.phone(), otp);
     }
 }
