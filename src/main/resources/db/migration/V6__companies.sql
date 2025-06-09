@@ -5,7 +5,7 @@ CREATE TABLE companies (
     company_name VARCHAR(255) NOT NULL,
     email VARCHAR NOT NULL,
     phone VARCHAR NOT NULL,
-    password VARCHAR(64) NOT NULL,
+    password VARCHAR NOT NULL,
     secret_key VARCHAR NOT NULL,
     counter BIGINT NOT NULL,
     status VARCHAR NOT NULL CHECK (status IN ('PENDING', 'ACTIVE')),
