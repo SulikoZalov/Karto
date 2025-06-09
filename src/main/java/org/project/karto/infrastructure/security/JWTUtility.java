@@ -49,6 +49,7 @@ public class JWTUtility {
 
     public String generateAdministratorToken() {
         return Jwt.issuer("Karto")
+                .upn("admin")
                 .groups(Role.ADMIN.name())
                 .expiresIn(Duration.ofMinutes(10))
                 .sign();
