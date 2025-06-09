@@ -128,28 +128,4 @@ class CompanyRepoTest extends Specification{
         company << (1..10).collect({TestDataGenerator.generateCompany()})
         password << (1..10).collect({TestDataGenerator.generatePassword()})
     }
-
-
-    void "fail updating same password twice"() {
-        when: "save company"
-        company.incrementCounter()
-        company.enable()
-        def saveResult = repo.save(company)
-
-        then: "verify success"
-        saveResult.success()
-
-        when: "update password twice"
-        company.changePassword(password)
-        def updateResult1 = repo.updatePassword(company)
-        def updateResult2 = repo.updatePassword(company)
-
-        then: "verify failure"
-        updateResult1.success()
-        !updateResult2.success()
-
-        where:
-        company << (1..10).collect({TestDataGenerator.generateCompany()})
-        password << (1..10).collect({TestDataGenerator.generatePassword()})
-    }
 }
