@@ -23,12 +23,7 @@ class AdminAuthResourceTest extends Specification {
     @Inject
     JWTUtility jwtUtility
 
-    AdminService mockService
-
-    def setup() {
-        mockService = Mock(AdminService)
-        QuarkusMock.installMockForType(mockService, AdminService.class)
-    }
+    AdminService adminService
 
     void "successful login"() {
         given:
@@ -42,7 +37,7 @@ class AdminAuthResourceTest extends Specification {
                 .extract()
 
         then: "verify that AdminService::auth has been invoked once"
-        1 * mockService.auth("valid key") >> new Token(adminToken)
+        1 * adminService.auth("valid key") >> new Token(adminToken)
 
         and: "verify response"
         response.statusCode() == 200
@@ -58,7 +53,7 @@ class AdminAuthResourceTest extends Specification {
                 .extract()
 
         then: "verify that AdminService::auth has been invoked once"
-        1 * mockService.auth("invalid key") >> { throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build()) }
+        1 * adminService.auth("invalid key") >> { throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build()) }
 
         and: "verify response"
         response.statusCode() == 403

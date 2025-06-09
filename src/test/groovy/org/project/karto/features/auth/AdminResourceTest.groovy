@@ -27,12 +27,7 @@ class AdminResourceTest extends Specification{
     @Inject
     ObjectMapper mapper
 
-    AdminService mockService
-
-    def setup() {
-        mockService = Mock(AdminService)
-        QuarkusMock.installMockForType(mockService, AdminService.class)
-    }
+    AdminService adminService
 
     void "successful partner registration"() {
         given:
@@ -51,7 +46,7 @@ class AdminResourceTest extends Specification{
                 .extract()
 
         then: "verify that AdminService::registerPartner has been invoked once"
-        1 * mockService.registerPartner(_)
+        1 * adminService.registerPartner(_)
 
         and: "verify response"
         response.statusCode() == 200
@@ -75,6 +70,6 @@ class AdminResourceTest extends Specification{
                 .extract()
 
         then: "verify that AdminService::registerPartner has been invoked once"
-        1 * mockService.registerPartner(_)
+        1 * adminService.registerPartner(_)
     }
 }
