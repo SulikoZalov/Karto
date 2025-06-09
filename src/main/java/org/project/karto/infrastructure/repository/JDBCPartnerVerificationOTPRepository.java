@@ -59,7 +59,7 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
     static final String FIND_BY_COMPANY_ID = select()
             .all()
             .from("companies_otp")
-            .where("company_id")
+            .where("company_id = ?")
             .build()
             .sql();
 
@@ -94,17 +94,21 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
     @Override
     public Result<PartnerVerificationOTP, Throwable> findBy(PartnerVerificationOTP otp) {
         var result = jet.read(FIND_BY_OTP, this::partnerOTPMapper, otp.otp());
-        return new Result<>(result.value(), result.throwable(), result.success());
+        return mapResult(result);
     }
 
     @Override
     public Result<PartnerVerificationOTP, Throwable> findBy(UUID companyID) {
-        return null;
+        return mapResult(jet.read(FIND_BY_COMPANY_ID, this::partnerOTPMapper, companyID));
     }
 
     @Override
     public Result<PartnerVerificationOTP, Throwable> findBy(String otp) {
         var result = jet.read(FIND_BY_OTP, this::partnerOTPMapper, otp);
+        return mapResult(result);
+    }
+
+    static Result<PartnerVerificationOTP, Throwable> mapResult(Result<PartnerVerificationOTP, Throwable> result) {
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
