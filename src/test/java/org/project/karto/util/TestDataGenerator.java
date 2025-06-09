@@ -179,4 +179,16 @@ public class TestDataGenerator {
     public static String generateSecretKey() {
         return HOTPGenerator.generateSecretKey();
     }
+
+    public static Company generateCompany(CompanyName companyName) {
+        return Company.of(
+                generateRegistrationNumber(),
+                companyName,
+                generateEmail(),
+                generatePhone(),
+                generatePassword(),
+                HOTPGenerator.generateSecretKey(),
+                generateCardLimits()
+        );
+    }
 }

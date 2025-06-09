@@ -128,4 +128,25 @@ class CompanyRepoTest extends Specification{
         company << (1..10).collect({TestDataGenerator.generateCompany()})
         password << (1..10).collect({TestDataGenerator.generatePassword()})
     }
+
+    void "invalid registration: company name exists"() {
+        when: "save company"
+        company.incrementCounter()
+        company.enable()
+        def saveResult = repo.save(company)
+
+        then: "verify success"
+        saveResult.success()
+
+        when: "save company name twice"
+        def company2 = TestDataGenerator.generateCompany(company.companyName())
+        repo.save(company2)
+
+        then: "verify double company name exception"
+
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+        password << (1..10).collect({TestDataGenerator.generatePassword()})
+    }
 }
