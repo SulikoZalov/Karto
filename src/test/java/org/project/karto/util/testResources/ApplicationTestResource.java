@@ -1,5 +1,6 @@
 package org.project.karto.util.testResources;
 
+import io.quarkus.logging.Log;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.testcontainers.containers.ComposeContainer;
 
@@ -16,8 +17,12 @@ public class ApplicationTestResource implements QuarkusTestResourceLifecycleMana
     public Map<String, String> start() {
         File composeFile = Path.of("src/test/resources/docker/test-compose.yaml").toFile();
         compose = new ComposeContainer(composeFile)
+                .withBuild(false)
+                .withPull(false)
                 .withExposedService("datasource-1", 5432)
-                .withExposedService("keycloak-1", 7080);
+                .withExposedService("keycloak-1", 7080)
+                .withLogConsumer("datasource-1", outputFrame -> Log.info("datasource -> " + outputFrame.getUtf8String()))
+                .withLogConsumer("keycloak-1", outputFrame -> Log.info("keycloak -> " + outputFrame.getUtf8String()));
 
         compose.start();
 
@@ -32,7 +37,7 @@ public class ApplicationTestResource implements QuarkusTestResourceLifecycleMana
         {
             String keycloakServiceHost = compose.getServiceHost("keycloak-1", 7080);
             int keycloakServicePort = compose.getServicePort("keycloak-1", 7080);
-            String keycloakURL = "http://%s:%s/realms/karto-realm".formatted(keycloakServiceHost, keycloakServicePort);
+            String keycloakURL = "http://%s:%s/auth/realms/karto-realm".formatted(keycloakServiceHost, keycloakServicePort);
             config.put("keycloak-url", keycloakURL);
         }
 

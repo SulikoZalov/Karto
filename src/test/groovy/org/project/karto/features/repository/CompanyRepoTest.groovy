@@ -7,7 +7,6 @@ import jakarta.inject.Inject
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.util.TestDataGenerator
 import org.project.karto.util.testResources.ApplicationTestResource
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -24,12 +23,13 @@ class CompanyRepoTest extends Specification{
     @Unroll("#company.id | #company.companyName.companyName")
     void "successful save"() {
         when:
-        repo.save(company)
+        def save_result = repo.save(company)
 
         then:
-        def result = repo.findBy(company.id())
+        save_result.success()
 
         and:
+        def result = repo.findBy(company.id())
         result.success()
 
         and:
@@ -42,47 +42,47 @@ class CompanyRepoTest extends Specification{
             company_from_repo.phone() == company.phone()
             company_from_repo.password() == company.password()
             company_from_repo.creationDate().truncatedTo(ChronoUnit.SECONDS) == company.creationDate().truncatedTo(ChronoUnit.SECONDS)
-            company_from_repo.cardUsageLimitation() == company_from_repo.cardUsageLimitation()
+            company_from_repo.cardUsageLimitation() == company.cardUsageLimitation()
+            company_from_repo.companyStatus() == company.companyStatus()
         }
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
     }
 
-    @Ignore("can't easily verify failure")
     void "fail saving same company 2 times"() {
         when:
-        repo.save(company)
-        repo.save(company)
+        def firstSaveResult = repo.save(company)
+        def secondSaveResult = repo.save(company)
 
         then:
-        def result = repo.findBy(company.id())
-
-        and:
-        !result.success()
-
-        and:
-        print result.throwable()
+        firstSaveResult.success()
+        !secondSaveResult.success()
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
     }
 
 
-    @Unroll("#company.id | old -> #company.cardUsagesLimitation().expirationPeriod(), #company.cardUsagesLimitation().maxUsageCount() | new -> #card_limits.expirationPeriod(), #card_limits.maxUsageCount()")
+    @Unroll("#company.id | old -> #company.cardUsageLimitation().expirationPeriod(), #company.cardUsageLimitation().maxUsageCount() | new -> #card_limits.expirationPeriod(), #card_limits.maxUsageCount()")
     void "successfully update card limits"() {
         when: "save company"
-        repo.save(company)
+        company.incrementCounter()
+        company.enable()
+        def saveResult = repo.save(company)
 
-        then: "successfully retrieve it"
-        repo.findBy(company.id()).success()
+        then: "verify success"
+        notThrown(Exception)
+        saveResult.success()
 
         when: "update company's card limitations"
         company.specifyCardUsageLimitations(card_limits)
-        company.cardUsageLimitation()
-        repo.updateCardUsageLimitations(company)
+        def updateResult = repo.updateCardUsageLimitations(company)
 
-        then: "retrieve updated company"
+        then: "verify success"
+        updateResult.success()
+
+        and: "retrieve updated company"
         def result = repo.findBy(company.id())
         result.success()
 
@@ -97,27 +97,32 @@ class CompanyRepoTest extends Specification{
     }
 
     @Unroll("#company.id | old -> #company.password().password() | new -> #password.password()")
-    @Ignore("SQL typo | can't verify failures")
     void "successfully update company password"() {
-        when: "save company"
-        println "saving company with password " << company.password().password()
-        repo.save(company)
+        given:
+        def oldPassword = company.password().password()
 
-        then: "successfully retrieve it"
-        repo.findBy(company.id()).success()
+        when: "save company"
+        company.incrementCounter()
+        company.enable()
+        def saveResult = repo.save(company)
+
+        then: "verify success"
+        saveResult.success()
 
         when: "update password"
         company.changePassword(password)
-        repo.updatePassword(company)
+        def updateResult = repo.updatePassword(company)
 
-        then: "retrieve updated company"
-        def result = repo.findBy(company.id())
-        result.success()
+        then: "verify success"
+        updateResult.success()
+
+        and: "retrieve updated company"
+        def findResult = repo.findBy(company.id())
+        findResult.success()
 
         and: "verify changes"
-        def new_password = result.orElseThrow().password()
-        println "new passwd is " << new_password
-        new_password.password() != company.password().password()
+        def new_password = findResult.orElseThrow().password()
+        new_password.password() != oldPassword
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
@@ -125,26 +130,23 @@ class CompanyRepoTest extends Specification{
     }
 
 
-    @Ignore("SQL typo | can't verify failures")
-    // TODO UNFINISHED
     void "fail updating same password twice"() {
         when: "save company"
-        repo.save(company)
+        company.incrementCounter()
+        company.enable()
+        def saveResult = repo.save(company)
 
-        then: "successfully retrieve it"
-        repo.findBy(company.id()).success()
+        then: "verify success"
+        saveResult.success()
 
-        when: "update password"
+        when: "update password twice"
         company.changePassword(password)
-        repo.updatePassword(company)
+        def updateResult1 = repo.updatePassword(company)
+        def updateResult2 = repo.updatePassword(company)
 
-        then: "retrieve updated company"
-        def result = repo.findBy(company.id())
-        result.success()
-
-        and: "verify changes"
-        def new_password = result.orElseThrow().password()
-        new_password.password() != company.password().password()
+        then: "verify failure"
+        updateResult1.success()
+        !updateResult2.success()
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})

@@ -1,6 +1,7 @@
 package org.project.karto.util;
 
 import net.datafaker.Faker;
+import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
@@ -47,8 +48,13 @@ public class TestDataGenerator {
             return companyName.value();
         }
     }
+    
+    public static String generateRegistrationCountryCode() {
+        var codes = Locale.getISOCountries();
+        return codes[faker.random().nextInt(codes.length)];
+    }
 
-    public static RegistrationNumber generateRegistrationNumber() {
+    public static String generateRegistrationNumberValue() {
         var min = 5;
         var max = 20;
 
@@ -69,13 +75,13 @@ public class TestDataGenerator {
             buff.repeat('-', max - buff.length());
         }
 
-        var number = buff.toString();
-
-        var codes = Locale.getISOCountries();
-        var rand_code = codes[faker.random().nextInt(codes.length)];
+        return buff.toString();
+    }
+    
+    public static RegistrationNumber generateRegistrationNumber() {
         return new RegistrationNumber(
-                rand_code,
-                number
+                generateRegistrationCountryCode(),
+                generateRegistrationNumberValue()
         );
     }
 
@@ -89,6 +95,20 @@ public class TestDataGenerator {
                 password,
                 password,
                 generateBirthdate().birthDate()
+        );
+    }
+    
+    public static CompanyRegistrationForm generateCompanyRegistrationForm() {
+        var cardLimits = generateCardLimits();
+        return new CompanyRegistrationForm(
+                generateRegistrationCountryCode(),
+                generateRegistrationNumberValue(),
+                generateCompanyName().companyName(),
+                generateEmail().email(),
+                generatePhone().phoneNumber(),
+                generatePassword().password(),
+                cardLimits.expirationDays(),
+                cardLimits.maxUsageCount()
         );
     }
 
