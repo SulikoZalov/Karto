@@ -58,7 +58,7 @@ class AdminAuthResourceTest extends Specification {
                 .extract()
 
         then: "verify that AdminService::auth has been invoked once"
-        1 * mockService.auth("valid key") >> { throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build()) }
+        1 * mockService.auth("invalid key") >> { throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build()) }
 
         and: "verify response"
         response.statusCode() == 403
