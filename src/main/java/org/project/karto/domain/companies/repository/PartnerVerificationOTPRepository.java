@@ -1,6 +1,6 @@
 package org.project.karto.domain.companies.repository;
 
-import org.project.karto.domain.common.containers.Result;
+import com.hadzhy.jetquerious.util.Result;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 
 import java.util.UUID;

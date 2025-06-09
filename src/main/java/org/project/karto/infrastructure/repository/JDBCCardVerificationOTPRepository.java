@@ -2,13 +2,12 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
-import io.quarkus.logging.Log;
+import com.hadzhy.jetquerious.util.Result;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.CardVerificationOTP;
 import org.project.karto.domain.card.repositories.CardVerificationOTPRepository;
 import org.project.karto.domain.card.value_objects.CardID;
 import org.project.karto.domain.card.value_objects.OwnerID;
-import org.project.karto.domain.common.containers.Result;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,31 +67,25 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
     }
 
     @Override
-    public void save(CardVerificationOTP otp) {
-        jet.write(SAVE_OTP,
+    public Result<Integer, Throwable> save(CardVerificationOTP otp) {
+        return jet.write(SAVE_OTP,
                         otp.otp(),
                         otp.cardID().value().toString(),
                         otp.isConfirmed(),
                         Timestamp.valueOf(otp.creationDate()),
-                        Timestamp.valueOf(otp.expirationDate()))
-                .ifFailure(throwable ->
-                        Log.errorf("Error saving gift card OTP: %s", throwable.getMessage()));
+                        Timestamp.valueOf(otp.expirationDate()));
     }
 
     @Override
-    public void update(CardVerificationOTP otp) {
-        jet.write(UPDATE_CONFIRMATION,
+    public Result<Integer, Throwable> update(CardVerificationOTP otp) {
+        return jet.write(UPDATE_CONFIRMATION,
                         otp.isConfirmed(),
-                        otp.otp())
-                .ifFailure(throwable ->
-                        Log.errorf("Error updating OTP confirmation: %s", throwable.getMessage()));
+                        otp.otp());
     }
 
     @Override
-    public void remove(CardVerificationOTP otp) {
-        jet.write(DELETE_OTP, otp.otp())
-                .ifFailure(throwable ->
-                        Log.errorf("Error deleting gift card OTP: %s", otp.otp()));
+    public Result<Integer, Throwable> remove(CardVerificationOTP otp) {
+        return jet.write(DELETE_OTP, otp.otp());
     }
 
     @Override

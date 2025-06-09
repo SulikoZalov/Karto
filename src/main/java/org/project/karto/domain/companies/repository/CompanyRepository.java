@@ -1,6 +1,6 @@
 package org.project.karto.domain.companies.repository;
 
-import org.project.karto.domain.common.containers.Result;
+import com.hadzhy.jetquerious.util.Result;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
@@ -11,15 +11,15 @@ import java.util.UUID;
 
 public interface CompanyRepository {
 
-    void save(Company company);
+    Result<Integer, Throwable> save(Company company);
 
-    void updateCardUsageLimitations(Company company);
+    Result<Integer, Throwable> updateCardUsageLimitations(Company company);
 
-    void updatePassword(Company company);
+    Result<Integer, Throwable> updatePassword(Company company);
 
-    void updateCounter(Company company);
+    Result<Integer, Throwable> updateCounter(Company company);
 
-    void updateVerification(Company company);
+    Result<Integer, Throwable> updateVerification(Company company);
 
     Result<Company, Throwable> findBy(UUID companyID);
 

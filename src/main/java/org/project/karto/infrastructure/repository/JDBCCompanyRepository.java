@@ -1,9 +1,9 @@
 package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
@@ -135,39 +135,34 @@ public class JDBCCompanyRepository implements CompanyRepository {
     }
 
     @Override
-    public void save(Company company) {
-        jet.write(SAVE_COMPANY, company.id(), company.registrationNumber().countryCode(), company.registrationNumber().value(),
+    public Result<Integer, Throwable> save(Company company) {
+        return jet.write(SAVE_COMPANY, company.id(), company.registrationNumber().countryCode(), company.registrationNumber().value(),
                         company.companyName(), company.email(), company.phone(), company.password(), company.keyAndCounter().key(),
-                        company.keyAndCounter().counter(), company.cardUsageLimitation().expirationDays(),
-                        company.cardUsageLimitation().maxUsageCount(), company.creationDate(), company.lastUpdated())
-                .ifFailure(throwable -> Log.errorf("Error saving company aggregate: %s.", throwable.getMessage()));
+                        company.keyAndCounter().counter(), company.companyStatus(), company.cardUsageLimitation().expirationDays(),
+                        company.cardUsageLimitation().maxUsageCount(), company.creationDate(), company.lastUpdated());
     }
 
     @Override
-    public void updateCardUsageLimitations(Company company) {
+    public Result<Integer, Throwable> updateCardUsageLimitations(Company company) {
         CardUsageLimitations cardUsageLimitations = company.cardUsageLimitation();
 
-        jet.write(UPDATE_COMPANY, cardUsageLimitations.expirationDays(),
-                        cardUsageLimitations.maxUsageCount(), company.lastUpdated(), company.id())
-                .ifFailure(throwable -> Log.errorf("Error update company aggregate: %s.", throwable.getMessage()));
+        return jet.write(UPDATE_COMPANY, cardUsageLimitations.expirationDays(),
+                        cardUsageLimitations.maxUsageCount(), company.lastUpdated(), company.id());
     }
 
     @Override
-    public void updatePassword(Company company) {
-        jet.write(UPDATE_PASSWORD, company.password(), company.lastUpdated(), company.id())
-                .ifFailure(throwable -> Log.errorf("Error update password: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updatePassword(Company company) {
+        return jet.write(UPDATE_PASSWORD, company.password(), company.lastUpdated(), company.id());
     }
 
     @Override
-    public void updateCounter(Company company) {
-        jet.write(UPDATE_COUNTER, company.keyAndCounter().counter(), company.lastUpdated(), company.id())
-                .ifFailure(throwable -> Log.errorf("Error update counter: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updateCounter(Company company) {
+        return jet.write(UPDATE_COUNTER, company.keyAndCounter().counter(), company.lastUpdated(), company.id());
     }
 
     @Override
-    public void updateVerification(Company company) {
-        jet.write(UPDATE_VERIFICATION, company.companyStatus(), company.lastUpdated(), company.id())
-                .ifFailure(throwable -> Log.errorf("Error update verification: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updateVerification(Company company) {
+        return jet.write(UPDATE_VERIFICATION, company.companyStatus(), company.lastUpdated(), company.id());
     }
 
     @Override

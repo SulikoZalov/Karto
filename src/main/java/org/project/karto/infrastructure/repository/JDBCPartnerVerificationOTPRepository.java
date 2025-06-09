@@ -2,9 +2,9 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
+import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 
