@@ -1,5 +1,7 @@
 package org.project.karto.features.partner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -10,8 +12,6 @@ import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.infrastructure.security.JWTUtility;
 import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.TestDataGenerator;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static io.restassured.RestAssured.given;
 
