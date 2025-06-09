@@ -14,10 +14,6 @@ import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -32,6 +28,7 @@ public class TestDataGenerator {
                 generateEmail(),
                 generatePhone(),
                 generatePassword(),
+                HOTPGenerator.generateSecretKey(),
                 generateCardLimits()
         );
     }
