@@ -130,6 +130,13 @@ public class JDBCCompanyRepository implements CompanyRepository {
             .build()
             .sql();
 
+    static final String IS_COMPANY_NAME_EXISTS = select()
+            .count("company_name")
+            .from("companies")
+            .where("company_name = ?")
+            .build()
+            .sql();
+
     JDBCCompanyRepository() {
         jet = JetQuerious.instance();
     }
@@ -221,6 +228,16 @@ public class JDBCCompanyRepository implements CompanyRepository {
                 .mapSuccess(count -> count != null && count > 0)
                 .orElseGet(() -> {
                     Log.error("Error checking email existence.");
+                    return false;
+                });
+    }
+
+    @Override
+    public boolean isExists(CompanyName companyName) {
+        return jet.readObjectOf(IS_COMPANY_NAME_EXISTS, Integer.class, companyName)
+                .mapSuccess(count -> count != null && count > 0)
+                .orElseGet(() -> {
+                    Log.error("Error checking company name existence.");
                     return false;
                 });
     }

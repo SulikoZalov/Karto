@@ -71,6 +71,10 @@ public class AdminService {
 
         Password.validate(registrationForm.rawPassword());
 
+        CompanyName companyName = new CompanyName(registrationForm.companyName());
+        if (companyRepository.isExists(companyName))
+            throw responseException(Response.Status.CONFLICT, "Company name already exists.");
+
         RegistrationNumber registrationNumber = new RegistrationNumber(registrationForm.registrationCountryCode(),
                 registrationForm.registrationNumber());
         if (companyRepository.isExists(registrationNumber))
@@ -88,7 +92,7 @@ public class AdminService {
 
         Company company = Company.of(
                 registrationNumber,
-                new CompanyName(registrationForm.companyName()),
+                companyName,
                 email,
                 phone,
                 encodedPassword,

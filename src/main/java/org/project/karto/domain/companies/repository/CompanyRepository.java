@@ -36,4 +36,6 @@ public interface CompanyRepository {
     boolean isExists(Phone phone);
 
     boolean isExists(Email email);
+
+    boolean isExists(CompanyName companyName);
 }
