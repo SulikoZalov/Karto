@@ -1,6 +1,7 @@
-package org.project.karto.util
+package org.project.karto.unit.util
 
 import net.datafaker.Faker
+import org.project.karto.util.TestDataGenerator
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -13,7 +14,7 @@ class TestDataGeneratorTest extends Specification{
         def max = 10000
 
         when:
-        def companies = (1..max).collect({TestDataGenerator.generateCompany()})
+        def companies = (1..max).collect({ TestDataGenerator.generateCompany()})
 
         then:
         notThrown(Exception)

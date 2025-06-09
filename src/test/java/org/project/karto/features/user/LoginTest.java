@@ -1,4 +1,4 @@
-package org.project.karto.features.auth;
+package org.project.karto.features.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -11,19 +11,19 @@ import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.application.dto.auth.Token;
 import org.project.karto.application.dto.auth.Tokens;
+import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
-import org.project.karto.util.testResources.ApplicationTestResource;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertFalse;
 import static io.smallrye.common.constraint.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.project.karto.features.auth.RegistrationTest.objectMapper;
+import static org.project.karto.features.user.RegistrationTest.objectMapper;
 
 @QuarkusTest
 @QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
-public class LoginTest {
+class LoginTest {
 
     private final JWTParser jwtParser;
 

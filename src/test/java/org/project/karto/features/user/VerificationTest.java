@@ -1,4 +1,4 @@
-package org.project.karto.features.auth;
+package org.project.karto.features.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.infrastructure.security.HOTPGenerator;
+import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
-import org.project.karto.util.testResources.ApplicationTestResource;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 @QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
-public class VerificationTest {
+class VerificationTest {
 
     private final DBManagementUtils dbManagement;
 

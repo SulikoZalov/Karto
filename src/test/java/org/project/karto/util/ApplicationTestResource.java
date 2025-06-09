@@ -1,4 +1,4 @@
-package org.project.karto.util.testResources;
+package org.project.karto.util;
 
 import io.quarkus.logging.Log;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
@@ -20,7 +20,9 @@ public class ApplicationTestResource implements QuarkusTestResourceLifecycleMana
                 .withBuild(false)
                 .withPull(false)
                 .withExposedService("datasource-1", 5432)
-                .withExposedService("keycloak-1", 7080);
+                .withExposedService("keycloak-1", 7080)
+                .withLogConsumer("datasource-1", outputFrame -> Log.info("datasource -> " + outputFrame.getUtf8String()))
+                .withLogConsumer("keycloak-1", outputFrame -> Log.info("keycloak -> " + outputFrame.getUtf8String()));
 
         compose.start();
 

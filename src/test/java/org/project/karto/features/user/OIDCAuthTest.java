@@ -1,4 +1,4 @@
-package org.project.karto.features.auth;
+package org.project.karto.features.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import static io.restassured.RestAssured.given;
 At the moment it's required to manually start a keycloak server and load realm, but tests by themselves are valid.
 Disabled until load of keycloak server will be automized.
 """)
-public class OIDCAuthTest {
+class OIDCAuthTest {
 
     private final DBManagementUtils dbManagementUtils;
 

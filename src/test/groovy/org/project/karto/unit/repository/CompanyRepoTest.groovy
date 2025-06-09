@@ -1,12 +1,12 @@
-package org.project.karto.features.repository
+package org.project.karto.unit.repository
 
 import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
+import org.project.karto.util.ApplicationTestResource
 import org.project.karto.util.TestDataGenerator
-import org.project.karto.util.testResources.ApplicationTestResource
 import spock.lang.Specification
 import spock.lang.Unroll
 

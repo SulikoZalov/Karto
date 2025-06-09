@@ -1,4 +1,4 @@
-package org.project.karto.features.auth;
+package org.project.karto.features.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,9 +11,9 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.RegistrationForm;
 
+import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.TestDataGenerator;
-import org.project.karto.util.testResources.ApplicationTestResource;
 
 import java.time.LocalDate;
 
@@ -21,7 +21,7 @@ import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 @QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
-public class RegistrationTest {
+class RegistrationTest {
 
     private final DBManagementUtils dbManagement;
 
