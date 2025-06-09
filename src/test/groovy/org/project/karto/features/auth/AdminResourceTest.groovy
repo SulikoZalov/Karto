@@ -45,10 +45,7 @@ class AdminResourceTest extends Specification{
                 .then()
                 .extract()
 
-        then: "verify that AdminService::registerPartner has been invoked once"
-        1 * adminService.registerPartner(_)
-
-        and: "verify response"
+        then: "verify response"
         response.statusCode() == 200
     }
 

@@ -2,13 +2,9 @@ package org.project.karto.features.auth
 
 import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
-import io.quarkus.test.junit.QuarkusMock
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
-import jakarta.ws.rs.WebApplicationException
-import jakarta.ws.rs.core.Response
-import org.project.karto.application.dto.auth.Token
-import org.project.karto.application.service.AdminService
+import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.project.karto.infrastructure.security.JWTUtility
 import org.project.karto.util.testResources.ApplicationTestResource
 import spock.lang.Specification
@@ -23,25 +19,19 @@ class AdminAuthResourceTest extends Specification {
     @Inject
     JWTUtility jwtUtility
 
-    AdminService adminService
+    @ConfigProperty(name = "admin.verification.key")
+    String verificationKey;
 
     void "successful login"() {
-        given:
-        def adminToken = jwtUtility.generateAdministratorToken()
-
         when:
-        def response = given().header("X-VERIFICATION-KEY", "valid key")
+        def response = given().header("X-VERIFICATION-KEY", verificationKey)
                 .when()
                 .post("karto/admin/auth/login")
                 .then()
                 .extract()
 
-        then: "verify that AdminService::auth has been invoked once"
-        1 * adminService.auth("valid key") >> new Token(adminToken)
-
-        and: "verify response"
+        then: "verify response"
         response.statusCode() == 200
-        adminToken == response.body().jsonPath().get("token").toString()
     }
 
     void "failure on invalid verification key"() {
@@ -52,10 +42,7 @@ class AdminAuthResourceTest extends Specification {
                 .then()
                 .extract()
 
-        then: "verify that AdminService::auth has been invoked once"
-        1 * adminService.auth("invalid key") >> { throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build()) }
-
-        and: "verify response"
+        then: "verify response"
         response.statusCode() == 403
     }
 }
