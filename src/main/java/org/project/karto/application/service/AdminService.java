@@ -55,7 +55,7 @@ public class AdminService {
     }
 
     public Token auth(String verificationKey) {
-        if (secureEquals(this.verificationKey, verificationKey))
+        if (!secureEquals(this.verificationKey, verificationKey))
             throw responseException(Response.Status.FORBIDDEN, "Invalid administrator verification key.");
 
         return new Token(jwtUtility.generateAdministratorToken());
