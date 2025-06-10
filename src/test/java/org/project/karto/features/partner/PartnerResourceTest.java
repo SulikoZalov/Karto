@@ -2,25 +2,38 @@ package org.project.karto.features.partner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
+import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
+import org.project.karto.domain.companies.repository.CompanyRepository;
 import org.project.karto.infrastructure.security.JWTUtility;
+import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(value = PostgresTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class)
 class PartnerResourceTest {
 
     @Inject
     JWTUtility jwtUtility;
+
+    @Inject
+    DBManagementUtils dbManagementUtils;
+
+    @Inject
+    CompanyRepository companyRepository;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -39,6 +52,22 @@ class PartnerResourceTest {
                 .then()
                 .assertThat()
                 .statusCode(Response.Status.OK.getStatusCode());
+    }
+
+    @Test
+    void verification() throws JsonProcessingException {
+        CompanyRegistrationForm form = saveCompany();
+        PartnerVerificationOTP otp = dbManagementUtils.getCompanyOTP(form);
+
+        given()
+                .queryParam("otp", otp.otp())
+                .when()
+                .patch("/karto/partner/verification")
+                .then()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+        Company company = companyRepository.findBy(new Phone(form.phone())).orElseThrow();
+        Assertions.assertTrue(company.isActive());
     }
 
     private CompanyRegistrationForm saveCompany() throws JsonProcessingException {

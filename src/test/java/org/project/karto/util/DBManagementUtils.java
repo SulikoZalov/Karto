@@ -8,8 +8,11 @@ import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.restassured.http.ContentType;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
+import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.common.containers.Result;
+import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
+import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;
@@ -18,6 +21,7 @@ import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
 import static io.restassured.RestAssured.given;
@@ -28,6 +32,8 @@ public class DBManagementUtils {
     private final OTPRepository otpRepository;
 
     private final UserRepository userRepository;
+
+    private final PartnerVerificationOTPRepository companyOTPRepository;
 
     private final JetQuerious jetQuerious = JetQuerious.instance();
 
@@ -54,10 +60,11 @@ public class DBManagementUtils {
 
     DBManagementUtils(
             UserRepository userRepository,
-            OTPRepository otpRepository) {
+            OTPRepository otpRepository, PartnerVerificationOTPRepository companyOTPRepository) {
 
         this.userRepository = userRepository;
         this.otpRepository = otpRepository;
+        this.companyOTPRepository = companyOTPRepository;
     }
 
     public OTP saveUser(RegistrationForm form) throws JsonProcessingException {
@@ -93,5 +100,10 @@ public class DBManagementUtils {
 
     public void removeUser(String email) {
         jetQuerious.write(DELETE_USER, email, email, email);
+    }
+
+    public PartnerVerificationOTP getCompanyOTP(CompanyRegistrationForm form) {
+        var result = jetQuerious.readObjectOf("SELECT id FROM companies WHERE phone = ?", String.class, form.phone());
+        return companyOTPRepository.findBy(UUID.fromString(result.value())).orElseThrow();
     }
 }
