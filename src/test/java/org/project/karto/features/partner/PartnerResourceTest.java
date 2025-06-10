@@ -84,6 +84,19 @@ class PartnerResourceTest {
                 .statusCode(Response.Status.ACCEPTED.getStatusCode());
     }
 
+    @Test
+    void changePassword() throws JsonProcessingException {
+        String token = login();
+
+        given()
+                .queryParam("newPassword", TestDataGenerator.generatePassword().password())
+                .header("Authorization", "Bearer " + token)
+                .patch("/karto/partner/password/change")
+                .then()
+                .log().all()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+    }
+
     private CompanyRegistrationForm saveCompany() throws JsonProcessingException {
         String adminToken = jwtUtility.generateAdministratorToken();
         CompanyRegistrationForm companyRegistrationForm = TestDataGenerator.generateCompanyRegistrationForm();
