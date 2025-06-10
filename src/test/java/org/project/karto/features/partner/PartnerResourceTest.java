@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
+import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
@@ -85,5 +86,31 @@ class PartnerResourceTest {
                 .extract();
 
         return companyRegistrationForm;
+    }
+
+    private void verifyCompany(PartnerVerificationOTP otp) {
+        given()
+                .queryParam("otp", otp.otp())
+                .when()
+                .patch("/karto/partner/verification")
+                .then()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+    }
+
+    @Test
+    void loginCompany() throws JsonProcessingException {
+        CompanyRegistrationForm form = saveCompany();
+        PartnerVerificationOTP otp = dbManagementUtils.getCompanyOTP(form);
+        verifyCompany(otp);
+
+        LoginForm loginForm = new LoginForm(form.phone(), form.rawPassword());
+        given()
+                .contentType(ContentType.JSON)
+                .body(mapper.writeValueAsString(loginForm))
+                .when()
+                .post("/karto/partner/login")
+                .then()
+                .assertThat()
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 }
