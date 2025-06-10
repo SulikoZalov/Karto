@@ -44,7 +44,7 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
             .sql();
 
     static final String UPDATE_CONFIRMATION = QueryForge.update("companies_otp")
-            .set("is_confirmed")
+            .set("is_confirmed = ?")
             .where("otp = ?")
             .build()
             .sql();
