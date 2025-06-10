@@ -105,7 +105,7 @@ public class JDBCCompanyRepository implements CompanyRepository {
     static final String FIND_BY_COMPANY_NAME = select()
             .all()
             .from("companies")
-            .where("phone = ?")
+            .where("company_name = ?")
             .build()
             .sql();
 
