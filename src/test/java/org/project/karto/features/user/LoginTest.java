@@ -11,8 +11,8 @@ import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.application.dto.auth.Token;
 import org.project.karto.application.dto.auth.Tokens;
-import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
+import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.project.karto.features.user.RegistrationTest.objectMapper;
 
 @QuarkusTest
-@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class)
 class LoginTest {
 
     private final JWTParser jwtParser;

@@ -15,14 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
-import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
+import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class)
 class TwoFactorAuthenticationTest {
 
     static final String ENABLE_2FA_URL = "/karto/auth/2FA/enable";

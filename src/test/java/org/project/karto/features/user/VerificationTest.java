@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.infrastructure.security.HOTPGenerator;
-import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
+import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class)
 class VerificationTest {
 
     private final DBManagementUtils dbManagement;

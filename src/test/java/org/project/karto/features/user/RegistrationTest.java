@@ -11,8 +11,8 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.RegistrationForm;
 
-import org.project.karto.util.ApplicationTestResource;
 import org.project.karto.util.DBManagementUtils;
+import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import java.time.LocalDate;
@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class)
 class RegistrationTest {
 
     private final DBManagementUtils dbManagement;

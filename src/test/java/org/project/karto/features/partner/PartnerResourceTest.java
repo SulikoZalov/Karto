@@ -10,13 +10,13 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.infrastructure.security.JWTUtility;
-import org.project.karto.util.ApplicationTestResource;
+import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(value = ApplicationTestResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = PostgresTestResource.class, restrictToAnnotatedClass = true)
 class PartnerResourceTest {
 
     @Inject
