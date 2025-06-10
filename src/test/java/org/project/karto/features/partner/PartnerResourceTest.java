@@ -2,7 +2,6 @@ package org.project.karto.features.partner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.LoginForm;
+import org.project.karto.application.dto.auth.Token;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
@@ -39,8 +39,6 @@ class PartnerResourceTest {
     ObjectMapper mapper = new ObjectMapper();
 
     static final String OTP_RESEND = "/karto/partner/otp/resend";
-
-    static final String VERIFICATION = "/karto/partner/verification";
 
     @Test
     void resendOTP() throws JsonProcessingException {
@@ -71,6 +69,21 @@ class PartnerResourceTest {
         Assertions.assertTrue(company.isActive());
     }
 
+    @Test
+    void changeCardLimitations() throws JsonProcessingException {
+        String token = login();
+
+        given()
+                .queryParam("expiration", 91)
+                .queryParam("maxUsageCount", 10)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .patch("/karto/partner/card/limitations")
+                .then()
+                .log().all()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+    }
+
     private CompanyRegistrationForm saveCompany() throws JsonProcessingException {
         String adminToken = jwtUtility.generateAdministratorToken();
         CompanyRegistrationForm companyRegistrationForm = TestDataGenerator.generateCompanyRegistrationForm();
@@ -99,18 +112,25 @@ class PartnerResourceTest {
 
     @Test
     void loginCompany() throws JsonProcessingException {
+        login();
+    }
+
+    private String login() throws JsonProcessingException {
         CompanyRegistrationForm form = saveCompany();
         PartnerVerificationOTP otp = dbManagementUtils.getCompanyOTP(form);
         verifyCompany(otp);
 
         LoginForm loginForm = new LoginForm(form.phone(), form.rawPassword());
-        given()
+        return given()
                 .contentType(ContentType.JSON)
                 .body(mapper.writeValueAsString(loginForm))
                 .when()
                 .post("/karto/partner/login")
                 .then()
                 .assertThat()
-                .statusCode(Response.Status.OK.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body()
+                .as(Token.class).token();
     }
 }
