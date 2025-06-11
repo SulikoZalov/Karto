@@ -202,11 +202,34 @@ public class TestDataGenerator {
         );
     }
 
+    public static GiftCard generateSelfBougthGiftCard(Balance balance) {
+        return GiftCard.selfBoughtCard(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                balance,
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
     public static GiftCard generateBoughtAsGiftCard() {
         return GiftCard.boughtAsAGift(
                 generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 generateBalance(),
+                new OwnerID(UUID.randomUUID()),
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateBoughtAsGiftCard(Balance balance) {
+        return GiftCard.boughtAsAGift(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                balance,
                 new OwnerID(UUID.randomUUID()),
                 new StoreID(UUID.randomUUID()),
                 generateSecretKey(),
