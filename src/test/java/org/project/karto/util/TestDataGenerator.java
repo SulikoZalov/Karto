@@ -3,6 +3,7 @@ package org.project.karto.util;
 import net.datafaker.Faker;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
+import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
@@ -17,10 +18,13 @@ import org.project.karto.infrastructure.security.HOTPGenerator;
 import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TestDataGenerator {
 
     private static final Faker faker = new Faker();
+
+    public static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
 
     public static Company generateCompany() {
         return Company.of(
@@ -185,5 +189,68 @@ public class TestDataGenerator {
 
     public static String generateSecretKey() {
         return HOTPGenerator.generateSecretKey();
+    }
+
+    public static GiftCard generateSelfBougthGiftCard() {
+        return GiftCard.selfBoughtCard(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                generateBalance(),
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateBoughtAsGiftCard() {
+        return GiftCard.boughtAsAGift(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                generateBalance(),
+                new OwnerID(UUID.randomUUID()),
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static PAN generatePAN() {
+        return new PAN(generateRandomCreditCardNumber());
+    }
+
+    public static String generateRandomCreditCardNumber() {
+        String bin = "";
+        int length = 16;
+        int randomNumberLength = length - 1;
+
+        StringBuilder builder = new StringBuilder(bin);
+        for (int i = 0; i < randomNumberLength; i++) {
+            int digit = RANDOM.nextInt(10);
+            builder.append(digit);
+        }
+
+        int checkDigit = getCheckDigit(builder.toString());
+        builder.append(checkDigit);
+
+        return builder.toString();
+    }
+
+    private static int getCheckDigit(String number) {
+        int sum = 0;
+        for (int i = 0; i < number.length(); i++) {
+
+            int digit = Integer.parseInt(number.substring(i, (i + 1)));
+
+            if ((i % 2) == 0) {
+                digit = digit * 2;
+                if (digit > 9) {
+                    digit = (digit / 10) + (digit % 10);
+                }
+            }
+            sum += digit;
+        }
+
+        int mod = sum % 10;
+        return ((mod == 0) ? 0 : 10 - mod);
     }
 }
