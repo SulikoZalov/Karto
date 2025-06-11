@@ -4,10 +4,10 @@ import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.UUID;
 
 public class GiftCard {
@@ -25,11 +25,6 @@ public class GiftCard {
     private int countOfUses;
     private KeyAndCounter keyAndCounter;
     private LocalDateTime lastUsage;
-
-    public static final Period MIN_VALIDITY_TIME = Period.ofWeeks(1);
-    public static final Period MAX_VALIDITY_TIME = Period.ofMonths(13);
-    private static final int MIN_COUNT_OF_USES = 3;
-    private static final int MAX_COUNT_OF_USES = 1240;
 
     private GiftCard(
             CardID id,
@@ -62,56 +57,40 @@ public class GiftCard {
     }
 
     public static GiftCard selfBoughtCard(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
-                                          String secretKey, int maxCountOfUses, Period validityPeriod) {
+                                          String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(pan, buyerID, balance, storeID, secretKey, maxCountOfUses, validityPeriod);
+        validateInputs(pan, buyerID, balance, storeID, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
-        LocalDateTime expirationDate = creationDate.plus(validityPeriod);
+        LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
+        int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses, pan,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
     public static GiftCard boughtAsAGift(PAN pan, BuyerID buyerID, Balance balance, @Nullable OwnerID ownerID,
-                                         StoreID storeID, String secretKey, int maxCountOfUses, Period validityPeriod) {
+                                         StoreID storeID, String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(pan, buyerID, balance, storeID, secretKey, maxCountOfUses, validityPeriod);
+        validateInputs(pan, buyerID, balance, storeID, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
-        LocalDateTime expirationDate = creationDate.plus(validityPeriod);
+        LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
+        int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, storeID, maxCountOfUses, pan,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
     private static void validateInputs(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
-                                       String secretKey, int maxCountOfUses, Period validityPeriod) {
+                                       String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         if (pan == null) throw new IllegalArgumentException("PAN cannot be null");
         if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
         if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
         if (storeID == null) throw new IllegalArgumentException("Store can`t be null");
         if (secretKey == null) throw new IllegalArgumentException("Secret key can`t be null");
-        if (validityPeriod == null) throw new IllegalArgumentException("Validity period can`t be null");
-        if (!isWithinValidRange(validityPeriod))
-            throw new IllegalArgumentException("Invalid validity period range");
-        if (!isWithinValidRange(maxCountOfUses))
-            throw new IllegalArgumentException("Invalid count of uses range");
-    }
-
-    private static boolean isWithinValidRange(Period period) {
-        if (period.isNegative() || period.isZero()) return false;
-
-        long days = period.toTotalMonths() * 30 + period.getDays();
-        long minDays = MIN_VALIDITY_TIME.toTotalMonths() * 30 + MIN_VALIDITY_TIME.getDays();
-        long maxDays = MAX_VALIDITY_TIME.toTotalMonths() * 30 + MAX_VALIDITY_TIME.getDays();
-        return days >= minDays && days <= maxDays;
-    }
-
-    private static boolean isWithinValidRange(int maxCountOfUses) {
-        if (maxCountOfUses < MIN_COUNT_OF_USES) return false;
-        return maxCountOfUses <= MAX_COUNT_OF_USES;
+        if (cardUsageLimitations == null) throw new IllegalArgumentException("Card limitations can`t be null");
     }
 
     public static GiftCard fromRepository(
