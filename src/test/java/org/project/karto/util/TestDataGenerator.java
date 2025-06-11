@@ -218,7 +218,6 @@ public class TestDataGenerator {
                 generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 generateBalance(),
-                new OwnerID(UUID.randomUUID()),
                 new StoreID(UUID.randomUUID()),
                 generateSecretKey(),
                 generateCardLimits()
@@ -230,7 +229,6 @@ public class TestDataGenerator {
                 generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 balance,
-                new OwnerID(UUID.randomUUID()),
                 new StoreID(UUID.randomUUID()),
                 generateSecretKey(),
                 generateCardLimits()

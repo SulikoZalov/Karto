@@ -69,8 +69,8 @@ public class GiftCard {
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
-    public static GiftCard boughtAsAGift(PAN pan, BuyerID buyerID, Balance balance, @Nullable OwnerID ownerID,
-                                         StoreID storeID, String secretKey, CardUsageLimitations cardUsageLimitations) {
+    public static GiftCard boughtAsAGift(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
+                                         String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         validateInputs(pan, buyerID, balance, storeID, secretKey, cardUsageLimitations);
 
@@ -78,7 +78,7 @@ public class GiftCard {
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, ownerID, storeID, maxCountOfUses, pan,
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses, pan,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
