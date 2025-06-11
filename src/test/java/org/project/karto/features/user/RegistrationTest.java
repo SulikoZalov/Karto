@@ -113,9 +113,9 @@ class RegistrationTest {
                 form.firstname(),
                 form.surname(),
                 form.phone(),
-                "123",
-                "123",
                 form.email(),
+                "123",
+                "123",
                 form.birthDate()
         );
 
@@ -125,6 +125,7 @@ class RegistrationTest {
                 .when()
                 .post("/karto/auth/registration")
                 .then()
+                .log().all()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
     }
 
