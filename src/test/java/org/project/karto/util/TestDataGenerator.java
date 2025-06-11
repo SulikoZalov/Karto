@@ -35,8 +35,8 @@ public class TestDataGenerator {
     }
 
     public static CardUsageLimitations generateCardLimits() {
-        int period = faker.random().nextInt(30, 92);
-        int usages = faker.random().nextInt(1, 10);
+        int period = generateCardExpirationDays();
+        int usages = generateCardUsageLimits();
 
         return CardUsageLimitations.of(period, usages);
     }
@@ -97,9 +97,16 @@ public class TestDataGenerator {
                 generateBirthdate().birthDate()
         );
     }
-    
+
+    public static int generateCardExpirationDays() {
+        return faker.random().nextInt(30, 92);
+    }
+
+    public static int generateCardUsageLimits() {
+        return faker.random().nextInt(1, 10);
+    }
+
     public static CompanyRegistrationForm generateCompanyRegistrationForm() {
-        var cardLimits = generateCardLimits();
         return new CompanyRegistrationForm(
                 generateRegistrationCountryCode(),
                 generateRegistrationNumberValue(),
@@ -107,8 +114,8 @@ public class TestDataGenerator {
                 generateEmail().email(),
                 generatePhone().phoneNumber(),
                 generatePassword().password(),
-                cardLimits.expirationDays(),
-                cardLimits.maxUsageCount()
+                generateCardExpirationDays(),
+                generateCardUsageLimits()
         );
     }
 
