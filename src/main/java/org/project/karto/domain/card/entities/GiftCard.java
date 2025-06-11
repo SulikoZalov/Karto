@@ -14,7 +14,7 @@ public class GiftCard {
     private final CardID id;
     private final PAN pan;
     private final BuyerID buyerID;
-    private final @Nullable OwnerID ownerID;
+    private @Nullable OwnerID ownerID;
     private final StoreID storeID;
     private final int maxCountOfUses;
     private final LocalDateTime creationDate;
@@ -187,11 +187,29 @@ public class GiftCard {
     public void activate() {
         if (isExpired()) throw new IllegalStateException("You can`t activate expired card");
         if (isVerified()) throw new IllegalStateException("You can`t enable already active card");
+        if (ownerID == null) throw new IllegalStateException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
             throw new IllegalStateException("Only cards in PENDING state can be verified.");
 
-        giftCardStatus = GiftCardStatus.ACTIVE;
-        keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+        this.giftCardStatus = GiftCardStatus.ACTIVE;
+        this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+    }
+
+    public void activate(OwnerID ownerID) {
+        if (isExpired()) throw new IllegalStateException("You can`t activate expired card.");
+        if (isVerified()) throw new IllegalStateException("You can`t enable already active card.");
+        if (ownerID == null) throw new IllegalStateException("You can`t activate account without owner id.");
+        if (giftCardStatus != GiftCardStatus.PENDING)
+            throw new IllegalStateException("Only cards in PENDING state can be verified.");
+
+        if (this.ownerID != null)
+            throw new IllegalArgumentException("You can`t change owner id. It can be specified only once.");
+        if (ownerID.value().equals(this.buyerID.value()))
+            throw new IllegalStateException("The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID");
+
+        this.ownerID = ownerID;
+        this.giftCardStatus = GiftCardStatus.ACTIVE;
+        this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
     }
 
     public boolean hasSufficientBalance(Amount amount) {
