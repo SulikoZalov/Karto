@@ -1,4 +1,4 @@
-package org.project.karto.infrastructure.exceptions;
+package org.project.karto.infrastructure.exceptions_handler;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
