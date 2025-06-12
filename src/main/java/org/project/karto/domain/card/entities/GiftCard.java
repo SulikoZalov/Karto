@@ -198,12 +198,12 @@ public class GiftCard {
     public void activate(OwnerID ownerID) {
         if (isExpired()) throw new IllegalStateException("You can`t activate expired card.");
         if (isVerified()) throw new IllegalStateException("You can`t enable already active card.");
-        if (ownerID == null) throw new IllegalStateException("You can`t activate account without owner id.");
+        if (ownerID == null) throw new IllegalArgumentException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
             throw new IllegalStateException("Only cards in PENDING state can be verified.");
 
         if (this.ownerID != null)
-            throw new IllegalArgumentException("You can`t change owner id. It can be specified only once.");
+            throw new IllegalStateException("You can`t change owner id. It can be specified only once.");
         if (ownerID.value().equals(this.buyerID.value()))
             throw new IllegalStateException("The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID");
 
