@@ -1,9 +1,9 @@
 package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
-import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
@@ -143,33 +143,34 @@ public class JDBCCompanyRepository implements CompanyRepository {
 
     @Override
     public Result<Integer, Throwable> save(Company company) {
-        return jet.write(SAVE_COMPANY, company.id(), company.registrationNumber().countryCode(), company.registrationNumber().value(),
+        return mapTransactionResult(
+                jet.write(SAVE_COMPANY, company.id(), company.registrationNumber().countryCode(), company.registrationNumber().value(),
                         company.companyName(), company.email(), company.phone(), company.password(), company.keyAndCounter().key(),
                         company.keyAndCounter().counter(), company.companyStatus(), company.cardUsageLimitation().expirationDays(),
-                        company.cardUsageLimitation().maxUsageCount(), company.creationDate(), company.lastUpdated());
+                        company.cardUsageLimitation().maxUsageCount(), company.creationDate(), company.lastUpdated()));
     }
 
     @Override
     public Result<Integer, Throwable> updateCardUsageLimitations(Company company) {
         CardUsageLimitations cardUsageLimitations = company.cardUsageLimitation();
 
-        return jet.write(UPDATE_COMPANY, cardUsageLimitations.expirationDays(),
-                        cardUsageLimitations.maxUsageCount(), company.lastUpdated(), company.id());
+        return mapTransactionResult(jet.write(UPDATE_COMPANY, cardUsageLimitations.expirationDays(),
+                        cardUsageLimitations.maxUsageCount(), company.lastUpdated(), company.id()));
     }
 
     @Override
     public Result<Integer, Throwable> updatePassword(Company company) {
-        return jet.write(UPDATE_PASSWORD, company.password(), company.lastUpdated(), company.id());
+        return mapTransactionResult(jet.write(UPDATE_PASSWORD, company.password(), company.lastUpdated(), company.id()));
     }
 
     @Override
     public Result<Integer, Throwable> updateCounter(Company company) {
-        return jet.write(UPDATE_COUNTER, company.keyAndCounter().counter(), company.lastUpdated(), company.id());
+        return mapTransactionResult(jet.write(UPDATE_COUNTER, company.keyAndCounter().counter(), company.lastUpdated(), company.id()));
     }
 
     @Override
     public Result<Integer, Throwable> updateVerification(Company company) {
-        return jet.write(UPDATE_VERIFICATION, company.companyStatus(), company.lastUpdated(), company.id());
+        return mapTransactionResult(jet.write(UPDATE_VERIFICATION, company.companyStatus(), company.lastUpdated(), company.id()));
     }
 
     @Override
@@ -260,5 +261,9 @@ public class JDBCCompanyRepository implements CompanyRepository {
 
     private static Result<Company, Throwable> mapResult(com.hadzhy.jetquerious.util.Result<Company, Throwable> read) {
         return new Result<>(read.value(), read.throwable(), read.success());
+    }
+
+    private Result<Integer, Throwable> mapTransactionResult(com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
+        return new Result<>(result.value(), result.throwable(), result.success());
     }
 }

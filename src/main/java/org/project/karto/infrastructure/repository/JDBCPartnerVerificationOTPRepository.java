@@ -2,9 +2,9 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
-import com.hadzhy.jetquerious.util.Result;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 
@@ -108,10 +108,6 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
         return mapResult(result);
     }
 
-    static Result<PartnerVerificationOTP, Throwable> mapResult(Result<PartnerVerificationOTP, Throwable> result) {
-        return new Result<>(result.value(), result.throwable(), result.success());
-    }
-
     private PartnerVerificationOTP partnerOTPMapper(ResultSet rs) throws SQLException {
         return PartnerVerificationOTP.fromRepository(
                 rs.getString("otp"),
@@ -120,5 +116,11 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
                 rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
                 rs.getObject("expiration_date", Timestamp.class).toLocalDateTime()
         );
+    }
+
+    private Result<PartnerVerificationOTP, Throwable> mapResult(
+            com.hadzhy.jetquerious.util.Result<PartnerVerificationOTP, Throwable> result
+    ) {
+        return new Result<>(result.value(), result.throwable(), result.success());
     }
 }

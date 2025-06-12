@@ -1,7 +1,5 @@
 package org.project.karto.domain.common.value_objects;
 
-import io.quarkus.logging.Log;
-
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,9 +28,7 @@ public record Email(String email) {
             throw new IllegalArgumentException("Invalid email format.");
 
         Matcher matcher = pattern.matcher(email);
-        if (!matcher.matches()) {
-            Log.errorf("Invalid email format: %s", email);
+        if (!matcher.matches())
             throw new IllegalArgumentException("Email format error");
-        }
     }
 }

@@ -1,6 +1,6 @@
 package org.project.karto.domain.companies.repository;
 
-import com.hadzhy.jetquerious.util.Result;
+import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;

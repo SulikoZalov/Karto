@@ -1,9 +1,9 @@
 package org.project.karto.domain.card.repositories;
 
-import com.hadzhy.jetquerious.util.Result;
 import org.project.karto.domain.card.entities.CardVerificationOTP;
 import org.project.karto.domain.card.value_objects.CardID;
 import org.project.karto.domain.card.value_objects.OwnerID;
+import org.project.karto.domain.common.containers.Result;
 
 public interface CardVerificationOTPRepository {
 

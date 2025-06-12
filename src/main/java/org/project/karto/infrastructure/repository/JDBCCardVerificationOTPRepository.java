@@ -2,12 +2,12 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
-import com.hadzhy.jetquerious.util.Result;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.CardVerificationOTP;
 import org.project.karto.domain.card.repositories.CardVerificationOTPRepository;
 import org.project.karto.domain.card.value_objects.CardID;
 import org.project.karto.domain.card.value_objects.OwnerID;
+import org.project.karto.domain.common.containers.Result;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,24 +68,24 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
 
     @Override
     public Result<Integer, Throwable> save(CardVerificationOTP otp) {
-        return jet.write(SAVE_OTP,
+        return mapResult(jet.write(SAVE_OTP,
                         otp.otp(),
                         otp.cardID().value().toString(),
                         otp.isConfirmed(),
                         Timestamp.valueOf(otp.creationDate()),
-                        Timestamp.valueOf(otp.expirationDate()));
+                        Timestamp.valueOf(otp.expirationDate())));
     }
 
     @Override
     public Result<Integer, Throwable> update(CardVerificationOTP otp) {
-        return jet.write(UPDATE_CONFIRMATION,
+        return mapResult(jet.write(UPDATE_CONFIRMATION,
                         otp.isConfirmed(),
-                        otp.otp());
+                        otp.otp()));
     }
 
     @Override
     public Result<Integer, Throwable> remove(CardVerificationOTP otp) {
-        return jet.write(DELETE_OTP, otp.otp());
+        return mapResult(jet.write(DELETE_OTP, otp.otp()));
     }
 
     @Override
@@ -123,5 +123,9 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
 
     private LocalDateTime convertTimestamp(Timestamp timestamp) {
         return timestamp != null ? timestamp.toLocalDateTime() : null;
+    }
+
+    private Result<Integer, Throwable> mapResult(com.hadzhy.jetquerious.util.Result<Integer, Throwable> res) {
+        return new Result<>(res.value(), res.throwable(), res.success());
     }
 }
