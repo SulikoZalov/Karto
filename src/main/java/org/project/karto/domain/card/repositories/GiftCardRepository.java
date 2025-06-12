@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface GiftCardRepository {
 
-    void save(GiftCard giftCard);
+    Result<Integer, Throwable> save(GiftCard giftCard);
 
-    void update(GiftCard giftCard);
+    Result<Integer, Throwable> update(GiftCard giftCard);
 
     Result<GiftCard, Throwable> findBy(CardID cardID);
 

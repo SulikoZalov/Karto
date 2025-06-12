@@ -1,26 +1,26 @@
 package org.project.karto.domain.user.repository;
 
 import org.project.karto.domain.common.containers.Result;
-import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.values_objects.RefreshToken;
 
 import java.util.UUID;
 
 public interface UserRepository {
 
-    void save(User user);
+    Result<Integer, Throwable> save(User user);
 
-    void saveRefreshToken(RefreshToken refreshToken);
+    Result<Integer, Throwable> saveRefreshToken(RefreshToken refreshToken);
 
-    void updatePhone(User user);
+    Result<Integer, Throwable> updatePhone(User user);
 
-    void updateCounter(User user);
+    Result<Integer, Throwable> updateCounter(User user);
 
-    void update2FA(User user);
+    Result<Integer, Throwable> update2FA(User user);
 
-    void updateVerification(User user);
+    Result<Integer, Throwable> updateVerification(User user);
 
     boolean isEmailExists(Email email);
 

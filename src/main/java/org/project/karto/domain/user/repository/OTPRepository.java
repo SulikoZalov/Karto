@@ -7,13 +7,13 @@ import java.util.UUID;
 
 public interface OTPRepository {
 
-    void save(OTP otp);
+    Result<Integer, Throwable> save(OTP otp);
 
-    void updateConfirmation(OTP otp);
+    Result<Integer, Throwable> updateConfirmation(OTP otp);
 
-    void remove(OTP otp);
+    Result<Integer, Throwable> remove(OTP otp);
 
-    boolean contains(UUID user_id);
+    boolean contains(UUID userID);
 
     Result<OTP, Throwable> findBy(OTP otp);
 

@@ -263,7 +263,7 @@ public class JDBCCompanyRepository implements CompanyRepository {
         return new Result<>(read.value(), read.throwable(), read.success());
     }
 
-    private Result<Integer, Throwable> mapTransactionResult(com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
+    static Result<Integer, Throwable> mapTransactionResult(com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 }

@@ -2,7 +2,6 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
-import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
@@ -14,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
+import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
 
 @ApplicationScoped
 public class JDBCPartnerVerificationOTPRepository implements PartnerVerificationOTPRepository {
@@ -68,27 +68,25 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
     }
 
     @Override
-    public void save(PartnerVerificationOTP otp) {
-        jet.write(SAVE_PARTNER_OTP, otp.otp(), otp.companyID(), otp.isConfirmed(), otp.creationDate(), otp.expirationDate())
-                .ifFailure(throwable -> Log.error("Error saving partner otp.", throwable));
+    public Result<Integer, Throwable> save(PartnerVerificationOTP otp) {
+        return mapTransactionResult(
+                jet.write(SAVE_PARTNER_OTP, otp.otp(), otp.companyID(), otp.isConfirmed(), otp.creationDate(), otp.expirationDate())
+        );
     }
 
     @Override
-    public void update(PartnerVerificationOTP otp) {
-        jet.write(UPDATE, otp.isConfirmed(), otp.otp())
-                .ifFailure(throwable -> Log.error("Error update partner otp.", throwable));
+    public Result<Integer, Throwable> update(PartnerVerificationOTP otp) {
+        return mapTransactionResult(jet.write(UPDATE, otp.isConfirmed(), otp.otp()));
     }
 
     @Override
-    public void remove(PartnerVerificationOTP otp) {
-        jet.write(REMOVE, otp.otp())
-                .ifFailure(throwable -> Log.error("Error delete partner otp.", throwable));
+    public Result<Integer, Throwable> remove(PartnerVerificationOTP otp) {
+        return mapTransactionResult(jet.write(REMOVE, otp.otp()));
     }
 
     @Override
-    public void updateConfirmation(PartnerVerificationOTP otp) {
-        jet.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp())
-                .ifFailure(throwable -> Log.error("Error update otp confirmation.", throwable));
+    public Result<Integer, Throwable> updateConfirmation(PartnerVerificationOTP otp) {
+        return mapTransactionResult(jet.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp()));
     }
 
     @Override

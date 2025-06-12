@@ -4,8 +4,8 @@ import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
-import org.project.karto.domain.user.repository.OTPRepository;
 import org.project.karto.domain.user.entities.OTP;
+import org.project.karto.domain.user.repository.OTPRepository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
+import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
 
 @ApplicationScoped
 public class JDBCOTPRepository implements OTPRepository {
@@ -68,26 +69,23 @@ public class JDBCOTPRepository implements OTPRepository {
     }
 
     @Override
-    public void save(OTP otp) {
-        jet.write(SAVE_OTP,
+    public Result<Integer, Throwable> save(OTP otp) {
+        return mapTransactionResult(jet.write(SAVE_OTP,
                         otp.otp(),
                         otp.userID().toString(),
                         otp.isConfirmed(),
                         otp.creationDate(),
-                        otp.expirationDate())
-                .ifFailure(throwable -> Log.errorf("Error saving otp: %s.", throwable.getMessage()));
+                        otp.expirationDate()));
     }
 
     @Override
-    public void updateConfirmation(OTP otp) {
-        jet.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp())
-                .ifFailure(throwable -> Log.errorf("Error update otp confirmation: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updateConfirmation(OTP otp) {
+        return mapTransactionResult(jet.write(UPDATE_CONFIRMATION, otp.isConfirmed(), otp.otp()));
     }
 
     @Override
-    public void remove(OTP otp) {
-        jet.write(REMOVE_OTP, otp.otp())
-                .ifFailure(throwable -> Log.errorf("Error deleting otp: %s.", otp.otp()));
+    public Result<Integer, Throwable> remove(OTP otp) {
+        return mapTransactionResult(jet.write(REMOVE_OTP, otp.otp()));
     }
 
     @Override

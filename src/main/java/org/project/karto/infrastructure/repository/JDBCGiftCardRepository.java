@@ -2,7 +2,6 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
-import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.insert;
 import static com.hadzhy.jetquerious.sql.QueryForge.select;
+import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
 
 @ApplicationScoped
 public class JDBCGiftCardRepository implements GiftCardRepository {
@@ -89,8 +89,8 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     }
 
     @Override
-    public void save(GiftCard giftCard) {
-        jet.write(SAVE_GIFT_CARD,
+    public Result<Integer, Throwable> save(GiftCard giftCard) {
+        return mapTransactionResult(jet.write(SAVE_GIFT_CARD,
                 giftCard.id(),
                 giftCard.pan(),
                 giftCard.buyerID(),
@@ -105,13 +105,12 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.creationDate(),
                 giftCard.expirationDate(),
                 giftCard.lastUsage()
-        ).ifFailure(throwable ->
-                Log.errorf("Error saving gift card: %s", throwable.getMessage()));
+        ));
     }
 
     @Override
-    public void update(GiftCard giftCard) {
-        jet.write(UPDATE_GIFT_CARD,
+    public Result<Integer, Throwable> update(GiftCard giftCard) {
+        return mapTransactionResult(jet.write(UPDATE_GIFT_CARD,
                 giftCard.giftCardStatus().name(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
@@ -119,8 +118,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.keyAndCounter().counter(),
                 giftCard.lastUsage(),
                 giftCard.id().toString()
-        ).ifFailure(throwable ->
-                Log.errorf("Error updating gift card: %s", throwable.getMessage()));
+        ));
     }
 
     @Override

@@ -7,13 +7,13 @@ import java.util.UUID;
 
 public interface PartnerVerificationOTPRepository {
 
-    void save(PartnerVerificationOTP otp);
+    Result<Integer, Throwable> save(PartnerVerificationOTP otp);
 
-    void update(PartnerVerificationOTP otp);
+    Result<Integer, Throwable> update(PartnerVerificationOTP otp);
 
-    void remove(PartnerVerificationOTP otp);
+    Result<Integer, Throwable> remove(PartnerVerificationOTP otp);
 
-    void updateConfirmation(PartnerVerificationOTP otp);
+    Result<Integer, Throwable> updateConfirmation(PartnerVerificationOTP otp);
 
     Result<PartnerVerificationOTP, Throwable> findBy(PartnerVerificationOTP otp);
 

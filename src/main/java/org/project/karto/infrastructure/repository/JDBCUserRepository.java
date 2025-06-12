@@ -4,12 +4,13 @@ import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
-import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Email;
+import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.UserRepository;
-import org.project.karto.domain.user.values_objects.*;
+import org.project.karto.domain.user.values_objects.PersonalData;
+import org.project.karto.domain.user.values_objects.RefreshToken;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
+import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
 
 
 @ApplicationScoped
@@ -123,9 +125,9 @@ public class JDBCUserRepository implements UserRepository {
     }
 
     @Override
-    public void save(User user) {
+    public Result<Integer, Throwable> save(User user) {
         PersonalData personalData = user.personalData();
-        jet.write(SAVE_USER,
+        return mapTransactionResult(jet.write(SAVE_USER,
                         user.id().toString(),
                         personalData.firstname(),
                         personalData.surname(),
@@ -138,41 +140,36 @@ public class JDBCUserRepository implements UserRepository {
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
                         user.creationDate(),
-                        user.lastUpdated())
-                .ifFailure(throwable -> Log.errorf("Error saving user: %s.", throwable.getMessage()));
+                        user.lastUpdated()));
     }
 
     @Override
-    public void saveRefreshToken(RefreshToken refreshToken) {
-        jet.write(SAVE_REFRESH_TOKEN,
+    public Result<Integer, Throwable> saveRefreshToken(RefreshToken refreshToken) {
+        return mapTransactionResult(jet.write(SAVE_REFRESH_TOKEN,
                         refreshToken.userID().toString(),
                         refreshToken.refreshToken(),
                         refreshToken.refreshToken())
-                .ifFailure(throwable -> Log.errorf("Error saving refresh token: %s.", throwable.getMessage()));
+        );
     }
 
     @Override
-    public void updatePhone(User user) {
-        jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString())
-                .ifFailure(throwable -> Log.errorf("Error update user phone: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updatePhone(User user) {
+        return mapTransactionResult(jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString()));
     }
 
     @Override
-    public void updateCounter(User user) {
-        jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString())
-                .ifFailure(throwable -> Log.errorf("Error update user counter: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updateCounter(User user) {
+        return mapTransactionResult(jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString()));
     }
 
     @Override
-    public void update2FA(User user) {
-        jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString())
-                .ifFailure(throwable -> Log.errorf("Error update user 2FA: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> update2FA(User user) {
+        return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString()));
     }
 
     @Override
-    public void updateVerification(User user) {
-        jet.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString())
-                .ifFailure(throwable -> Log.errorf("Error update verification: %s.", throwable.getMessage()));
+    public Result<Integer, Throwable> updateVerification(User user) {
+        return mapTransactionResult(jet.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString()));
     }
 
     @Override
