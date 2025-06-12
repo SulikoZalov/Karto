@@ -1,6 +1,8 @@
 package org.project.karto.unit.domain
 
 import org.project.karto.domain.card.enumerations.GiftCardStatus
+import org.project.karto.domain.card.value_objects.Amount
+import org.project.karto.domain.card.value_objects.Balance
 import org.project.karto.domain.card.value_objects.OwnerID
 import org.project.karto.util.TestDataGenerator
 import spock.lang.*
@@ -21,7 +23,6 @@ class GiftCardTest extends Specification {
     def "should create bought-as-gift card with correct initial values"() {
         when:
         def card = TestDataGenerator.generateBoughtAsGiftCard()
-        def owner = new OwnerID(UUID.randomUUID());
 
         then:
         card.ownerID() == null
@@ -72,7 +73,6 @@ class GiftCardTest extends Specification {
     def "should thrown an exception: invalid owner id"() {
         given:
         def card = TestDataGenerator.generateBoughtAsGiftCard()
-        def ownerID = null
 
         when:
         card.activate(null)
@@ -120,5 +120,77 @@ class GiftCardTest extends Specification {
         then:
         def e = thrown(IllegalStateException)
         e.getMessage() == "The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID"
+    }
+
+    def "should successfully spend money from self bought card"() {
+        given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate()
+        def amount = new Amount(BigDecimal.valueOf(50L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        card.balance().value() == BigDecimal.valueOf(50L)
+        card.countOfUses() == 1
+    }
+
+    def "should successfully spend money from bought as gift card"() {
+        given:
+        def card = TestDataGenerator.generateBoughtAsGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate(new OwnerID(UUID.randomUUID()))
+        def amount = new Amount(BigDecimal.valueOf(50L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        card.balance().value() == BigDecimal.valueOf(50L)
+        card.countOfUses() == 1
+    }
+
+    def "should thrown an exception: can`t spend from unverified card"() {
+        given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        def amount = TestDataGenerator.generateAmount(BigDecimal.valueOf(100L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.getMessage() == "Card is not activated"
+    }
+
+    def "should thrown an exception: has no sufficient balance"() {
+        given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate()
+        def amount = new Amount(BigDecimal.valueOf(120L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.getMessage() == "There is not enough money on the balance"
+    }
+
+    def "should throw if card reached max count of uses"() {
+        given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)), 3)
+        card.activate()
+        Amount amount = new Amount(BigDecimal.valueOf(1L))
+
+        when:
+        card.spend(amount)
+        card.spend(amount)
+        card.spend(amount)
+        card.spend(amount)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Card reached max count of uses"
     }
 }
