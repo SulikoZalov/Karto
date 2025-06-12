@@ -248,7 +248,7 @@ public class TestDataGenerator {
     }
 
     public static GiftCard generateBoughtAsGiftCard(Balance balance, int maxUsageCount) {
-        CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxCountOfUsage);
+        CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxUsageCount);
         return GiftCard.boughtAsAGift(
                 generatePAN(),
                 new BuyerID(UUID.randomUUID()),
