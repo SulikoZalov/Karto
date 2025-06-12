@@ -213,6 +213,18 @@ public class TestDataGenerator {
         );
     }
 
+    public static GiftCard generateSelfBougthGiftCard(Balance balance, int maxCountOfUsage) {
+        CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxCountOfUsage);
+        return GiftCard.selfBoughtCard(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                balance,
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                cardUsageLimitations
+        );
+    }
+
     public static GiftCard generateBoughtAsGiftCard() {
         return GiftCard.boughtAsAGift(
                 generatePAN(),
@@ -232,6 +244,18 @@ public class TestDataGenerator {
                 new StoreID(UUID.randomUUID()),
                 generateSecretKey(),
                 generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateBoughtAsGiftCard(Balance balance, int maxUsageCount) {
+        CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxCountOfUsage);
+        return GiftCard.boughtAsAGift(
+                generatePAN(),
+                new BuyerID(UUID.randomUUID()),
+                balance,
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                cardUsageLimitations
         );
     }
 
