@@ -1,5 +1,6 @@
 package org.project.karto.application.service;
 
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -100,7 +101,10 @@ public class AdminService {
                 CardUsageLimitations.of(registrationForm.cardExpirationDays(), registrationForm.cardMaxUsageCount())
         );
 
-        companyRepository.save(company);
+        companyRepository.save(company)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to save company. Please try again later."));
+
         generateAndResendPartnerOTP(company);
     }
 
@@ -108,9 +112,19 @@ public class AdminService {
         PartnerVerificationOTP otp = PartnerVerificationOTP
                 .of(company, hotpGenerator.generateHOTP(company.keyAndCounter().key(), company.keyAndCounter().counter()));
 
-        otpRepository.save(otp);
+        otpRepository.save(otp)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to process your request at the moment. Please try again."));
+
         company.incrementCounter();
-        companyRepository.updateCounter(company);
+
+        companyRepository.updateCounter(company)
+                .orElseThrow(() -> {
+                    otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t remove otp.", throwable));
+                    return responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to process your request at the moment. Please try again.");
+                });
+
         phoneInteractionService.sendOTP(company.phone(), otp);
     }
 }

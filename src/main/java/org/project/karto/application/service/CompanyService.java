@@ -1,5 +1,6 @@
 package org.project.karto.application.service;
 
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import org.project.karto.application.dto.auth.LoginForm;
@@ -54,7 +55,7 @@ public class CompanyService {
         PartnerVerificationOTP otp = otpRepository.findBy(company.id())
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
 
-        otpRepository.remove(otp);
+        otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t delete otp.", throwable));
         generateAndResendPartnerOTP(company);
     }
 
@@ -73,10 +74,14 @@ public class CompanyService {
                 throw responseException(Response.Status.GONE, "OTP is gone.");
 
             otp.confirm();
-            otpRepository.updateConfirmation(otp);
+            otpRepository.updateConfirmation(otp)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to confirm your account at the moment. Please try again later."));
 
             company.enable();
-            companyRepository.updateVerification(company);
+            companyRepository.updateVerification(company)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to update verification status. Please try again."));
         } catch (IllegalStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
         }
@@ -108,7 +113,9 @@ public class CompanyService {
         Password encodedPassword = new Password(passwordEncoder.encode(rawPassword));
 
         company.changePassword(encodedPassword);
-        companyRepository.updatePassword(company);
+        companyRepository.updatePassword(company)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to change password. Please try again later."));
     }
 
     public void changeCardLimitations(int days, int maxUsageCount, String receivedCompanyName) {
@@ -119,16 +126,29 @@ public class CompanyService {
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "This company not found."));
 
         company.specifyCardUsageLimitations(limitations);
-        companyRepository.updateCardUsageLimitations(company);
+
+        companyRepository.updateCardUsageLimitations(company)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to change card limitations. Please try again later."));
     }
 
     private void generateAndResendPartnerOTP(Company company) {
         PartnerVerificationOTP otp = PartnerVerificationOTP
                 .of(company, hotpGenerator.generateHOTP(company.keyAndCounter().key(), company.keyAndCounter().counter()));
 
-        otpRepository.save(otp);
+        otpRepository.save(otp)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to process your request at the moment. Please try again."));
+
         company.incrementCounter();
-        companyRepository.updateCounter(company);
+
+        companyRepository.updateCounter(company)
+                .orElseThrow(() -> {
+                    otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t remove otp.", throwable));
+                    return responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to process your request at the moment. Please try again.");
+                });
+
         phoneInteractionService.sendOTP(company.phone(), otp);
     }
 }

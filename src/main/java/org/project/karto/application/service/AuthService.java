@@ -11,7 +11,9 @@ import org.project.karto.domain.user.entities.OTP;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.OTPRepository;
 import org.project.karto.domain.user.repository.UserRepository;
-import org.project.karto.domain.user.values_objects.*;
+import org.project.karto.domain.user.values_objects.Password;
+import org.project.karto.domain.user.values_objects.PersonalData;
+import org.project.karto.domain.user.values_objects.RefreshToken;
 import org.project.karto.infrastructure.communication.EmailInteractionService;
 import org.project.karto.infrastructure.communication.PhoneInteractionService;
 import org.project.karto.infrastructure.security.HOTPGenerator;
@@ -92,7 +94,9 @@ public class AuthService {
         String secretKey = HOTPGenerator.generateSecretKey();
 
         User user = User.of(personalData, secretKey);
-        userRepository.save(user);
+        userRepository.save(user)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to register your account at the moment. Please try again later."));
 
         generateAndSendOTP(user);
         emailInteractionService.sendSoftVerificationMessage(email);
@@ -105,7 +109,7 @@ public class AuthService {
         OTP otp = otpRepository.findBy(user.id())
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
 
-        otpRepository.remove(otp);
+        otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t delete otp.", throwable));
         generateAndSendOTP(user);
     }
 
@@ -120,7 +124,9 @@ public class AuthService {
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
         user.registerPhoneForVerification(phone);
-        userRepository.updatePhone(user);
+        userRepository.updatePhone(user)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to change your account phone at the moment. Please try again later."));
 
         generateAndSendOTP(user);
         emailInteractionService.sendSoftVerificationMessage(email);
@@ -141,10 +147,14 @@ public class AuthService {
                 throw responseException(Response.Status.GONE, "OTP is gone.");
 
             otp.confirm();
-            otpRepository.updateConfirmation(otp);
+            otpRepository.updateConfirmation(otp)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to confirm you account at the moment. Please try again later."));
 
             user.enable();
-            userRepository.updateVerification(user);
+            userRepository.updateVerification(user)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to update your verification status at the moment. Please try again later."));
         } catch (IllegalStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
         }
@@ -171,7 +181,9 @@ public class AuthService {
         }
 
         Tokens tokens = generateTokens(user);
-        userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+        userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to authenticate your account at the moment. Please try again later."));
         return tokens;
     }
 
@@ -213,11 +225,15 @@ public class AuthService {
             if (!user.is2FAEnabled()) {
                 Log.info("Two factor authentication is enabled and verified for user.");
                 user.enable2FA();
-                userRepository.update2FA(user);
+                userRepository.update2FA(user)
+                        .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                                "Unable to enable your account 2FA at the moment. Please try again later."));
             }
 
             Tokens tokens = generateTokens(user);
-            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to authenticate your account at the moment. Please try again later."));
             return tokens;
         } catch (IllegalStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
@@ -235,14 +251,18 @@ public class AuthService {
             if (!userRepository.isEmailExists(email)) {
                 User user = registerNonExistedUser(claims, email);
                 Tokens tokens = generateTokens(user);
-                userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+                userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+                        .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                                "Unable to authenticate your account at the moment. Please try again later."));
                 return tokens;
             }
 
             User user = userRepository.findBy(email)
                     .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Unexpected. Registered user not found."));
             Tokens tokens = generateTokens(user);
-            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()));
+            userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to authenticate your account at the moment. Please try again later."));
             return tokens;
         } catch (DateTimeParseException e) {
             throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
@@ -285,7 +305,11 @@ public class AuthService {
         String secretKey = HOTPGenerator.generateSecretKey();
 
         User user = User.of(personalData, secretKey);
-        userRepository.save(user);
+
+        userRepository.save(user)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to register your account at the moment. Please try again later."));
+
         emailInteractionService.sendSoftVerificationMessage(email);
         return user;
     }
@@ -309,9 +333,20 @@ public class AuthService {
 
     private void generateAndSendOTP(User user) {
         OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-        otpRepository.save(otp);
+
+        otpRepository.save(otp)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to process your request at the moment. Please try again."));
+
         user.incrementCounter();
-        userRepository.updateCounter(user);
+
+        userRepository.updateCounter(user)
+                .orElseThrow(() -> {
+                    otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t remove otp.", throwable));
+                    return responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to process your request at the moment. Please try again.");
+                });
+
         phoneInteractionService.sendOTP(new Phone(user.personalData().phone().orElseThrow()), otp);
     }
 }
