@@ -16,6 +16,8 @@ import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
 
+import static org.project.karto.util.RestUtil.errorMessage
+
 @Dependent
 @QuarkusSpockTest
 class AdminServiceTest extends Specification {
@@ -48,7 +50,7 @@ class AdminServiceTest extends Specification {
 
         then:
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Invalid administrator verification key."
+        errorMessage(e) == "Invalid administrator verification key."
         token == null
     }
 
@@ -72,7 +74,7 @@ class AdminServiceTest extends Specification {
 
         then:
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Company registration form must be filled."
+        errorMessage(e) == "Company registration form must be filled."
     }
 
     void "fail registration: password invalid"() {
@@ -93,7 +95,7 @@ class AdminServiceTest extends Specification {
         service.registerPartner(form)
 
         then:
-        thrown(WebApplicationException)
+        thrown(IllegalArgumentException)
     }
 
     void "fail registration: company name invalid"() {
@@ -114,7 +116,7 @@ class AdminServiceTest extends Specification {
         service.registerPartner(form)
 
         then:
-        thrown(WebApplicationException)
+        thrown(IllegalArgumentException)
     }
 
     void "fail registration: company name exists"() {
@@ -130,7 +132,7 @@ class AdminServiceTest extends Specification {
         then:
         1 * mockRepo.isExists(new CompanyName(form.companyName())) >> true
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Company name already exists."
+        errorMessage(e) == "Company name already exists."
     }
 
     void "fail registration: registration number exists"() {
@@ -147,7 +149,7 @@ class AdminServiceTest extends Specification {
         1 * mockRepo.isExists(new CompanyName(form.companyName())) >> false
         1 * mockRepo.isExists(new RegistrationNumber(form.registrationCountryCode(), form.registrationNumber())) >> true
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Registration number already exists."
+        errorMessage(e) == "Registration number already exists."
     }
 
     void "fail registration: phone number exists"() {
@@ -165,7 +167,7 @@ class AdminServiceTest extends Specification {
         1 * mockRepo.isExists(new RegistrationNumber(form.registrationCountryCode(), form.registrationNumber())) >> false
         1 * mockRepo.isExists(new Phone(form.phone())) >> true
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Phone already exists."
+        errorMessage(e) == "Phone already exists."
     }
 
     void "fail registration: email exists"() {
@@ -184,6 +186,6 @@ class AdminServiceTest extends Specification {
         1 * mockRepo.isExists(new Phone(form.phone())) >> false
         1 * mockRepo.isExists(new Email(form.email())) >> true
         WebApplicationException e = thrown(WebApplicationException)
-        e.getResponse().getEntity() == "Email already exists."
+        errorMessage(e) == "Email already exists."
     }
 }
