@@ -12,6 +12,7 @@ import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
+import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.values_objects.*;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 
@@ -36,6 +37,19 @@ public class TestDataGenerator {
                 HOTPGenerator.generateSecretKey(),
                 generateCardLimits()
         );
+    }
+
+    public static User generateUser() {
+        var personalData = new PersonalData(
+                generateFirstname().firstname(),
+                generateSurname().surname(),
+                generatePhone().phoneNumber(),
+                generatePassword().password(),
+                generateEmail().email(),
+                generateBirthdate().birthDate()
+        );
+
+        return User.of(personalData, HOTPGenerator.generateSecretKey());
     }
 
     public static CardUsageLimitations generateCardLimits() {
