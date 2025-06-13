@@ -4,16 +4,12 @@ import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.common.containers.Result;
-import org.project.karto.domain.common.value_objects.CardUsageLimitations;
-import org.project.karto.domain.common.value_objects.Email;
-import org.project.karto.domain.common.value_objects.KeyAndCounter;
-import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.repository.CompanyRepository;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
-import org.project.karto.domain.user.values_objects.Password;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

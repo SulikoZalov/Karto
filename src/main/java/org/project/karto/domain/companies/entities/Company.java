@@ -1,13 +1,9 @@
 package org.project.karto.domain.companies.entities;
 
-import org.project.karto.domain.common.value_objects.CardUsageLimitations;
-import org.project.karto.domain.common.value_objects.Email;
-import org.project.karto.domain.common.value_objects.KeyAndCounter;
-import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.enumerations.CompanyStatus;
-import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.companies.value_objects.CompanyName;
-import org.project.karto.domain.user.values_objects.Password;
+import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
