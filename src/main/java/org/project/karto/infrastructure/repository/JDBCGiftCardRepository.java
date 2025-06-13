@@ -96,7 +96,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.buyerID(),
                 giftCard.ownerID(),
                 giftCard.storeID(),
-                giftCard.giftCardStatus().name(),
+                giftCard.giftCardStatus(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
                 giftCard.maxCountOfUses(),
@@ -111,7 +111,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     @Override
     public Result<Integer, Throwable> update(GiftCard giftCard) {
         return mapTransactionResult(jet.write(UPDATE_GIFT_CARD,
-                giftCard.giftCardStatus().name(),
+                giftCard.giftCardStatus(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
                 giftCard.keyAndCounter().key(),

@@ -69,18 +69,18 @@ public class JDBCCardVerificationOTPRepository implements CardVerificationOTPRep
     @Override
     public Result<Integer, Throwable> save(CardVerificationOTP otp) {
         return mapResult(jet.write(SAVE_OTP,
-                        otp.otp(),
-                        otp.cardID().value().toString(),
-                        otp.isConfirmed(),
-                        Timestamp.valueOf(otp.creationDate()),
-                        Timestamp.valueOf(otp.expirationDate())));
+                otp.otp(),
+                otp.cardID(),
+                otp.isConfirmed(),
+                otp.creationDate(),
+                otp.expirationDate()));
     }
 
     @Override
     public Result<Integer, Throwable> update(CardVerificationOTP otp) {
         return mapResult(jet.write(UPDATE_CONFIRMATION,
-                        otp.isConfirmed(),
-                        otp.otp()));
+                otp.isConfirmed(),
+                otp.otp()));
     }
 
     @Override
