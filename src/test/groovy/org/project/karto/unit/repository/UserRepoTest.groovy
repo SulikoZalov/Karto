@@ -69,7 +69,7 @@ class UserRepoTest extends Specification{
         updatePhoneResult.success()
 
         where:
-        user << (1..10).collect({ TestDataGenerator.generateUser()})
+        user << (1..10).collect({ TestDataGenerator.generateUserWithoutPhoneAndPassword()})
         phone << (1..10).collect({TestDataGenerator.generatePhone()})
     }
 
@@ -102,6 +102,7 @@ class UserRepoTest extends Specification{
         when:
         user.incrementCounter()
         user.enable()
+        user.incrementCounter()
         user.enable2FA()
         def _2faResult = repo.update2FA(user)
 

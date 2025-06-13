@@ -56,6 +56,19 @@ public class TestDataGenerator {
         return User.of(personalData, HOTPGenerator.generateSecretKey());
     }
 
+    public static User generateUserWithoutPhoneAndPassword() {
+        var personalData = new PersonalData(
+                generateFirstname().firstname(),
+                generateSurname().surname(),
+                null,
+                null,
+                generateEmail().email(),
+                generateBirthdate().birthDate()
+        );
+
+        return User.of(personalData, HOTPGenerator.generateSecretKey());
+    }
+
     public static CardUsageLimitations generateCardLimits() {
         int period = generateCardExpirationDays();
         int usages = generateCardUsageLimits();

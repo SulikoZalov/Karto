@@ -63,7 +63,7 @@ class GiftCardRepoTest extends Specification {
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
     }
 
-    void "update unactivated gift card"() {
+    void "update amount of activated gift card"() {
         when:
         def result = repo.save(giftCard)
 
@@ -71,11 +71,18 @@ class GiftCardRepoTest extends Specification {
         result.success()
 
         when:
+        giftCard.activate()
+        def activationResult = repo.update(giftCard)
+
+        then:
+        activationResult.success()
+
+        when:
         giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)))
         def updateResult = repo.update(giftCard)
 
         then:
-        !updateResult.success()
+        updateResult.success()
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
