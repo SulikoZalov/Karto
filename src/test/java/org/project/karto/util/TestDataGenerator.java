@@ -6,11 +6,9 @@ import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
-import org.project.karto.domain.common.value_objects.CardUsageLimitations;
-import org.project.karto.domain.common.value_objects.Email;
-import org.project.karto.domain.common.value_objects.Password;
-import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.entities.Company;
+import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.user.entities.User;
@@ -30,6 +28,7 @@ public class TestDataGenerator {
     private static final Faker faker = new Faker();
 
     public static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
+    public static final HOTPGenerator HOTP_GENERATOR = new HOTPGenerator();
 
     public static Company generateCompany() {
         return Company.of(
@@ -41,6 +40,11 @@ public class TestDataGenerator {
                 HOTPGenerator.generateSecretKey(),
                 generateCardLimits()
         );
+    }
+
+    public static PartnerVerificationOTP generatePartnerVerificationOTP(Company company) {
+        KeyAndCounter keyAndCounter = company.keyAndCounter();
+        return PartnerVerificationOTP.of(company, HOTP_GENERATOR.generateHOTP(keyAndCounter.key(), keyAndCounter.counter()));
     }
 
     public static User generateUser() {
