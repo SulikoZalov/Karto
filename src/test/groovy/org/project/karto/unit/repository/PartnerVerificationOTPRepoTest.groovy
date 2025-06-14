@@ -87,7 +87,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         otpSaveResult.success()
 
         when:
-//        otp.confirm()
+        otp.confirm()
         def confirmResult = otpRepository.updateConfirmation(otp)
 
         then:

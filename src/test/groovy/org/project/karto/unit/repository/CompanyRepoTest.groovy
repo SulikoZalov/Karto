@@ -151,8 +151,7 @@ class CompanyRepoTest extends Specification{
 
     void "update company counter"() {
         when:
-        //TODO ???
-//        company.incrementCounter()
+        company.incrementCounter()
         def result = repo.updateCounter(company)
 
         then:
@@ -165,7 +164,6 @@ class CompanyRepoTest extends Specification{
 
     void "update company verification"() {
         when:
-        // TODO ???
         company.incrementCounter()
         company.enable()
         def result = repo.updateVerification(company)
