@@ -180,7 +180,7 @@ class TestDataGeneratorTest extends Specification{
     void "generate amounts"() {
         given:
         def max = 10000
-        def rand = BigDecimal.valueOf(faker.number().randomNumber())
+        def rand = BigDecimal.valueOf(faker.random().nextInt(10, 1000000))
 
         when:
         def amounts = (1..max).collect({TestDataGenerator.generateAmount(rand)})
