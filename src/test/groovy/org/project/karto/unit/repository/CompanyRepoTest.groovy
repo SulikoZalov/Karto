@@ -96,6 +96,26 @@ class CompanyRepoTest extends Specification{
         card_limits << (1..10).collect({TestDataGenerator.generateCardLimits()})
     }
 
+    @Unroll("#company.id | old -> #company.cardUsageLimitation().expirationPeriod(), #company.cardUsageLimitation().maxUsageCount() | new -> #card_limits.expirationPeriod(), #card_limits.maxUsageCount()")
+    void "fail updating card limits of inactive company"() {
+        when: "save company"
+        def saveResult = repo.save(company)
+
+        then: "verify success"
+        notThrown(Exception)
+        saveResult.success()
+
+        when: "update company's card limitations"
+        company.specifyCardUsageLimitations(card_limits)
+
+        then: "verify failure"
+        thrown(IllegalArgumentException)
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+        card_limits << (1..10).collect({TestDataGenerator.generateCardLimits()})
+    }
+
     @Unroll("#company.id | old -> #company.password().password() | new -> #password.password()")
     void "successfully update company password"() {
         given:
@@ -127,5 +147,313 @@ class CompanyRepoTest extends Specification{
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
         password << (1..10).collect({TestDataGenerator.generatePassword()})
+    }
+
+    void "update company counter"() {
+        when:
+        //TODO ???
+//        company.incrementCounter()
+        def result = repo.updateCounter(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "update company verification"() {
+        when:
+        // TODO ???
+        company.incrementCounter()
+        company.enable()
+        def result = repo.updateVerification(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful find by ID"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def findResult = repo.findBy(company.id())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail find by non existent ID"() {
+        when:
+        def findResult = repo.findBy(company.id())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful find by registration number"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def findResult = repo.findBy(company.registrationNumber())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail find by non existent registration number"() {
+        when:
+        def findResult = repo.findBy(company.registrationNumber())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful find by phone number"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def findResult = repo.findBy(company.phone())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail find by non existent phone number"() {
+        when:
+        def findResult = repo.findBy(company.phone())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful find by email"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def findResult = repo.findBy(company.email())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail find by non existent email"() {
+        when:
+        def findResult = repo.findBy(company.email())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful find by company name"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def findResult = repo.findBy(company.companyName())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail find by non existent company name"() {
+        when:
+        def findResult = repo.findBy(company.companyName())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful is exists by registration number"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def isExistResult = repo.isExists(company.registrationNumber())
+
+        then:
+        notThrown(Exception)
+        isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail is exists by non existent registration number"() {
+        when:
+        def isExistResult = repo.isExists(company.registrationNumber())
+
+        then:
+        notThrown(Exception)
+        !isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful is exists by phone number"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def isExistResult = repo.isExists(company.phone())
+
+        then:
+        notThrown(Exception)
+        isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail is exists by non existent phone number"() {
+        when:
+        def isExistResult = repo.isExists(company.phone())
+
+        then:
+        notThrown(Exception)
+        !isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful is exists by email"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def isExistResult = repo.isExists(company.email())
+
+        then:
+        notThrown(Exception)
+        isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail is exists by non existent email"() {
+        when:
+        def isExistResult = repo.isExists(company.email())
+
+        then:
+        notThrown(Exception)
+        !isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "successful is exists by company name"() {
+        when:
+        def result = repo.save(company)
+
+        then:
+        notThrown(Exception)
+        result.success()
+
+        when:
+        def isExistResult = repo.isExists(company.companyName())
+
+        then:
+        notThrown(Exception)
+        isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
+    }
+
+    void "fail is exists by non existent company name"() {
+        when:
+        def isExistResult = repo.isExists(company.companyName())
+
+        then:
+        notThrown(Exception)
+        !isExistResult
+
+        where:
+        company << (1..10).collect({TestDataGenerator.generateCompany()})
     }
 }
