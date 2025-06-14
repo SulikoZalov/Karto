@@ -158,14 +158,15 @@ class GiftCardRepoTest extends Specification {
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
     }
 
-    // fails because 0-length List is considered success
-    void "fail find by non existent buyer ID"() {
+    void "fail find by non existent buyer ID: empty list"() {
         when:
         def findResult = repo.findBy(giftCard.buyerID())
 
         then:
         notThrown(Exception)
-        !findResult.success()
+        findResult.success()
+        def value = findResult.value()
+        value.size() == 0
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
@@ -189,14 +190,15 @@ class GiftCardRepoTest extends Specification {
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
     }
 
-    // fails because 0-length List is considered success
     void "fail find by non existent owner ID"() {
         when:
         def findResult = repo.findBy(giftCard.ownerID())
 
         then:
         notThrown(Exception)
-        !findResult.success()
+        findResult.success()
+        def value = findResult.value()
+        value.size() == 0
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
@@ -220,14 +222,15 @@ class GiftCardRepoTest extends Specification {
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
     }
 
-    // fails because 0-length List is considered success
     void "fail find by non existent store ID"() {
         when:
         def findResult = repo.findBy(giftCard.storeID())
 
         then:
         notThrown(Exception)
-        !findResult.success()
+        findResult.success()
+        def value = findResult.value()
+        value.size() == 0
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
