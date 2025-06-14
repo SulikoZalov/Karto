@@ -75,11 +75,6 @@ public class JDBCPartnerVerificationOTPRepository implements PartnerVerification
     }
 
     @Override
-    public Result<Integer, Throwable> update(PartnerVerificationOTP otp) {
-        return mapTransactionResult(jet.write(UPDATE, otp.isConfirmed(), otp.otp()));
-    }
-
-    @Override
     public Result<Integer, Throwable> remove(PartnerVerificationOTP otp) {
         return mapTransactionResult(jet.write(REMOVE, otp.otp()));
     }

@@ -9,8 +9,6 @@ public interface PartnerVerificationOTPRepository {
 
     Result<Integer, Throwable> save(PartnerVerificationOTP otp);
 
-    Result<Integer, Throwable> update(PartnerVerificationOTP otp);
-
     Result<Integer, Throwable> remove(PartnerVerificationOTP otp);
 
     Result<Integer, Throwable> updateConfirmation(PartnerVerificationOTP otp);
