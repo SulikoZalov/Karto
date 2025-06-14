@@ -79,7 +79,7 @@ class CardVerificationOTPRepoTest extends Specification {
         saveResult.success()
 
         when:
-//        otp.confirm()
+        otp.confirm()
         def confirmResult = verificationOTPRepository.update(otp)
 
         then:
