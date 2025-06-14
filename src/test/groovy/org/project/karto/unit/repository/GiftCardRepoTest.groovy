@@ -103,6 +103,131 @@ class GiftCardRepoTest extends Specification {
 
         then:
         notThrown(Exception)
+        updateResult1.success()
+        updateResult2.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "successful find by card ID"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+
+        when:
+        def findResult = repo.findBy(giftCard.id())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "fail find by non existent card ID"() {
+        when:
+        def findResult = repo.findBy(giftCard.id())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "successful find by buyer ID"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+
+        when:
+        def findResult = repo.findBy(giftCard.buyerID())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    // fails because 0-length List is considered success
+    void "fail find by non existent buyer ID"() {
+        when:
+        def findResult = repo.findBy(giftCard.buyerID())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "successful find by owner ID"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+
+        when:
+        def findResult = repo.findBy(giftCard.ownerID())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    // fails because 0-length List is considered success
+    void "fail find by non existent owner ID"() {
+        when:
+        def findResult = repo.findBy(giftCard.ownerID())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "successful find by store ID"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+
+        when:
+        def findResult = repo.findBy(giftCard.storeID())
+
+        then:
+        notThrown(Exception)
+        findResult.success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    // fails because 0-length List is considered success
+    void "fail find by non existent store ID"() {
+        when:
+        def findResult = repo.findBy(giftCard.storeID())
+
+        then:
+        notThrown(Exception)
+        !findResult.success()
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
