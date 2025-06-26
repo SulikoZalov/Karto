@@ -60,6 +60,7 @@ public class GiftCard {
                                           String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
+        if (storeID == null) throw new IllegalArgumentException("StoreID cannot be null for store-specific gift cards.");
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
@@ -73,12 +74,39 @@ public class GiftCard {
                                          String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
+        if (storeID == null) throw new IllegalArgumentException("StoreID cannot be null for store-specific gift cards.");
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses,
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+    }
+
+    public static GiftCard selfBoughtCommonCard(BuyerID buyerID, Balance balance,
+                                                String secretKey, CardUsageLimitations cardUsageLimitations) {
+
+        validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
+
+        LocalDateTime creationDate = LocalDateTime.now();
+        LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
+
+        int maxCountOfUses = cardUsageLimitations.maxUsageCount();
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), null, maxCountOfUses,
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+    }
+
+    public static GiftCard giftedCommonCard(BuyerID buyerID, Balance balance,
+                                            String secretKey, CardUsageLimitations cardUsageLimitations) {
+
+        validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
+
+        LocalDateTime creationDate = LocalDateTime.now();
+        LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
+
+        int maxCountOfUses = cardUsageLimitations.maxUsageCount();
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, null, maxCountOfUses,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
