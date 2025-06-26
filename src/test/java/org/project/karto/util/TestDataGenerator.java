@@ -228,7 +228,6 @@ public class TestDataGenerator {
 
     public static GiftCard generateSelfBougthGiftCard() {
         return GiftCard.selfBoughtCard(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 generateBalance(),
                 new StoreID(UUID.randomUUID()),
@@ -239,7 +238,6 @@ public class TestDataGenerator {
 
     public static GiftCard generateSelfBougthGiftCard(Balance balance) {
         return GiftCard.selfBoughtCard(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 balance,
                 new StoreID(UUID.randomUUID()),
@@ -251,7 +249,6 @@ public class TestDataGenerator {
     public static GiftCard generateSelfBougthGiftCard(Balance balance, int maxCountOfUsage) {
         CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxCountOfUsage);
         return GiftCard.selfBoughtCard(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 balance,
                 new StoreID(UUID.randomUUID()),
@@ -262,7 +259,6 @@ public class TestDataGenerator {
 
     public static GiftCard generateBoughtAsGiftCard() {
         return GiftCard.boughtAsAGift(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 generateBalance(),
                 new StoreID(UUID.randomUUID()),
@@ -273,7 +269,6 @@ public class TestDataGenerator {
 
     public static GiftCard generateBoughtAsGiftCard(Balance balance) {
         return GiftCard.boughtAsAGift(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 balance,
                 new StoreID(UUID.randomUUID()),
@@ -285,7 +280,6 @@ public class TestDataGenerator {
     public static GiftCard generateBoughtAsGiftCard(Balance balance, int maxUsageCount) {
         CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxUsageCount);
         return GiftCard.boughtAsAGift(
-                generatePAN(),
                 new BuyerID(UUID.randomUUID()),
                 balance,
                 new StoreID(UUID.randomUUID()),

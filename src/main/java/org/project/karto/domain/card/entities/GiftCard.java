@@ -12,7 +12,6 @@ import java.util.UUID;
 
 public class GiftCard {
     private final CardID id;
-    private final PAN pan;
     private final BuyerID buyerID;
     private @Nullable OwnerID ownerID;
     private final StoreID storeID;
@@ -32,7 +31,6 @@ public class GiftCard {
             @Nullable OwnerID ownerID,
             StoreID storeID,
             int maxCountOfUses,
-            PAN pan,
             GiftCardStatus giftCardStatus,
             Balance balance,
             int countOfUses,
@@ -46,7 +44,6 @@ public class GiftCard {
         this.ownerID = ownerID;
         this.storeID = storeID;
         this.maxCountOfUses = maxCountOfUses;
-        this.pan = pan;
         this.giftCardStatus = giftCardStatus;
         this.balance = balance;
         this.countOfUses = countOfUses;
@@ -56,36 +53,35 @@ public class GiftCard {
         this.lastUsage = lastUsage;
     }
 
-    public static GiftCard selfBoughtCard(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
+    public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, StoreID storeID,
                                           String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(pan, buyerID, balance, storeID, secretKey, cardUsageLimitations);
+        validateInputs(buyerID, balance, storeID, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses, pan,
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
-    public static GiftCard boughtAsAGift(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
+    public static GiftCard boughtAsAGift(BuyerID buyerID, Balance balance, StoreID storeID,
                                          String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(pan, buyerID, balance, storeID, secretKey, cardUsageLimitations);
+        validateInputs(buyerID, balance, storeID, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
-        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses, pan,
+        return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses,
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
-    private static void validateInputs(PAN pan, BuyerID buyerID, Balance balance, StoreID storeID,
+    private static void validateInputs(BuyerID buyerID, Balance balance, StoreID storeID,
                                        String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        if (pan == null) throw new IllegalArgumentException("PAN cannot be null");
         if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
         if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
         if (storeID == null) throw new IllegalArgumentException("Store can`t be null");
@@ -95,7 +91,6 @@ public class GiftCard {
 
     public static GiftCard fromRepository(
             CardID id,
-            PAN pan,
             BuyerID buyerID,
             OwnerID ownerID,
             StoreID storeID,
@@ -108,7 +103,7 @@ public class GiftCard {
             LocalDateTime expirationDate,
             LocalDateTime lastUsage) {
 
-        return new GiftCard(id, buyerID, ownerID, storeID, maxCountOfUses, pan,
+        return new GiftCard(id, buyerID, ownerID, storeID, maxCountOfUses,
                 giftCardStatus, balance, countOfUses, keyAndCounter, creationDate, expirationDate, lastUsage);
     }
 
@@ -126,10 +121,6 @@ public class GiftCard {
 
     public StoreID storeID() {
         return storeID;
-    }
-
-    public PAN pan() {
-        return pan;
     }
 
     public GiftCardStatus giftCardStatus() {
