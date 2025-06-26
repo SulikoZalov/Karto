@@ -288,10 +288,6 @@ public class TestDataGenerator {
         );
     }
 
-    public static PAN generatePAN() {
-        return new PAN(generateRandomCreditCardNumber());
-    }
-
     public static String generateRandomCreditCardNumber() {
         String bin = "";
         int length = 16;
