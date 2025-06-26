@@ -255,8 +255,12 @@ public class GiftCard {
             throw new IllegalArgumentException("There is not enough money on the balance");
 
         countOfUses++;
-        balance = new Balance(balance.value().subtract(totalAmount.value()));
+        balance = calculateBalance(totalAmount);
         lastUsage = LocalDateTime.now();
+    }
+
+    private Balance calculateBalance(Amount totalAmount) {
+        return new Balance(balance.value().subtract(totalAmount.value()));
     }
 
     private Amount calculateTotalAmount(Amount amount) {
