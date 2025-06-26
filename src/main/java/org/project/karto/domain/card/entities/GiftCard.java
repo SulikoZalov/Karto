@@ -2,19 +2,22 @@ package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
+import org.project.karto.domain.card.enumerations.GiftCardType;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 public class GiftCard {
     private final CardID id;
     private final BuyerID buyerID;
     private @Nullable OwnerID ownerID;
-    private final StoreID storeID;
+    private final @Nullable StoreID storeID;
     private final int maxCountOfUses;
     private final LocalDateTime creationDate;
     private final LocalDateTime expirationDate;
@@ -56,7 +59,7 @@ public class GiftCard {
     public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, StoreID storeID,
                                           String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(buyerID, balance, storeID, secretKey, cardUsageLimitations);
+        validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
@@ -69,7 +72,7 @@ public class GiftCard {
     public static GiftCard boughtAsAGift(BuyerID buyerID, Balance balance, StoreID storeID,
                                          String secretKey, CardUsageLimitations cardUsageLimitations) {
 
-        validateInputs(buyerID, balance, storeID, secretKey, cardUsageLimitations);
+        validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
@@ -79,12 +82,11 @@ public class GiftCard {
                 GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
     }
 
-    private static void validateInputs(BuyerID buyerID, Balance balance, StoreID storeID,
-                                       String secretKey, CardUsageLimitations cardUsageLimitations) {
+    private static void validateInputs(BuyerID buyerID, Balance balance, String secretKey,
+                                       CardUsageLimitations cardUsageLimitations) {
 
         if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
         if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
-        if (storeID == null) throw new IllegalArgumentException("Store can`t be null");
         if (secretKey == null) throw new IllegalArgumentException("Secret key can`t be null");
         if (cardUsageLimitations == null) throw new IllegalArgumentException("Card limitations can`t be null");
     }
@@ -115,12 +117,12 @@ public class GiftCard {
         return buyerID;
     }
 
-    public OwnerID ownerID() {
-        return ownerID;
+    public Optional<OwnerID> ownerID() {
+        return Optional.ofNullable(ownerID);
     }
 
-    public StoreID storeID() {
-        return storeID;
+    public Optional<StoreID> storeID() {
+        return Optional.ofNullable(storeID);
     }
 
     public GiftCardStatus giftCardStatus() {
@@ -136,6 +138,11 @@ public class GiftCard {
         return buyerID.value().equals(ownerID.value()) ?
                 GiftCardRecipientType.SELF :
                 GiftCardRecipientType.OTHER;
+    }
+
+    public GiftCardType giftCardType() {
+        if (storeID == null) return GiftCardType.COMMON;
+        return GiftCardType.STORE_SPECIFIC;
     }
 
     public Balance balance() {
@@ -213,11 +220,25 @@ public class GiftCard {
         if (isExpired()) throw new IllegalStateException("You can`t use expired card");
         if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
         if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
-        if (!hasSufficientBalance(amount))
+
+        Amount totalAmount = calculateTotalAmount(amount);
+
+        if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
         countOfUses++;
-        balance = new Balance(balance.value().subtract(amount.value()));
+        balance = new Balance(balance.value().subtract(totalAmount.value()));
         lastUsage = LocalDateTime.now();
+    }
+
+    private Amount calculateTotalAmount(Amount amount) {
+        if (giftCardType() != GiftCardType.COMMON) return amount;
+
+        Amount fee = calculateFee(amount);
+        return new Amount(amount.value().add(fee.value()));
+    }
+
+    private Amount calculateFee(Amount amount) {
+        return new Amount(amount.value().multiply(BigDecimal.valueOf(0.02)));
     }
 }

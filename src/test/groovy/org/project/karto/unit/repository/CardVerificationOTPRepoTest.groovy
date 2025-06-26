@@ -210,7 +210,7 @@ class CardVerificationOTPRepoTest extends Specification {
         saveResult.success()
 
         when:
-        def findResult = verificationOTPRepository.findBy(card.ownerID())
+        def findResult = verificationOTPRepository.findBy(card.ownerID().get())
 
         then:
         notThrown(Exception)
@@ -235,7 +235,7 @@ class CardVerificationOTPRepoTest extends Specification {
         saveResult.success()
 
         when:
-        def findResult = verificationOTPRepository.findBy(noNameCard.ownerID())
+        def findResult = verificationOTPRepository.findBy(noNameCard.ownerID().get())
 
         then:
         notThrown(Exception)

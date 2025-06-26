@@ -5,7 +5,7 @@ import org.project.karto.domain.card.value_objects.Amount
 import org.project.karto.domain.card.value_objects.Balance
 import org.project.karto.domain.card.value_objects.OwnerID
 import org.project.karto.util.TestDataGenerator
-import spock.lang.*
+import spock.lang.Specification
 
 class GiftCardTest extends Specification {
 
@@ -14,7 +14,7 @@ class GiftCardTest extends Specification {
         def card = TestDataGenerator.generateSelfBougthGiftCard()
 
         then:
-        card.buyerID().value() == card.ownerID().value()
+        card.buyerID().value() == card.ownerID().get().value()
         card.countOfUses() == 0
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()
@@ -25,7 +25,7 @@ class GiftCardTest extends Specification {
         def card = TestDataGenerator.generateBoughtAsGiftCard()
 
         then:
-        card.ownerID() == null
+        card.ownerID().isEmpty()
         card.countOfUses() == 0
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()

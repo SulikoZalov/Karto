@@ -180,7 +180,7 @@ class GiftCardRepoTest extends Specification {
         result.success()
 
         when:
-        def findResult = repo.findBy(giftCard.ownerID())
+        def findResult = repo.findBy(giftCard.ownerID().get())
 
         then:
         notThrown(Exception)
@@ -192,7 +192,7 @@ class GiftCardRepoTest extends Specification {
 
     void "fail find by non existent owner ID"() {
         when:
-        def findResult = repo.findBy(giftCard.ownerID())
+        def findResult = repo.findBy(giftCard.ownerID().get())
 
         then:
         notThrown(Exception)
@@ -212,7 +212,7 @@ class GiftCardRepoTest extends Specification {
         result.success()
 
         when:
-        def findResult = repo.findBy(giftCard.storeID())
+        def findResult = repo.findBy(giftCard.storeID().get())
 
         then:
         notThrown(Exception)
@@ -224,7 +224,7 @@ class GiftCardRepoTest extends Specification {
 
     void "fail find by non existent store ID"() {
         when:
-        def findResult = repo.findBy(giftCard.storeID())
+        def findResult = repo.findBy(giftCard.storeID().get())
 
         then:
         notThrown(Exception)
