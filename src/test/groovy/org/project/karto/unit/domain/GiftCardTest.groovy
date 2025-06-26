@@ -215,6 +215,34 @@ class GiftCardTest extends Specification {
         card.countOfUses() == 1
     }
 
+    def "should thrown an exception: has no sufficient balance for fee on self bought card"() {
+        given:
+        def card = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(BigDecimal.valueOf(50L)))
+        card.activate()
+        def amount = new Amount(BigDecimal.valueOf(50L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.getMessage() == "There is not enough money on the balance"
+    }
+
+    def "should thrown an exception: has no sufficient balance for fee on bought as a gift card"() {
+        given:
+        def card = TestDataGenerator.generateBoughtAsGiftCommonCard(new Balance(BigDecimal.valueOf(50L)))
+        card.activate(new OwnerID(UUID.randomUUID()))
+        def amount = new Amount(BigDecimal.valueOf(50L))
+
+        when:
+        card.spend(amount)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.getMessage() == "There is not enough money on the balance"
+    }
+
     def "should thrown an exception: can`t spend from unverified card"() {
         given:
         def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
