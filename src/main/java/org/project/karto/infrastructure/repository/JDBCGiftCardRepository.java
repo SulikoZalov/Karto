@@ -145,11 +145,12 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
 
     private GiftCard mapGiftCard(ResultSet rs) throws SQLException {
         String ownerId = rs.getString("owner_id");
+        String storeId = rs.getString("store_id");
         return GiftCard.fromRepository(
                 CardID.fromString(rs.getString("id")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 ownerId != null ? OwnerID.fromString(ownerId) : null,
-                StoreID.fromString(rs.getString("store_id")),
+                storeId != null ? StoreID.fromString(storeId) : null,
                 GiftCardStatus.valueOf(rs.getString("gift_card_status")),
                 new Balance(rs.getBigDecimal("balance")),
                 rs.getInt("count_of_uses"),
