@@ -24,9 +24,46 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        repo.findBy(giftCard.id()).success()
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    void "save gift card: bought as gift"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+        repo.findBy(giftCard.id()).success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateBoughtAsGiftCard()})
+    }
+
+    void "save gift card: self bought common type"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+        repo.findBy(giftCard.id()).success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateSelfBoughtCommonGiftCard()})
+    }
+
+    void "save gift card: bought as gift common type"() {
+        when:
+        def result = repo.save(giftCard)
+
+        then:
+        result.success()
+        repo.findBy(giftCard.id()).success()
+
+        where:
+        giftCard << (1..10).collect({TestDataGenerator.generateBoughtAsGiftCommonCard()})
     }
 
     void "fail saving same card twice"() {
