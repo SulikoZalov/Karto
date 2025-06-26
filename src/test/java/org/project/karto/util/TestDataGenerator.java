@@ -288,6 +288,42 @@ public class TestDataGenerator {
         );
     }
 
+    public static GiftCard generateSelfBoughtCommonGiftCard() {
+        return GiftCard.selfBoughtCommonCard(
+                new BuyerID(UUID.randomUUID()),
+                generateBalance(),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateSelfBoughtCommonGiftCard(Balance balance) {
+        return GiftCard.selfBoughtCommonCard(
+                new BuyerID(UUID.randomUUID()),
+                balance,
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateBoughtAsGiftCommonCard() {
+        return GiftCard.giftedCommonCard(
+                new BuyerID(UUID.randomUUID()),
+                generateBalance(),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateBoughtAsGiftCommonCard(Balance balance) {
+        return GiftCard.giftedCommonCard(
+                new BuyerID(UUID.randomUUID()),
+                balance,
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
     public static String generateRandomCreditCardNumber() {
         String bin = "";
         int length = 16;

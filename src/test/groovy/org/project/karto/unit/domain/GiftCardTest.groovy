@@ -1,6 +1,7 @@
 package org.project.karto.unit.domain
 
 import org.project.karto.domain.card.enumerations.GiftCardStatus
+import org.project.karto.domain.card.enumerations.GiftCardType
 import org.project.karto.domain.card.value_objects.Amount
 import org.project.karto.domain.card.value_objects.Balance
 import org.project.karto.domain.card.value_objects.OwnerID
@@ -15,6 +16,7 @@ class GiftCardTest extends Specification {
 
         then:
         card.buyerID().value() == card.ownerID().get().value()
+        card.giftCardType() == GiftCardType.STORE_SPECIFIC
         card.countOfUses() == 0
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()
@@ -26,9 +28,20 @@ class GiftCardTest extends Specification {
 
         then:
         card.ownerID().isEmpty()
+        card.giftCardType() == GiftCardType.STORE_SPECIFIC
         card.countOfUses() == 0
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()
+    }
+
+    def "should create self-bought common type gift card with correct initial values"() {
+        when:
+        def card = TestDataGenerator.generateSelfBoughtCommonGiftCard()
+    }
+
+    def "should create bought-as-gift common type gift card with correct initial values"() {
+        when:
+        def card = TestDataGenerator.generateBoughtAsGiftCommonCard()
     }
 
     def "should activate pending self bought card"() {
