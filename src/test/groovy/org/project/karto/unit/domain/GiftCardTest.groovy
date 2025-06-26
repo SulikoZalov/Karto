@@ -181,6 +181,40 @@ class GiftCardTest extends Specification {
         card.countOfUses() == 1
     }
 
+    def "should successfully spend money from self bought common type gift card"() {
+        given:
+        def card = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate()
+        def amount = new Amount(BigDecimal.valueOf(50L))
+        Balance initialBalance = card.balance();
+
+        when:
+        card.spend(amount)
+
+        then:
+        def fee = amount.value() * BigDecimal.valueOf(0.02)
+        def subtractedAmount = amount.value() + fee
+        card.balance().value() == initialBalance.value() - subtractedAmount
+        card.countOfUses() == 1
+    }
+
+    def "should successfully spend money from bought as gift common type gift card"() {
+        given:
+        def card = TestDataGenerator.generateBoughtAsGiftCommonCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate(new OwnerID(UUID.randomUUID()))
+        def amount = new Amount(BigDecimal.valueOf(50L))
+        Balance initialBalance = card.balance();
+
+        when:
+        card.spend(amount)
+
+        then:
+        def fee = amount.value() * BigDecimal.valueOf(0.02)
+        def subtractedAmount = amount.value() + fee
+        card.balance().value() == initialBalance.value() - subtractedAmount
+        card.countOfUses() == 1
+    }
+
     def "should thrown an exception: can`t spend from unverified card"() {
         given:
         def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
