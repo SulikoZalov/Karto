@@ -18,6 +18,7 @@ class GiftCardTest extends Specification {
         card.buyerID().value() == card.ownerID().get().value()
         card.giftCardType() == GiftCardType.STORE_SPECIFIC
         card.countOfUses() == 0
+        card.storeID().isPresent()
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()
     }
@@ -29,6 +30,7 @@ class GiftCardTest extends Specification {
         then:
         card.ownerID().isEmpty()
         card.giftCardType() == GiftCardType.STORE_SPECIFIC
+        card.storeID().isPresent()
         card.countOfUses() == 0
         card.giftCardStatus() == GiftCardStatus.PENDING
         !card.isVerified()
@@ -37,11 +39,27 @@ class GiftCardTest extends Specification {
     def "should create self-bought common type gift card with correct initial values"() {
         when:
         def card = TestDataGenerator.generateSelfBoughtCommonGiftCard()
+
+        then:
+        card.storeID().isEmpty()
+        card.buyerID().value() == card.ownerID().get().value()
+        card.giftCardType() == GiftCardType.COMMON
+        card.countOfUses() == 0
+        card.giftCardStatus() == GiftCardStatus.PENDING
+        !card.isVerified()
     }
 
     def "should create bought-as-gift common type gift card with correct initial values"() {
         when:
         def card = TestDataGenerator.generateBoughtAsGiftCommonCard()
+
+        then:
+        card.storeID().isEmpty()
+        card.ownerID().isEmpty()
+        card.giftCardType() == GiftCardType.COMMON
+        card.countOfUses() == 0
+        card.giftCardStatus() == GiftCardStatus.PENDING
+        !card.isVerified()
     }
 
     def "should activate pending self bought card"() {
