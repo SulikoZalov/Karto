@@ -172,6 +172,9 @@ public class User {
             throw new IllegalArgumentException("Account is not verified");
 
         BigDecimal remainingSum = cashbackStorage.amount().subtract(amount.value());
+        if (remainingSum.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("Insufficient funds in cashback storage");
+
         cashbackStorage = new CashbackStorage(remainingSum);
     }
 
