@@ -3,16 +3,18 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
 import org.project.karto.domain.card.enumerations.GiftCardType;
+import org.project.karto.domain.card.events.CashbackEvent;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.interfaces.KartoDomainEvent;
 import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class GiftCard {
     private final CardID id;
@@ -28,6 +30,13 @@ public class GiftCard {
     private int countOfUses;
     private KeyAndCounter keyAndCounter;
     private LocalDateTime lastUsage;
+    private final Deque<KartoDomainEvent> events;
+
+    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.02);        // 2%
+    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.12);       // 12%
+    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);             // 50 units of spending
+    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0025);      // 0.25%
+    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.0003);   // 0.03% for every consecutive usage day
 
     private GiftCard(
             CardID id,
@@ -55,6 +64,7 @@ public class GiftCard {
         this.creationDate = creationDate;
         this.expirationDate = expirationDate;
         this.lastUsage = lastUsage;
+        this.events = new ArrayDeque<>();
     }
 
     public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, StoreID storeID,
@@ -202,6 +212,12 @@ public class GiftCard {
         return lastUsage;
     }
 
+    public List<KartoDomainEvent> pullEvents() {
+        List<KartoDomainEvent> eventList = new ArrayList<>(events);
+        events.clear();
+        return eventList;
+    }
+
     public boolean isExpired() {
         if (expirationDate.isBefore(LocalDateTime.now())) {
             giftCardStatus = GiftCardStatus.EXPIRED;
@@ -244,20 +260,29 @@ public class GiftCard {
         return balance.value().compareTo(amount.value()) >= 0;
     }
 
-    public void spend(Amount amount) {
-        if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
-        if (isExpired()) throw new IllegalStateException("You can`t use expired card");
-        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
-        if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
+    public void spend(Amount amount, UserActivitySnapshot activitySnapshot) {
+        validateSpendAbility(amount, activitySnapshot);
 
         Amount totalAmount = calculateTotalAmount(amount);
-
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
         countOfUses++;
         balance = calculateBalance(totalAmount);
         lastUsage = LocalDateTime.now();
+
+        BigDecimal cashback = calculateCashback(totalAmount.value(), activitySnapshot);
+        events.addFirst(new CashbackEvent(id, ownerID, cashback));
+    }
+
+    private void validateSpendAbility(Amount amount, UserActivitySnapshot activitySnapshot) {
+        if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
+        if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
+        if (!activitySnapshot.userID().equals(ownerID.value()))
+            throw new IllegalArgumentException("UserID do not match");
+        if (isExpired()) throw new IllegalStateException("You can`t use expired card");
+        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
+        if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
     }
 
     private Balance calculateBalance(Amount totalAmount) {
@@ -273,5 +298,19 @@ public class GiftCard {
 
     private Amount calculateFee(Amount amount) {
         return new Amount(amount.value().multiply(BigDecimal.valueOf(0.02)));
+    }
+
+    private BigDecimal calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
+        BigDecimal totalSpentFactor = snapshot.totalAmountSpent()
+                .divide(SPENT_DIVISOR, 4, RoundingMode.HALF_UP)
+                .multiply(SPENT_MULTIPLIER);
+
+        BigDecimal activityFactor = BigDecimal.valueOf(snapshot.consecutiveActiveDays())
+                .multiply(ACTIVITY_MULTIPLIER);
+
+        BigDecimal totalRate = DEFAULT_CASHBACK.add(totalSpentFactor).add(activityFactor);
+
+        if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) totalRate = MAX_CASHBACK_RATE;
+        return spentAmount.multiply(totalRate).setScale(2, RoundingMode.HALF_UP);
     }
 }
