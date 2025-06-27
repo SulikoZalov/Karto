@@ -136,6 +136,30 @@ class UserRepoTest extends Specification{
         user << (1..10).collect({ TestDataGenerator.generateUser()})
     }
 
+    void "successfully update cashback storage"() {
+        when:
+        def result = repo.save(user)
+        BigDecimal oldCash = user.cashbackStorage().amount();
+
+        then:
+        result.success()
+
+        when:
+        user.incrementCounter()
+        user.enable()
+        user.addCashback(amount)
+        def storageUpdateResult = repo.updateCashbackStorage(user)
+
+        then:
+        notThrown(Exception)
+        storageUpdateResult.success()
+        user.cashbackStorage().amount() == oldCash.add(amount.value())
+
+        where:
+        user << (1..10).collect({ TestDataGenerator.generateUser()})
+        amount << (1..10).collect({TestDataGenerator.generateAmount(BigDecimal.valueOf(50))})
+    }
+
     void "successful is email exists"() {
         when:
         def result = repo.save(user)

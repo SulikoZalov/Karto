@@ -9,6 +9,7 @@ import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.UserRepository;
+import org.project.karto.domain.user.values_objects.CashbackStorage;
 import org.project.karto.domain.user.values_objects.PersonalData;
 import org.project.karto.domain.user.values_objects.RefreshToken;
 
@@ -39,6 +40,7 @@ public class JDBCUserRepository implements UserRepository {
             .column("is_2fa_enabled")
             .column("secret_key")
             .column("counter")
+            .column("cashback_storage")
             .column("creation_date")
             .column("last_updated")
             .values()
@@ -74,6 +76,12 @@ public class JDBCUserRepository implements UserRepository {
 
     static final String UPDATE_VERIFICATION = update("user_account")
             .set("is_verified = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_CASHBACK_STORAGE = update("user_account")
+            .set("cashback_storage = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -139,6 +147,7 @@ public class JDBCUserRepository implements UserRepository {
                         user.is2FAEnabled(),
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
+                        user.cashbackStorage(),
                         user.creationDate(),
                         user.lastUpdated()));
     }
@@ -170,6 +179,11 @@ public class JDBCUserRepository implements UserRepository {
     @Override
     public Result<Integer, Throwable> updateVerification(User user) {
         return mapTransactionResult(jet.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString()));
+    }
+
+    @Override
+    public Result<Integer, Throwable> updateCashbackStorage(User user) {
+        return mapTransactionResult(jet.write(UPDATE_CASHBACK_STORAGE, user.cashbackStorage(), user.id()));
     }
 
     @Override
@@ -237,6 +251,7 @@ public class JDBCUserRepository implements UserRepository {
                 rs.getBoolean("is_verified"),
                 rs.getBoolean("is_2fa_enabled"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
+                new CashbackStorage(rs.getBigDecimal("cashback_storage")),
                 rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
                 rs.getObject("last_updated", Timestamp.class).toLocalDateTime());
     }

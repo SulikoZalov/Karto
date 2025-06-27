@@ -1,4 +1,4 @@
-package org.project.karto.domain.card.value_objects;
+package org.project.karto.domain.common.value_objects;
 
 import java.math.BigDecimal;
 

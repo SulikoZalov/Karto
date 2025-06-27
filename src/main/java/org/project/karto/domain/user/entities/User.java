@@ -1,10 +1,13 @@
 package org.project.karto.domain.user.entities;
 
 import org.project.karto.domain.common.enumerations.Role;
+import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
-import org.project.karto.domain.user.values_objects.PersonalData;
 import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.user.values_objects.CashbackStorage;
+import org.project.karto.domain.user.values_objects.PersonalData;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,6 +19,7 @@ public class User {
     private boolean isVerified;
     private boolean is2FAEnabled;
     private KeyAndCounter keyAndCounter;
+    private CashbackStorage cashbackStorage;
     private final LocalDateTime creationDate;
     private final LocalDateTime lastUpdated;
 
@@ -25,12 +29,16 @@ public class User {
             boolean isVerified,
             boolean is2FAEnabled,
             KeyAndCounter keyAndCounter,
-            LocalDateTime creationDate, LocalDateTime lastUpdated) {
+            CashbackStorage cashbackStorage,
+            LocalDateTime creationDate,
+            LocalDateTime lastUpdated) {
 
-        if (id == null || personalData == null ||
-                creationDate == null || keyAndCounter == null || lastUpdated == null) {
-            throw new IllegalArgumentException("User data is null");
-        }
+        if (id == null) throw new IllegalArgumentException("id must not be null");
+        if (personalData == null) throw new IllegalArgumentException("personalData must not be null");
+        if (keyAndCounter == null) throw new IllegalArgumentException("keyAndCounter must not be null");
+        if (cashbackStorage == null) throw new IllegalArgumentException("cashbackStorage must not be null");
+        if (creationDate == null) throw new IllegalArgumentException("creationDate must not be null");
+        if (lastUpdated == null) throw new IllegalArgumentException("lastUpdated must not be null");
 
         this.id = id;
         this.personalData = personalData;
@@ -38,6 +46,7 @@ public class User {
         this.isVerified = isVerified;
         this.is2FAEnabled = is2FAEnabled;
         this.keyAndCounter = keyAndCounter;
+        this.cashbackStorage = cashbackStorage;
         this.creationDate = creationDate;
         this.lastUpdated = lastUpdated;
     }
@@ -48,6 +57,7 @@ public class User {
                 false,
                 false,
                 new KeyAndCounter(key, 0),
+                new CashbackStorage(BigDecimal.ZERO),
                 LocalDateTime.now(),
                 LocalDateTime.now());
     }
@@ -58,6 +68,7 @@ public class User {
             boolean isEnabled,
             boolean is2FAVerified,
             KeyAndCounter keyAndCounter,
+            CashbackStorage cashbackStorage,
             LocalDateTime creationDate,
             LocalDateTime lastUpdated) {
 
@@ -66,6 +77,7 @@ public class User {
                 isEnabled,
                 is2FAVerified,
                 keyAndCounter,
+                cashbackStorage,
                 creationDate,
                 lastUpdated);
     }
@@ -138,6 +150,29 @@ public class User {
 
     public void incrementCounter() {
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+    }
+
+    public CashbackStorage cashbackStorage() {
+        return cashbackStorage;
+    }
+
+    public void addCashback(Amount amount) {
+        if (amount == null)
+            throw new IllegalArgumentException("Amount can`t be null");
+        if (!isVerified)
+            throw new IllegalArgumentException("Account is not verified");
+
+        cashbackStorage = new CashbackStorage(cashbackStorage.amount().add(amount.value()));
+    }
+
+    public void removeCashFromStorage(Amount amount) {
+        if (amount == null)
+            throw new IllegalArgumentException("Amount can`t be null");
+        if (!isVerified)
+            throw new IllegalArgumentException("Account is not verified");
+
+        BigDecimal remainingSum = cashbackStorage.amount().subtract(amount.value());
+        cashbackStorage = new CashbackStorage(remainingSum);
     }
 
     public LocalDateTime creationDate() {

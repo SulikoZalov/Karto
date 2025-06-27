@@ -5,6 +5,7 @@ import org.project.karto.domain.card.enumerations.GiftCardStatus;
 import org.project.karto.domain.card.enumerations.GiftCardType;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 
