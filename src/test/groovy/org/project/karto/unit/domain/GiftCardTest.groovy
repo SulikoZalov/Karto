@@ -279,7 +279,11 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(100L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), new Fee(BigDecimal.TWO))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), new Fee(BigDecimal.valueOf(0.2)))
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.getMessage() == "There is not enough money on the balance"
     }
 
     def "should throw if card reached max count of uses"() {
