@@ -3,6 +3,7 @@ package org.project.karto.unit.domain
 import org.project.karto.domain.card.enumerations.GiftCardStatus
 import org.project.karto.domain.card.enumerations.GiftCardType
 import org.project.karto.domain.card.value_objects.Balance
+import org.project.karto.domain.card.value_objects.Fee
 import org.project.karto.domain.card.value_objects.OwnerID
 import org.project.karto.domain.card.value_objects.UserActivitySnapshot
 import org.project.karto.domain.common.value_objects.Amount
@@ -161,7 +162,7 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(50L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         card.balance().value() == BigDecimal.valueOf(50L)
@@ -175,7 +176,7 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(50L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         card.balance().value() == BigDecimal.valueOf(50L)
@@ -190,7 +191,7 @@ class GiftCardTest extends Specification {
         Balance initialBalance = card.balance();
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def fee = amount.value() * BigDecimal.valueOf(0.02)
@@ -207,7 +208,7 @@ class GiftCardTest extends Specification {
         Balance initialBalance = card.balance();
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def fee = amount.value() * BigDecimal.valueOf(0.02)
@@ -223,7 +224,7 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(50L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -237,7 +238,7 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(50L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -250,7 +251,7 @@ class GiftCardTest extends Specification {
         def amount = TestDataGenerator.generateAmount(BigDecimal.valueOf(100L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def e = thrown(IllegalStateException)
@@ -264,7 +265,7 @@ class GiftCardTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(120L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -278,10 +279,10 @@ class GiftCardTest extends Specification {
         Amount amount = new Amount(BigDecimal.valueOf(1L))
 
         when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()))
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
 
         then:
         def e = thrown(IllegalArgumentException)

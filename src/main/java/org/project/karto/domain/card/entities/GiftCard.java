@@ -260,10 +260,10 @@ public class GiftCard {
         return balance.value().compareTo(amount.value()) >= 0;
     }
 
-    public void spend(Amount amount, UserActivitySnapshot activitySnapshot) {
-        validateSpendAbility(amount, activitySnapshot);
+    public void spend(Amount amount, UserActivitySnapshot activitySnapshot, Fee externalFee) {
+        validateSpendAbility(amount, activitySnapshot, externalFee);
 
-        Amount totalAmount = calculateTotalAmount(amount);
+        Amount totalAmount = calculateTotalAmount(amount, externalFee);
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
@@ -275,9 +275,10 @@ public class GiftCard {
         events.addFirst(new CashbackEvent(id, ownerID, cashback));
     }
 
-    private void validateSpendAbility(Amount amount, UserActivitySnapshot activitySnapshot) {
+    private void validateSpendAbility(Amount amount, UserActivitySnapshot activitySnapshot, Fee externalFee) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
         if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
+        if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
         if (!activitySnapshot.userID().equals(ownerID.value()))
             throw new IllegalArgumentException("UserID do not match");
         if (isExpired()) throw new IllegalStateException("You can`t use expired card");
@@ -289,7 +290,8 @@ public class GiftCard {
         return new Balance(balance.value().subtract(totalAmount.value()));
     }
 
-    private Amount calculateTotalAmount(Amount amount) {
+    private Amount calculateTotalAmount(Amount amount, Fee externalFee) {
+        amount = new Amount(amount.value().add(externalFee.rate()));
         if (giftCardType() != GiftCardType.COMMON) return amount;
 
         Amount fee = calculateFee(amount);

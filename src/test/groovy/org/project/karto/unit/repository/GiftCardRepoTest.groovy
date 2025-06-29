@@ -4,6 +4,7 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.karto.domain.card.value_objects.Fee
 import org.project.karto.domain.card.value_objects.UserActivitySnapshot
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
@@ -90,7 +91,7 @@ class GiftCardRepoTest extends Specification {
         result.success()
 
         when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()))
+        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
         def updateResult = repo.update(giftCard)
 
         then:
@@ -116,7 +117,7 @@ class GiftCardRepoTest extends Specification {
         activationResult.success()
 
         when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()))
+        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
         def updateResult = repo.update(giftCard)
 
         then:
@@ -135,7 +136,7 @@ class GiftCardRepoTest extends Specification {
         result.success()
 
         when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()))
+        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
         def updateResult1 = repo.update(giftCard)
         def updateResult2 = repo.update(giftCard)
 
