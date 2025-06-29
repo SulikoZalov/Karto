@@ -272,6 +272,16 @@ class GiftCardTest extends Specification {
         e.getMessage() == "There is not enough money on the balance"
     }
 
+    def "should thrown an exception: has no sufficient balance for external fee"() {
+        given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
+        card.activate()
+        def amount = new Amount(BigDecimal.valueOf(100L))
+
+        when:
+        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), new Fee(BigDecimal.TWO))
+    }
+
     def "should throw if card reached max count of uses"() {
         given:
         def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)), 3)

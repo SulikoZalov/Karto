@@ -32,6 +32,7 @@ public class GiftCard {
     private LocalDateTime lastUsage;
     private final Deque<KartoDomainEvent> events;
 
+    public static final BigDecimal KARTO_COMMON_CARD_FEE = BigDecimal.valueOf(0.02);
     public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.02);        // 2%
     public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.12);       // 12%
     public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);             // 50 units of spending
@@ -291,15 +292,19 @@ public class GiftCard {
     }
 
     private Amount calculateTotalAmount(Amount amount, Fee externalFee) {
-        amount = new Amount(amount.value().add(externalFee.rate()));
+        amount = calculateExternalFee(amount, externalFee);
         if (giftCardType() != GiftCardType.COMMON) return amount;
 
-        Amount fee = calculateFee(amount);
+        Amount fee = calculateInternalFee(amount);
         return new Amount(amount.value().add(fee.value()));
     }
 
-    private Amount calculateFee(Amount amount) {
-        return new Amount(amount.value().multiply(BigDecimal.valueOf(0.02)));
+    private static Amount calculateExternalFee(Amount amount, Fee externalFee) {
+        return new Amount(amount.value().multiply(externalFee.rate()));
+    }
+
+    private Amount calculateInternalFee(Amount amount) {
+        return new Amount(amount.value().multiply(KARTO_COMMON_CARD_FEE));
     }
 
     private BigDecimal calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
