@@ -3,6 +3,7 @@ package org.project.karto.util;
 import net.datafaker.Faker;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
+import org.project.karto.domain.card.entities.CardPurchaseIntent;
 import org.project.karto.domain.card.entities.GiftCard;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
@@ -322,6 +323,19 @@ public class TestDataGenerator {
                 generateSecretKey(),
                 generateCardLimits()
         );
+    }
+
+    public static CardPurchaseIntent generateCardPurchaseIntent(Amount totalPayedAmount) {
+        return CardPurchaseIntent.of(
+                UUID.randomUUID(),
+                new BuyerID(UUID.randomUUID()),
+                RANDOM.nextInt(1, 100),
+                totalPayedAmount
+        );
+    }
+
+    public static Fee generateFee(double maxRate) {
+        return new Fee(BigDecimal.valueOf(RANDOM.nextDouble(0.01, maxRate)));
     }
 
     public static String generateRandomCreditCardNumber() {
