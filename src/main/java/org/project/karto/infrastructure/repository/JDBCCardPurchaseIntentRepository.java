@@ -82,16 +82,16 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
                 purchaseIntent.orderID(),
                 purchaseIntent.totalPayedAmount(),
                 purchaseIntent.creationDate(),
-                purchaseIntent.resultDate(),
+                purchaseIntent.resultDate().orElse(null),
                 purchaseIntent.status(),
-                purchaseIntent.removedFee()));
+                purchaseIntent.removedFee().orElse(null)));
     }
 
     @Override
     public Result<Integer, Throwable> update(CardPurchaseIntent purchaseIntent) {
         return mapTransactionResult(jet.write(UPDATE_PURCHASE_INTENT,
-                purchaseIntent.resultDate(),
-                purchaseIntent.removedFee(),
+                purchaseIntent.resultDate().orElse(null),
+                purchaseIntent.removedFee().orElse(null),
                 purchaseIntent.id()));
     }
 
@@ -103,17 +103,17 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
 
     @Override
     public Result<CardPurchaseIntent, Throwable> findBy(UUID id) {
-        return mapResult( jet.read(FIND_BY_ID, this::mapCardPurchaseIntent, id));
+        return mapResult(jet.read(FIND_BY_ID, this::mapCardPurchaseIntent, id));
     }
 
     @Override
     public Result<CardPurchaseIntent, Throwable> findBy(BuyerID buyerID) {
-        return mapResult( jet.read(FIND_BY_ID, this::mapCardPurchaseIntent, buyerID));
+        return mapResult(jet.read(FIND_BY_BUYER_ID, this::mapCardPurchaseIntent, buyerID));
     }
 
     @Override
     public Result<CardPurchaseIntent, Throwable> findBy(long orderID) {
-        return mapResult( jet.read(FIND_BY_ID, this::mapCardPurchaseIntent, orderID));
+        return mapResult(jet.read(FIND_BY_ORDER_ID, this::mapCardPurchaseIntent, orderID));
     }
 
     private CardPurchaseIntent mapCardPurchaseIntent(ResultSet rs) throws SQLException {
