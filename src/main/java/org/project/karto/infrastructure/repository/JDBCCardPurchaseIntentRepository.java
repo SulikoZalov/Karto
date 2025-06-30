@@ -2,6 +2,7 @@ package org.project.karto.infrastructure.repository;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.CardPurchaseIntent;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.repositories.CardPurchaseIntentRepository;
@@ -20,6 +21,7 @@ import static com.hadzhy.jetquerious.sql.QueryForge.insert;
 import static com.hadzhy.jetquerious.sql.QueryForge.select;
 import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
 
+@ApplicationScoped
 public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepository {
 
     private final JetQuerious jet;
@@ -41,6 +43,7 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
     static final String UPDATE_PURCHASE_INTENT = QueryForge.update("card_purchase_intent")
             .set("""
                 result_date = ?,
+                status = ?,
                 removed_fee = ?
              """)
             .where("id = ?")
@@ -91,6 +94,7 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
     public Result<Integer, Throwable> update(CardPurchaseIntent purchaseIntent) {
         return mapTransactionResult(jet.write(UPDATE_PURCHASE_INTENT,
                 purchaseIntent.resultDate().orElse(null),
+                purchaseIntent.status(),
                 purchaseIntent.removedFee().orElse(null),
                 purchaseIntent.id()));
     }
