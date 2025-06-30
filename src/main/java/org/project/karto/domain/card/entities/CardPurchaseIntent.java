@@ -52,7 +52,7 @@ public class CardPurchaseIntent {
         if (id.equals(buyerID.value()))
             throw new IllegalArgumentException("Do not match");
         if (totalPayedAmount == null) throw new IllegalArgumentException("Total payed amount cannot be null");
-        if (orderID < 0) throw new IllegalArgumentException("OrderID cannot be negative");
+        if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be negative or zero");
 
         return new CardPurchaseIntent(id, buyerID, orderID, totalPayedAmount, LocalDateTime.now(), null, PurchaseStatus.PENDING, null);
     }
