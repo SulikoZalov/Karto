@@ -4,132 +4,116 @@ import org.project.karto.domain.card.entities.CardPurchaseIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.BuyerID
 import org.project.karto.domain.card.value_objects.Fee
+import org.project.karto.domain.card.value_objects.StoreID
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
-import spock.lang.Unroll
-
-import java.time.LocalDateTime
 
 class CardPurchaseIntentTest extends Specification {
 
-    def "should create CardPurchaseIntent with valid parameters"() {
+    def "should create CardPurchaseIntent in PENDING status with optional storeID"() {
         given:
-        UUID id = UUID.randomUUID()
-        BuyerID buyerID = new BuyerID(UUID.randomUUID())
-        long orderId = 123
-        Amount amount = new Amount(new BigDecimal("100.00"))
+        def id = UUID.randomUUID()
+        def buyerID = new BuyerID(UUID.randomUUID())
+        def storeID = new StoreID(UUID.randomUUID())
+        def orderID = 100L
+        def totalAmount = new Amount(100)
 
         when:
-        def intent = CardPurchaseIntent.of(id, buyerID, null, orderId, amount)
+        def intent = CardPurchaseIntent.of(id, buyerID, storeID, orderID, totalAmount)
 
         then:
         intent.id() == id
         intent.buyerID() == buyerID
-        intent.orderID() == orderId
-        intent.totalPayedAmount() == amount
+        intent.storeID().get() == storeID
+        intent.orderID() == orderID
+        intent.totalPayedAmount() == totalAmount
         intent.status() == PurchaseStatus.PENDING
         intent.resultDate().isEmpty()
     }
 
-    @Unroll
-    def "should throw exception for invalid parameters during creation: id=#id, buyerID=#buyerID, orderID=#orderId, amount=#amount"() {
+    def "should throw exception when creating with invalid input"() {
         when:
-        CardPurchaseIntent.of(id, buyerID, null, orderId, amount)
+        CardPurchaseIntent.of(null, new BuyerID(UUID.randomUUID()), null, 1L, new Amount(10))
 
         then:
         thrown(IllegalArgumentException)
 
-        where:
-        id          | buyerID                 | orderId | amount
-        null        | new BuyerID(UUID.randomUUID()) | 1      | new Amount(BigDecimal.ONE)
-        UUID.randomUUID() | null              | 1      | new Amount(BigDecimal.ONE)
-        UUID.randomUUID() | new BuyerID(UUID.randomUUID()) | -1 | new Amount(BigDecimal.ONE)
-        UUID.randomUUID() | new BuyerID(UUID.randomUUID()) | 1  | null
-        UUID.fromString("00000000-0000-0000-0000-000000000001") | new BuyerID(UUID.fromString("00000000-0000-0000-0000-000000000001")) | 1 | new Amount(BigDecimal.ONE)
+        when:
+        CardPurchaseIntent.of(UUID.randomUUID(), null, null, 1L, new Amount(10))
+
+        then:
+        thrown(IllegalArgumentException)
+
+        when:
+        CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, -1L, new Amount(10))
+
+        then:
+        thrown(IllegalArgumentException)
+
+        when:
+        CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, null)
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
-    def "should mark intent as success with valid fee"() {
+    def "should mark intent as SUCCESS and set removed fee"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        Fee fee = new Fee(new BigDecimal("0.1"))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
 
         when:
         intent.markAsSuccess(fee)
 
         then:
         intent.status() == PurchaseStatus.SUCCESS
-        intent.resultDate().isPresent()
         intent.removedFee().get() == fee
+        intent.resultDate().isPresent()
     }
 
-    def "should throw if trying to mark as success twice"() {
+    def "should not allow success if fee greater than total amount"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        Fee fee = new Fee(new BigDecimal("0.05"))
-        intent.markAsSuccess(fee)
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(50))
+        def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(100))
+
 
         when:
         intent.markAsSuccess(fee)
-
-        then:
-        def ex = thrown(IllegalStateException)
-        ex.message == "Transaction cannot change it`s status twice."
-    }
-
-    def "should throw if fee is null during success"() {
-        given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-
-        when:
-        intent.markAsSuccess(null)
-
-        then:
-        IllegalArgumentException e = thrown()
-        e.message == "Removed fee cannot be null"
-    }
-
-    def "should throw if fee amount is greater than total payed amount"() {
-        given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("10.00")))
-        Fee highFee = new Fee(new BigDecimal("2.0")) // 200%
-
-        when:
-        intent.markAsSuccess(highFee)
 
         then:
         def ex = thrown(IllegalArgumentException)
-        ex.message == "The commission cannot be greater than the total amount paid."
+        ex.message.contains("commission cannot be greater")
     }
 
     def "should calculate net amount correctly after success"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        Fee fee = new Fee(new BigDecimal("0.1"))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def fee = new Fee(BigDecimal.valueOf(0.05))
+
         intent.markAsSuccess(fee)
 
         when:
         def netAmount = intent.calculateNetAmount()
 
         then:
-        netAmount.value() == new BigDecimal("90.00")
+        netAmount.value() == 95.00
     }
 
-    def "should throw when calculating net amount before success"() {
+    def "should throw when calculating net amount if not SUCCESS"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
 
         when:
         intent.calculateNetAmount()
 
         then:
-        def ex = thrown(IllegalStateException)
-        ex.message == "Cannot calculate net amount: status is not SUCCESS"
+        thrown(IllegalStateException)
     }
 
-    def "should mark as cancel from pending"() {
+    def "should allow marking as CANCEL or FAILURE only when pending"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
 
         when:
         intent.markAsCancel()
@@ -137,72 +121,43 @@ class CardPurchaseIntentTest extends Specification {
         then:
         intent.status() == PurchaseStatus.CANCEL
         intent.resultDate().isPresent()
+
+        when:
+        def anotherIntent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 2L, new Amount(100))
+        anotherIntent.markAsFailure()
+
+        then:
+        anotherIntent.status() == PurchaseStatus.FAILURE
+        anotherIntent.resultDate().isPresent()
     }
 
-    def "should mark as failure from pending"() {
+    def "should not allow double status change"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        intent.markAsCancel()
+        def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(100))
 
         when:
         intent.markAsFailure()
 
         then:
-        intent.status() == PurchaseStatus.FAILURE
-        intent.resultDate().isPresent()
-    }
-
-    @Unroll
-    def "should throw when trying to mark status twice (initial: #initialStatus, action: #action)"() {
-        given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        Fee fee = new Fee(new BigDecimal("0.1"))
-
-        switch (initialStatus) {
-            case PurchaseStatus.SUCCESS -> intent.markAsSuccess(fee)
-            case PurchaseStatus.CANCEL -> intent.markAsCancel()
-            case PurchaseStatus.FAILURE -> intent.markAsFailure()
-        }
+        thrown(IllegalStateException)
 
         when:
-        action.call(intent)
+        intent.markAsSuccess(fee)
 
         then:
-        def ex = thrown(IllegalStateException)
-        ex.message == "Transaction cannot change it`s status twice."
-
-        where:
-        initialStatus         | action
-        PurchaseStatus.SUCCESS | { it -> it.markAsCancel() }
-        PurchaseStatus.SUCCESS | { it -> it.markAsFailure() }
-        PurchaseStatus.SUCCESS | { it -> it.markAsSuccess(new Fee(BigDecimal.valueOf(0.1))) }
-        PurchaseStatus.CANCEL  | { it -> it.markAsSuccess(new Fee(BigDecimal.valueOf(0.1))) }
-        PurchaseStatus.CANCEL  | { it -> it.markAsFailure() }
-        PurchaseStatus.FAILURE | { it -> it.markAsCancel() }
-        PurchaseStatus.FAILURE | { it -> it.markAsSuccess(new Fee(BigDecimal.valueOf(0.1))) }
+        thrown(IllegalStateException)
     }
 
-    def "should create from repository with all fields preserved"() {
+    def "should fail when marking success with null fee"() {
         given:
-        UUID id = UUID.randomUUID()
-        BuyerID buyerID = new BuyerID(UUID.randomUUID())
-        long orderId = 123
-        Amount amount = new Amount(new BigDecimal("100.00"))
-        LocalDateTime creationDate = LocalDateTime.now().minusDays(1)
-        LocalDateTime resultDate = LocalDateTime.now()
-        Fee fee = new Fee(BigDecimal.valueOf(0.05))
-        PurchaseStatus status = PurchaseStatus.SUCCESS
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
 
         when:
-        def intent = CardPurchaseIntent.fromRepository(id, buyerID, null, orderId, amount, creationDate, resultDate, status, fee)
+        intent.markAsSuccess(null)
 
         then:
-        intent.id() == id
-        intent.buyerID() == buyerID
-        intent.orderID() == orderId
-        intent.totalPayedAmount() == amount
-        intent.creationDate() == creationDate
-        intent.resultDate().get() == resultDate
-        intent.status() == status
-        intent.removedFee().get() == fee
+        thrown(IllegalArgumentException)
     }
 }

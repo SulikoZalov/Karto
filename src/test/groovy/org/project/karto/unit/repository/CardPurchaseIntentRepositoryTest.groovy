@@ -6,6 +6,7 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.Fee
+import org.project.karto.domain.card.value_objects.StoreID
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCCardPurchaseIntentRepository
 import org.project.karto.infrastructure.repository.JDBCOrderIDRepository
@@ -27,6 +28,22 @@ class CardPurchaseIntentRepositoryTest extends Specification {
     def "should save and retrieve CardPurchaseIntent by ID"() {
         given:
         def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        repository.save(intent)
+
+        when:
+        def result = repository.findBy(intent.id())
+
+        then:
+        result.success()
+        result.value().id() == intent.id()
+        result.value().buyerID() == intent.buyerID()
+        result.value().status() == PurchaseStatus.PENDING
+    }
+
+    def "should save and retrieve CardPurchaseIntent by ID with specified storeID"() {
+        given:
+        def intent = TestDataGenerator
+                .generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")), new StoreID(UUID.randomUUID()))
         repository.save(intent)
 
         when:

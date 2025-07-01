@@ -335,6 +335,16 @@ public class TestDataGenerator {
         );
     }
 
+    public static CardPurchaseIntent generateCardPurchaseIntent(Amount totalPayedAmount, StoreID storeID) {
+        return CardPurchaseIntent.of(
+                UUID.randomUUID(),
+                new BuyerID(UUID.randomUUID()),
+                storeID,
+                RANDOM.nextInt(1, 100),
+                totalPayedAmount
+        );
+    }
+
     public static Fee generateFee(double maxRate) {
         return new Fee(BigDecimal.valueOf(RANDOM.nextDouble(0.01, maxRate)));
     }
