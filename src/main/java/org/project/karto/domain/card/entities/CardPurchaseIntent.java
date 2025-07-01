@@ -3,6 +3,7 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.value_objects.BuyerID;
 import org.project.karto.domain.card.value_objects.Fee;
+import org.project.karto.domain.card.value_objects.StoreID;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 public class CardPurchaseIntent {
     private final UUID id;
     private final BuyerID buyerID;
+    private final @Nullable StoreID storeID;
     private final long orderID;
     private final Amount totalPayedAmount;
     private final LocalDateTime creationDate;
@@ -24,6 +26,7 @@ public class CardPurchaseIntent {
     private CardPurchaseIntent(
             UUID id,
             BuyerID buyerID,
+            StoreID storeID,
             long orderID,
             Amount totalPayedAmount,
             LocalDateTime creationDate,
@@ -33,6 +36,7 @@ public class CardPurchaseIntent {
 
         this.id = id;
         this.buyerID = buyerID;
+        this.storeID = storeID;
         this.orderID = orderID;
         this.totalPayedAmount = totalPayedAmount;
         this.creationDate = creationDate;
@@ -44,22 +48,23 @@ public class CardPurchaseIntent {
     public static CardPurchaseIntent of(
             UUID id,
             BuyerID buyerID,
+            @Nullable StoreID storeID,
             long orderID,
             Amount totalPayedAmount) {
 
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
         if (buyerID == null) throw new IllegalArgumentException("BuyerID cannot be null");
-        if (id.equals(buyerID.value()))
-            throw new IllegalArgumentException("Do not match");
         if (totalPayedAmount == null) throw new IllegalArgumentException("Total payed amount cannot be null");
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be negative or zero");
 
-        return new CardPurchaseIntent(id, buyerID, orderID, totalPayedAmount, LocalDateTime.now(), null, PurchaseStatus.PENDING, null);
+        return new CardPurchaseIntent(id, buyerID, storeID, orderID, totalPayedAmount,
+                LocalDateTime.now(), null, PurchaseStatus.PENDING, null);
     }
 
     public static CardPurchaseIntent fromRepository(
             UUID id,
             BuyerID buyerID,
+            StoreID storeID,
             long orderID,
             Amount totalPayedAmount,
             LocalDateTime creationDate,
@@ -67,7 +72,7 @@ public class CardPurchaseIntent {
             PurchaseStatus status,
             Fee removedFee) {
 
-        return new CardPurchaseIntent(id, buyerID, orderID, totalPayedAmount, creationDate, resultDate, status, removedFee);
+        return new CardPurchaseIntent(id, buyerID, storeID, orderID, totalPayedAmount, creationDate, resultDate, status, removedFee);
     }
 
     public UUID id() {
@@ -76,6 +81,10 @@ public class CardPurchaseIntent {
 
     public BuyerID buyerID() {
         return buyerID;
+    }
+
+    public Optional<StoreID> storeID() {
+        return Optional.ofNullable(storeID);
     }
 
     public long orderID() {

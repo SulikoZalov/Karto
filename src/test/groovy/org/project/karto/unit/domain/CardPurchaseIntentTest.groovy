@@ -21,7 +21,7 @@ class CardPurchaseIntentTest extends Specification {
         Amount amount = new Amount(new BigDecimal("100.00"))
 
         when:
-        def intent = CardPurchaseIntent.of(id, buyerID, orderId, amount)
+        def intent = CardPurchaseIntent.of(id, buyerID, null, orderId, amount)
 
         then:
         intent.id() == id
@@ -35,7 +35,7 @@ class CardPurchaseIntentTest extends Specification {
     @Unroll
     def "should throw exception for invalid parameters during creation: id=#id, buyerID=#buyerID, orderID=#orderId, amount=#amount"() {
         when:
-        CardPurchaseIntent.of(id, buyerID, orderId, amount)
+        CardPurchaseIntent.of(id, buyerID, null, orderId, amount)
 
         then:
         thrown(IllegalArgumentException)
@@ -193,7 +193,7 @@ class CardPurchaseIntentTest extends Specification {
         PurchaseStatus status = PurchaseStatus.SUCCESS
 
         when:
-        def intent = CardPurchaseIntent.fromRepository(id, buyerID, orderId, amount, creationDate, resultDate, status, fee)
+        def intent = CardPurchaseIntent.fromRepository(id, buyerID, null, orderId, amount, creationDate, resultDate, status, fee)
 
         then:
         intent.id() == id

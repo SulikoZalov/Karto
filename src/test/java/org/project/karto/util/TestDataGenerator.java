@@ -329,6 +329,7 @@ public class TestDataGenerator {
         return CardPurchaseIntent.of(
                 UUID.randomUUID(),
                 new BuyerID(UUID.randomUUID()),
+                null,
                 RANDOM.nextInt(1, 100),
                 totalPayedAmount
         );

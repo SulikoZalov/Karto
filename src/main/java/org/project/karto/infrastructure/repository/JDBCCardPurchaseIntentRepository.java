@@ -8,6 +8,7 @@ import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.repositories.CardPurchaseIntentRepository;
 import org.project.karto.domain.card.value_objects.BuyerID;
 import org.project.karto.domain.card.value_objects.Fee;
+import org.project.karto.domain.card.value_objects.StoreID;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Amount;
 
@@ -30,6 +31,7 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
             .into("card_purchase_intent")
             .column("id")
             .column("buyer_id")
+            .column("store_id")
             .column("order_id")
             .column("total_payed_amount")
             .column("creation_date")
@@ -80,6 +82,7 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
         return mapTransactionResult(jet.write(SAVE_CARD_PURCHASE_INTENT,
                 purchaseIntent.id(),
                 purchaseIntent.buyerID(),
+                purchaseIntent.storeID().orElse(null),
                 purchaseIntent.orderID(),
                 purchaseIntent.totalPayedAmount(),
                 purchaseIntent.creationDate(),
@@ -115,9 +118,12 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
     private CardPurchaseIntent mapCardPurchaseIntent(ResultSet rs) throws SQLException {
         Timestamp resultDate = rs.getTimestamp("result_date");
         BigDecimal removedFee = rs.getBigDecimal("removed_fee");
+        String storeID = rs.getString("store_id");
+
         return CardPurchaseIntent.fromRepository(
                 UUID.fromString(rs.getString("id")),
                 BuyerID.fromString(rs.getString("buyer_id")),
+                storeID == null ? null : StoreID.fromString(storeID),
                 rs.getLong("order_id"),
                 new Amount(rs.getBigDecimal("total_payed_amount")),
                 rs.getTimestamp("creation_date").toLocalDateTime(),

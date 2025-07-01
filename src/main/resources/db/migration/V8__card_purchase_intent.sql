@@ -1,6 +1,7 @@
 CREATE TABLE card_purchase_intent (
     id CHAR(36) NOT NULL,
     buyer_id CHAR(36) NOT NULL,
+    store_id CHAR(36),
     order_id BIGINT NOT NULL,
     total_payed_amount NUMERIC NOT NULL,
     creation_date TIMESTAMP NOT NULL,
