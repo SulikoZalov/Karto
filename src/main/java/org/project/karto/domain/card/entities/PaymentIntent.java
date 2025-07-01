@@ -10,7 +10,7 @@ import org.project.karto.domain.common.value_objects.Amount;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class PurchaseIntent {
+public class PaymentIntent {
     private final UUID id;
     private final BuyerID buyerID;
     private final CardID cardID;
@@ -22,7 +22,7 @@ public class PurchaseIntent {
     private @Nullable LocalDateTime resultDate;
     private PurchaseStatus status;
 
-    private PurchaseIntent(
+    private PaymentIntent(
             UUID id,
             BuyerID buyerID,
             CardID cardID,
@@ -44,7 +44,7 @@ public class PurchaseIntent {
         this.status = status;
     }
 
-    static PurchaseIntent of(
+    static PaymentIntent of(
             BuyerID buyerID,
             CardID cardID,
             StoreID storeID,
@@ -57,11 +57,11 @@ public class PurchaseIntent {
         if (totalAmount == null) throw new IllegalArgumentException("TotalAmount cannot be null");
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
 
-        return new PurchaseIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
+        return new PaymentIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
                 LocalDateTime.now(), null, PurchaseStatus.PENDING);
     }
 
-    public static PurchaseIntent fromRepository(
+    public static PaymentIntent fromRepository(
             UUID id,
             BuyerID buyerID,
             CardID cardID,
@@ -72,7 +72,7 @@ public class PurchaseIntent {
             LocalDateTime resultDate,
             PurchaseStatus status) {
 
-        return new PurchaseIntent(id, buyerID, cardID, storeID, orderID, totalAmount, creationDate, resultDate, status);
+        return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount, creationDate, resultDate, status);
     }
 
     public UUID id() {
