@@ -8,13 +8,14 @@ import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PaymentIntent {
     private final UUID id;
     private final BuyerID buyerID;
     private final CardID cardID;
-    private final StoreID storeID;
+    private final @Nullable StoreID storeID;
     private final long orderID;
     private final Amount totalAmount;
     private final LocalDateTime creationDate;
@@ -53,7 +54,6 @@ public class PaymentIntent {
 
         if (buyerID == null) throw new IllegalArgumentException("BuyerID cannot be null");
         if (cardID == null) throw new IllegalArgumentException("CardID cannot be null");
-        if (storeID == null) throw new IllegalArgumentException("StoreID cannot be null");
         if (totalAmount == null) throw new IllegalArgumentException("TotalAmount cannot be null");
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
 
@@ -87,8 +87,8 @@ public class PaymentIntent {
         return cardID;
     }
 
-    public StoreID storeID() {
-        return storeID;
+    public Optional<StoreID> storeID() {
+        return Optional.ofNullable(storeID);
     }
 
     public long orderID() {
