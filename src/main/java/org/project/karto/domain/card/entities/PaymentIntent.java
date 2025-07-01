@@ -103,8 +103,8 @@ public class PaymentIntent {
         return creationDate;
     }
 
-    public LocalDateTime resultDate() {
-        return resultDate;
+    public Optional<LocalDateTime> resultDate() {
+        return Optional.ofNullable(resultDate);
     }
 
     public PurchaseStatus status() {
