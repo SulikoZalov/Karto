@@ -12,8 +12,6 @@ public interface CardPurchaseIntentRepository {
 
     Result<Integer, Throwable> update(CardPurchaseIntent purchaseIntent);
 
-    Result<Long, Throwable> next();
-
     Result<CardPurchaseIntent, Throwable> findBy(UUID id);
 
     Result<CardPurchaseIntent, Throwable> findBy(BuyerID buyerID);

@@ -50,8 +50,6 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
             .build()
             .sql();
 
-    static final String NEXT = "SELECT nextval('card_purchase_intent_order_id_seq')";
-
     static final String FIND_BY_ID = select()
             .all()
             .from("card_purchase_intent")
@@ -97,12 +95,6 @@ public class JDBCCardPurchaseIntentRepository implements CardPurchaseIntentRepos
                 purchaseIntent.status(),
                 purchaseIntent.removedFee().orElse(null),
                 purchaseIntent.id()));
-    }
-
-    @Override
-    public Result<Long, Throwable> next() {
-        var result = jet.readObjectOf(NEXT, Long.class);
-        return new Result<>(result.value(), result.throwable(), result.success());
     }
 
     @Override

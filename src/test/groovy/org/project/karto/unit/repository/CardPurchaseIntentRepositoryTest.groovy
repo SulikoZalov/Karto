@@ -8,6 +8,7 @@ import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.Fee
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCCardPurchaseIntentRepository
+import org.project.karto.infrastructure.repository.JDBCOrderIDRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
@@ -16,6 +17,9 @@ import spock.lang.Specification
 @QuarkusSpockTest
 @QuarkusTestResource(value = PostgresTestResource.class)
 class CardPurchaseIntentRepositoryTest extends Specification {
+
+    @Inject
+    JDBCOrderIDRepository orderIDRepository;
 
     @Inject
     JDBCCardPurchaseIntentRepository repository
@@ -55,8 +59,8 @@ class CardPurchaseIntentRepositoryTest extends Specification {
 
     def "should generate next order ID from sequence"() {
         when:
-        def next1 = repository.next()
-        def next2 = repository.next()
+        def next1 = orderIDRepository.next()
+        def next2 = orderIDRepository.next()
 
         then:
         next1.success()
