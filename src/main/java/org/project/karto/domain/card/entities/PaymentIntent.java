@@ -22,6 +22,7 @@ public class PaymentIntent {
 
     private @Nullable LocalDateTime resultDate;
     private PurchaseStatus status;
+    private boolean isConfirmed;
 
     private PaymentIntent(
             UUID id,
@@ -111,6 +112,10 @@ public class PaymentIntent {
         return status;
     }
 
+    public boolean isConfirmed() {
+        return isConfirmed;
+    }
+
     public void markAsSuccess() {
         isStatusPending();
 
@@ -130,6 +135,11 @@ public class PaymentIntent {
 
         this.status = PurchaseStatus.FAILURE;
         touch();
+    }
+
+    void confirm() {
+        if (isConfirmed) throw new IllegalArgumentException("PaymentIntent is already confirmed");
+        this.isConfirmed = true;
     }
 
     private void touch() {
