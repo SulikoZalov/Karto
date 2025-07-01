@@ -33,7 +33,8 @@ public class PaymentIntent {
             Amount totalAmount,
             LocalDateTime creationDate,
             LocalDateTime resultDate,
-            PurchaseStatus status) {
+            PurchaseStatus status,
+            boolean isConfirmed) {
 
         this.id = id;
         this.buyerID = buyerID;
@@ -44,6 +45,7 @@ public class PaymentIntent {
         this.creationDate = creationDate;
         this.resultDate = resultDate;
         this.status = status;
+        this.isConfirmed = isConfirmed;
     }
 
     static PaymentIntent of(
@@ -59,7 +61,7 @@ public class PaymentIntent {
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
 
         return new PaymentIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
-                LocalDateTime.now(), null, PurchaseStatus.PENDING);
+                LocalDateTime.now(), null, PurchaseStatus.PENDING, false);
     }
 
     public static PaymentIntent fromRepository(
@@ -71,9 +73,10 @@ public class PaymentIntent {
             Amount totalAmount,
             LocalDateTime creationDate,
             LocalDateTime resultDate,
-            PurchaseStatus status) {
+            PurchaseStatus status,
+            boolean isConfirmed) {
 
-        return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount, creationDate, resultDate, status);
+        return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount, creationDate, resultDate, status, isConfirmed);
     }
 
     public UUID id() {
