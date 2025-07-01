@@ -11,6 +11,8 @@ public interface PaymentIntentRepository {
 
     Result<Integer, Throwable> update(PaymentIntent paymentIntent);
 
+    Result<Integer, Throwable> updateConfirmation(PaymentIntent paymentIntent);
+
     Result<PaymentIntent, Throwable> findBy(UUID id);
 
     Result<PaymentIntent, Throwable> findBy(long orderID);

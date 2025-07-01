@@ -37,6 +37,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
             .column("creation_date")
             .column("result_date")
             .column("status")
+            .column("is_confirmed")
             .values()
             .build()
             .sql();
@@ -46,6 +47,12 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 result_date = ?,
                 status = ?
             """)
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_CONFIRMATION = QueryForge.update("payment_intent")
+            .set("is_confirmed = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -79,7 +86,8 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.totalAmount(),
                 paymentIntent.creationDate(),
                 paymentIntent.resultDate().orElse(null),
-                paymentIntent.status()));
+                paymentIntent.status(),
+                paymentIntent.isConfirmed()));
     }
 
     @Override
@@ -88,6 +96,11 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.resultDate().orElse(null),
                 paymentIntent.status(),
                 paymentIntent.id()));
+    }
+
+    @Override
+    public Result<Integer, Throwable> updateConfirmation(PaymentIntent paymentIntent) {
+        return mapTransactionResult(jet.write(UPDATE_CONFIRMATION, paymentIntent.isConfirmed(), paymentIntent.id()));
     }
 
     @Override
@@ -113,7 +126,8 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 new Amount(rs.getBigDecimal("total_amount")),
                 rs.getTimestamp("creation_date").toLocalDateTime(),
                 resultDate == null ? null : resultDate.toLocalDateTime(),
-                PurchaseStatus.valueOf(rs.getString("status"))
+                PurchaseStatus.valueOf(rs.getString("status")),
+                rs.getBoolean("is_confirmed")
         );
     }
 
