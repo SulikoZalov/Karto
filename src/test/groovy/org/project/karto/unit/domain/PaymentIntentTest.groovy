@@ -36,7 +36,7 @@ class PaymentIntentTest extends Specification {
         intent.orderID() == orderID
         intent.totalAmount() == amount
         intent.creationDate() != null
-        intent.resultDate() == null
+        intent.resultDate().isEmpty()
         intent.status() == PurchaseStatus.PENDING
     }
 
@@ -167,6 +167,60 @@ class PaymentIntentTest extends Specification {
         then:
         def ex = thrown(IllegalArgumentException)
         ex.message == "You can`t change status twice"
+    }
+
+    def "should successfully confirm PaymentIntent after status change via reflection"() {
+        given:
+        def payment = createValidPaymentIntent()
+        payment.markAsSuccess()
+
+        and:
+        Method confirmMethod = PaymentIntent.getDeclaredMethod("confirm")
+        confirmMethod.setAccessible(true)
+
+        when:
+        confirmMethod.invoke(payment)
+
+        then:
+        payment.isConfirmed()
+    }
+
+    def "should throw exception when trying to confirm PaymentIntent in PENDING status via reflection"() {
+        given:
+        def payment = createValidPaymentIntent()
+
+        and:
+        Method confirmMethod = PaymentIntent.getDeclaredMethod("confirm")
+        confirmMethod.setAccessible(true)
+
+        when:
+        confirmMethod.invoke(payment)
+
+        then:
+        def ex = thrown(InvocationTargetException)
+        ex.cause instanceof IllegalArgumentException
+        ex.cause.message == "You can`t confirm payment intent with PENDING status"
+    }
+
+    def "should throw exception when trying to confirm already confirmed PaymentIntent via reflection"() {
+        given:
+        def payment = createValidPaymentIntent()
+        payment.markAsFailure()
+
+        and:
+        Method confirmMethod = PaymentIntent.getDeclaredMethod("confirm")
+        confirmMethod.setAccessible(true)
+
+        when: "First confirmation"
+        confirmMethod.invoke(payment)
+
+        and: "Second confirmation attempt"
+        confirmMethod.invoke(payment)
+
+        then:
+        def ex = thrown(InvocationTargetException)
+        ex.cause instanceof IllegalArgumentException
+        ex.cause.message == "PaymentIntent is already confirmed"
     }
 
     private static PaymentIntent createValidPaymentIntent() {
