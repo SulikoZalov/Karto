@@ -142,6 +142,9 @@ public class PaymentIntent {
 
     void confirm() {
         if (isConfirmed) throw new IllegalArgumentException("PaymentIntent is already confirmed");
+        if (status == PurchaseStatus.PENDING)
+            throw new IllegalArgumentException("You can`t confirm payment intent with PENDING status");
+
         this.isConfirmed = true;
     }
 
