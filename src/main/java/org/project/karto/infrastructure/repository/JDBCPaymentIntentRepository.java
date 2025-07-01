@@ -85,7 +85,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
     @Override
     public Result<Integer, Throwable> update(PaymentIntent paymentIntent) {
         return mapTransactionResult(jet.write(UPDATE_STATUS,
-                paymentIntent.resultDate(),
+                paymentIntent.resultDate().orElse(null),
                 paymentIntent.status(),
                 paymentIntent.id()));
     }
@@ -106,7 +106,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
 
         return PaymentIntent.fromRepository(
                 UUID.fromString(rs.getString("id")),
-                BuyerID.fromString(rs.getString("owner_id")),
+                BuyerID.fromString(rs.getString("buyer_id")),
                 CardID.fromString(rs.getString("card_id")),
                 storeID == null ? null : StoreID.fromString(storeID),
                 rs.getLong("order_id"),
