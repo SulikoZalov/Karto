@@ -89,6 +89,28 @@ class PaymentIntentRepositoryTest extends Specification {
         findResult.value().resultDate() != null
     }
 
+    def "successfully update confirmation"() {
+        given:
+        def payment = createPaymentIntent()
+        repo.save(payment)
+
+        when:
+        payment.markAsSuccess()
+        def updateResult = repo.update(payment)
+
+        then:
+        updateResult.success()
+
+        when:
+        Method confirm = PaymentIntent.getDeclaredMethod("confirm")
+        confirm.setAccessible(true)
+        confirm.invoke(payment)
+        def confirmation = repo.updateConfirmation(payment)
+
+        then:
+        confirmation.success()
+    }
+
     def "fail find by non-existent id"() {
         when:
         def result = repo.findBy(UUID.randomUUID())
