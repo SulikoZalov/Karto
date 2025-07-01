@@ -1,5 +1,6 @@
 package org.project.karto.domain.card.entities;
 
+import org.project.karto.domain.card.enumerations.GiftCardType;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.value_objects.BuyerID;
 import org.project.karto.domain.card.value_objects.Fee;
@@ -85,6 +86,10 @@ public class CardPurchaseIntent {
 
     public Optional<StoreID> storeID() {
         return Optional.ofNullable(storeID);
+    }
+
+    public GiftCardType giftCardType() {
+        return storeID == null ? GiftCardType.COMMON : GiftCardType.STORE_SPECIFIC;
     }
 
     public long orderID() {
