@@ -1,14 +1,15 @@
 package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.enumerations.GiftCardType;
+import org.project.karto.domain.card.enumerations.PaymentType;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
-import org.project.karto.domain.card.value_objects.BuyerID;
-import org.project.karto.domain.card.value_objects.Fee;
-import org.project.karto.domain.card.value_objects.StoreID;
+import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -116,8 +117,14 @@ public class CardPurchaseIntent {
         return Optional.ofNullable(removedFee);
     }
 
-    public void markAsSuccess(Fee removedFee) { // TODO need to create and return check
+    public Check markAsSuccess(Fee removedFee, Currency currency, PaymentType paymentType,
+                               PaymentSystem paymentSystem, ExternalPayeeDescription description) {
+
         if (removedFee == null) throw new IllegalArgumentException("Removed fee cannot be null");
+        if (currency == null) throw new IllegalArgumentException("Currency cannot be null");
+        if (paymentType == null) throw new IllegalArgumentException("Payment type cannot be null");
+        if (paymentSystem == null) throw new IllegalArgumentException("Payment system cannot be null");
+        if (description == null) throw new IllegalArgumentException("Description cannot be null");
         isPendingCard();
 
         Amount feeAmount = removedFee.calculateFee(totalPayedAmount);
@@ -127,6 +134,8 @@ public class CardPurchaseIntent {
         this.resultDate = LocalDateTime.now();
         this.status = PurchaseStatus.SUCCESS;
         this.removedFee = removedFee;
+        return Check.cardPurchaseCheck(orderID, buyerID, storeID, null, totalPayedAmount, currency, paymentType,
+                new InternalFeeAmount(BigDecimal.ZERO), new ExternalFeeAmount(feeAmount.value()), paymentSystem, description);
     }
 
     public Amount calculateNetAmount() {
