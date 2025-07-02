@@ -257,7 +257,7 @@ public class GiftCard {
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
     }
 
-    public PaymentIntent validateSpendAbility(Amount amount, Fee externalFee, StoreID storeID, long orderID) {
+    public PaymentIntent initializeTransaction(Amount amount, Fee externalFee, StoreID storeID, long orderID) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
         if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
 
@@ -270,10 +270,11 @@ public class GiftCard {
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
+        countOfUses++;
         return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount);
     }
 
-    public void applySpentMutation(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
+    public void applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
         if (intent == null) throw new IllegalArgumentException("Payment intent cannot be null");
         if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
 
@@ -284,10 +285,11 @@ public class GiftCard {
             throw new IllegalStateException("Payment intent is already confirmed");
 
         intent.confirm();
-        if (intent.status() != PurchaseStatus.SUCCESS)
+        if (intent.status() != PurchaseStatus.SUCCESS) {
+            countOfUses--;
             throw new IllegalStateException("Payment intent is not successful");
+        }
 
-        countOfUses++;
         balance = calculateBalance(intent.totalAmount());
         lastUsage = LocalDateTime.now();
 
