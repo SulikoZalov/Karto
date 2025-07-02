@@ -283,6 +283,9 @@ public class GiftCard {
         if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
         if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
 
+        if (storeID != null && !storeID.equals(this.storeID))
+            throw new IllegalArgumentException("Store-specific card cannot be used in another store");
+
         Amount totalAmount = calculateTotalAmount(amount, externalFee);
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
