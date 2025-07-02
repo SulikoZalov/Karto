@@ -274,10 +274,8 @@ public class GiftCard {
         incrementVersion();
     }
 
-    public PaymentIntent initializeTransaction(Amount amount, Fee externalFee, StoreID storeID, long orderID) {
+    public synchronized PaymentIntent initializeTransaction(Amount amount, StoreID storeID, long orderID) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
-        if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
-
         if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t use expired card");
 
         if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
@@ -286,7 +284,7 @@ public class GiftCard {
         if (storeID != null && !storeID.equals(this.storeID))
             throw new IllegalArgumentException("Store-specific card cannot be used in another store");
 
-        Amount totalAmount = calculateTotalAmount(amount, externalFee);
+        Amount totalAmount = calculateTotalAmount(amount);
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
@@ -295,7 +293,7 @@ public class GiftCard {
         return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount);
     }
 
-    public void applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
+    public synchronized void applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
         if (intent == null) throw new IllegalArgumentException("Payment intent cannot be null");
         if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
 
@@ -333,18 +331,11 @@ public class GiftCard {
         return new Balance(balance.value().subtract(totalAmount.value()));
     }
 
-    private Amount calculateTotalAmount(Amount amount, Fee externalFee) {
-        BigDecimal externalFeeCalculated = calculateExternalFee(amount, externalFee);
-        Amount totalAfterExternalFee = new Amount(amount.value().add(externalFeeCalculated));
+    private Amount calculateTotalAmount(Amount amount) {
+        if (giftCardType() != GiftCardType.COMMON) return amount;
 
-        if (giftCardType() != GiftCardType.COMMON) return totalAfterExternalFee;
-
-        BigDecimal fee = calculateInternalFee(totalAfterExternalFee);
-        return new Amount(totalAfterExternalFee.value().add(fee));
-    }
-
-    private BigDecimal calculateExternalFee(Amount amount, Fee externalFee) {
-        return amount.value().multiply(externalFee.rate());
+        BigDecimal fee = calculateInternalFee(amount);
+        return new Amount(amount.value().add(fee));
     }
 
     private BigDecimal calculateInternalFee(Amount amount) {
