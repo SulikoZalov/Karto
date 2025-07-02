@@ -123,6 +123,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
     private PaymentIntent mapPaymentIntent(ResultSet rs) throws SQLException {
         String storeID = rs.getString("store_id");
         Timestamp resultDate = rs.getTimestamp("result_date");
+        String description = rs.getString("description");
 
         return PaymentIntent.fromRepository(
                 UUID.fromString(rs.getString("id")),
@@ -135,7 +136,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 resultDate == null ? null : resultDate.toLocalDateTime(),
                 PurchaseStatus.valueOf(rs.getString("status")),
                 rs.getBoolean("is_confirmed"),
-                new ExternalPayeeDescription(rs.getString("description"))
+                description == null ? null : new ExternalPayeeDescription(description)
         );
     }
 

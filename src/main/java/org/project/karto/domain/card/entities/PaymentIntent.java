@@ -130,10 +130,11 @@ public class PaymentIntent {
     }
 
     public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
-        if (description == null) throw new IllegalArgumentException("Description cannot be null");
+        if (payeeDescription == null) throw new IllegalArgumentException("Description cannot be null");
         isStatusPending();
 
         this.status = PurchaseStatus.SUCCESS;
+        this.description = payeeDescription;
         touch();
     }
 

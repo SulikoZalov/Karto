@@ -8,6 +8,7 @@ import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.BuyerID
 import org.project.karto.domain.card.value_objects.CardID
+import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
 import org.project.karto.domain.card.value_objects.StoreID
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCPaymentIntentRepository
@@ -74,7 +75,7 @@ class PaymentIntentRepositoryTest extends Specification {
         repo.save(payment)
 
         when:
-        payment.markAsSuccess()
+        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
         def updateResult = repo.update(payment)
 
         then:
@@ -95,7 +96,7 @@ class PaymentIntentRepositoryTest extends Specification {
         repo.save(payment)
 
         when:
-        payment.markAsSuccess()
+        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
         def updateResult = repo.update(payment)
 
         then:

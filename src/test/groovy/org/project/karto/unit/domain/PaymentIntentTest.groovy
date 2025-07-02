@@ -4,6 +4,7 @@ import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.BuyerID
 import org.project.karto.domain.card.value_objects.CardID
+import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
 import org.project.karto.domain.card.value_objects.StoreID
 import org.project.karto.domain.common.value_objects.Amount
 import spock.lang.Specification
@@ -123,9 +124,10 @@ class PaymentIntentTest extends Specification {
     def "should successfully change status from PENDING to SUCCESS"() {
         given:
         def payment = createValidPaymentIntent()
+        ExternalPayeeDescription description = new ExternalPayeeDescription("some description")
 
         when:
-        payment.markAsSuccess()
+        payment.markAsSuccess(description)
 
         then:
         payment.status() == PurchaseStatus.SUCCESS
@@ -159,7 +161,7 @@ class PaymentIntentTest extends Specification {
     def "should throw exception when trying to change status twice"() {
         given:
         def payment = createValidPaymentIntent()
-        payment.markAsSuccess()
+        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
 
         when:
         payment.markAsCancel()
@@ -172,7 +174,7 @@ class PaymentIntentTest extends Specification {
     def "should successfully confirm PaymentIntent after status change via reflection"() {
         given:
         def payment = createValidPaymentIntent()
-        payment.markAsSuccess()
+        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
 
         and:
         Method confirmMethod = PaymentIntent.getDeclaredMethod("confirm")
