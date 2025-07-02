@@ -235,6 +235,7 @@ public class GiftCard {
     public boolean markExpiredIfNeeded() {
         if (expirationDate.isBefore(LocalDateTime.now())) {
             giftCardStatus = GiftCardStatus.EXPIRED;
+            incrementVersion();
             return true;
         }
 
@@ -250,6 +251,7 @@ public class GiftCard {
 
         this.giftCardStatus = GiftCardStatus.ACTIVE;
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+        incrementVersion();
     }
 
     public void activate(OwnerID ownerID) {
@@ -267,6 +269,7 @@ public class GiftCard {
         this.ownerID = ownerID;
         this.giftCardStatus = GiftCardStatus.ACTIVE;
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+        incrementVersion();
     }
 
     public PaymentIntent initializeTransaction(Amount amount, Fee externalFee, StoreID storeID, long orderID) {
@@ -283,6 +286,7 @@ public class GiftCard {
             throw new IllegalArgumentException("There is not enough money on the balance");
 
         countOfUses++;
+        incrementVersion();
         return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount);
     }
 
@@ -299,6 +303,7 @@ public class GiftCard {
         intent.confirm();
         if (intent.status() != PurchaseStatus.SUCCESS) {
             countOfUses--;
+            incrementVersion();
             throw new IllegalStateException("Payment intent is not successful");
         }
 
@@ -307,6 +312,11 @@ public class GiftCard {
 
         BigDecimal cashback = calculateCashback(intent.totalAmount().value(), activitySnapshot);
         events.addFirst(new CashbackEvent(id, ownerID, cashback));
+        incrementVersion();
+    }
+
+    private void incrementVersion() {
+        version++;
     }
 
     private boolean hasSufficientBalance(Amount amount) {
