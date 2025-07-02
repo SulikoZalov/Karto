@@ -16,7 +16,7 @@ public class Check {
     private final long orderID;
     private final BuyerID buyerID;
     private final @Nullable StoreID storeID;
-    private final @Nullable CardID cardID;
+    private final CardID cardID;
     private final Amount totalAmount;
     private final Currency currency;
     private final PaymentType paymentType;
@@ -69,23 +69,10 @@ public class Check {
             PaymentSystem paymentSystem,
             ExternalPayeeDescription description) {
 
-        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, externalFee, paymentSystem, description);
-
-        return new Check(
-                UUID.randomUUID(),
-                orderID,
-                buyerID,
-                storeID,
-                cardID,
-                spentAmount,
-                currency,
-                paymentType,
-                internalFee,
-                externalFee,
-                paymentSystem,
-                description,
-                LocalDateTime.now()
-        );
+        validateInputs(orderID, buyerID, cardID, spentAmount, currency,
+                paymentType, internalFee, externalFee, paymentSystem, description);
+        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount,
+                currency, paymentType, internalFee, externalFee, paymentSystem, description, LocalDateTime.now());
     }
 
     static Check paymentCheck(
@@ -101,24 +88,12 @@ public class Check {
             ExternalPayeeDescription description) {
 
         ExternalFeeAmount zeroedFee = new ExternalFeeAmount(BigDecimal.ZERO);
+        if (cardID == null) throw new IllegalArgumentException("CardID can`t be null");
 
-        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
-
-        return new Check(
-                UUID.randomUUID(),
-                orderID,
-                buyerID,
-                storeID,
-                cardID,
-                spentAmount,
-                currency,
-                paymentType,
-                internalFee,
-                zeroedFee,
-                paymentSystem,
-                description,
-                LocalDateTime.now()
-        );
+        validateInputs(orderID, buyerID, cardID, spentAmount,
+                currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
+        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType,
+                internalFee, zeroedFee, paymentSystem, description, LocalDateTime.now());
     }
 
     public static Check fromRepository(
@@ -136,26 +111,14 @@ public class Check {
             ExternalPayeeDescription description,
             LocalDateTime creationDate) {
 
-        return new Check(
-                checkID,
-                orderID,
-                buyerID,
-                storeID,
-                cardID,
-                spentAmount,
-                currency,
-                paymentType,
-                internalFee,
-                externalFee,
-                paymentSystem,
-                description,
-                creationDate
-        );
+        return new Check(checkID, orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType, internalFee,
+                externalFee, paymentSystem, description, creationDate);
     }
 
     private static void validateInputs(
             long orderID,
             BuyerID buyerID,
+            CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -164,24 +127,16 @@ public class Check {
             PaymentSystem paymentSystem,
             ExternalPayeeDescription description) {
 
-        if (orderID <= 0)
-            throw new IllegalArgumentException("orderID must be positive");
-        if (buyerID == null)
-            throw new IllegalArgumentException("buyerID must not be null");
-        if (spentAmount == null)
-            throw new IllegalArgumentException("spentAmount must not be null");
-        if (currency == null)
-            throw new IllegalArgumentException("currency must not be null");
-        if (paymentType == null)
-            throw new IllegalArgumentException("paymentType must not be null");
-        if (internalFee == null)
-            throw new IllegalArgumentException("internalFee must not be null");
-        if (externalFee == null)
-            throw new IllegalArgumentException("externalFee must not be null");
-        if (paymentSystem == null)
-            throw new IllegalArgumentException("paymentSystem must not be null");
-        if (description == null)
-            throw new IllegalArgumentException("description must not be null");
+        if (orderID <= 0) throw new IllegalArgumentException("orderID must be positive");
+        if (buyerID == null) throw new IllegalArgumentException("buyerID must not be null");
+        if (cardID == null) throw new IllegalArgumentException("cardID must not be null");
+        if (spentAmount == null) throw new IllegalArgumentException("spentAmount must not be null");
+        if (currency == null) throw new IllegalArgumentException("currency must not be null");
+        if (paymentType == null) throw new IllegalArgumentException("paymentType must not be null");
+        if (internalFee == null) throw new IllegalArgumentException("internalFee must not be null");
+        if (externalFee == null) throw new IllegalArgumentException("externalFee must not be null");
+        if (paymentSystem == null) throw new IllegalArgumentException("paymentSystem must not be null");
+        if (description == null) throw new IllegalArgumentException("description must not be null");
     }
 
     public UUID id() {
@@ -196,8 +151,8 @@ public class Check {
         return buyerID;
     }
 
-    public Optional<CardID> cardID() {
-        return Optional.ofNullable(cardID);
+    public CardID cardID() {
+        return cardID;
     }
 
     public Optional<StoreID> storeID() {
