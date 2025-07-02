@@ -220,7 +220,7 @@ public class GiftCard {
         return eventList;
     }
 
-    public boolean isExpired() {
+    public boolean markExpiredIfNeeded() {
         if (expirationDate.isBefore(LocalDateTime.now())) {
             giftCardStatus = GiftCardStatus.EXPIRED;
             return true;
@@ -230,7 +230,7 @@ public class GiftCard {
     }
 
     public void activate() {
-        if (isExpired()) throw new IllegalStateException("You can`t activate expired card");
+        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t activate expired card");
         if (isVerified()) throw new IllegalStateException("You can`t enable already active card");
         if (ownerID == null) throw new IllegalStateException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
@@ -241,7 +241,7 @@ public class GiftCard {
     }
 
     public void activate(OwnerID ownerID) {
-        if (isExpired()) throw new IllegalStateException("You can`t activate expired card.");
+        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t activate expired card.");
         if (isVerified()) throw new IllegalStateException("You can`t enable already active card.");
         if (ownerID == null) throw new IllegalArgumentException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
@@ -261,7 +261,7 @@ public class GiftCard {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
         if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
 
-        if (isExpired()) throw new IllegalStateException("You can`t use expired card");
+        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t use expired card");
 
         if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
         if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
