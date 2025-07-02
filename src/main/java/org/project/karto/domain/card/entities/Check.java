@@ -60,7 +60,6 @@ public class Check {
             long orderID,
             BuyerID buyerID,
             StoreID storeID,
-            @Nullable CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -70,7 +69,7 @@ public class Check {
             ExternalPayeeDescription description) {
 
         validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, externalFee, paymentSystem, description);
-        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount,
+        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, null, spentAmount,
                 currency, paymentType, internalFee, externalFee, paymentSystem, description, LocalDateTime.now());
     }
 

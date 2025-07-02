@@ -134,7 +134,7 @@ public class CardPurchaseIntent {
         this.resultDate = LocalDateTime.now();
         this.status = PurchaseStatus.SUCCESS;
         this.removedFee = removedFee;
-        return Check.cardPurchaseCheck(orderID, buyerID, storeID, null, totalPayedAmount, currency, paymentType,
+        return Check.cardPurchaseCheck(orderID, buyerID, storeID, totalPayedAmount, currency, paymentType,
                 new InternalFeeAmount(BigDecimal.ZERO), new ExternalFeeAmount(feeAmount.value()), paymentSystem, description);
     }
 
