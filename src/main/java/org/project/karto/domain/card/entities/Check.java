@@ -16,7 +16,7 @@ public class Check {
     private final long orderID;
     private final BuyerID buyerID;
     private final @Nullable StoreID storeID;
-    private final CardID cardID;
+    private final @Nullable CardID cardID;
     private final Amount totalAmount;
     private final Currency currency;
     private final PaymentType paymentType;
@@ -60,7 +60,7 @@ public class Check {
             long orderID,
             BuyerID buyerID,
             StoreID storeID,
-            CardID cardID,
+            @Nullable CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -69,8 +69,7 @@ public class Check {
             PaymentSystem paymentSystem,
             ExternalPayeeDescription description) {
 
-        validateInputs(orderID, buyerID, cardID, spentAmount, currency,
-                paymentType, internalFee, externalFee, paymentSystem, description);
+        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, externalFee, paymentSystem, description);
         return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount,
                 currency, paymentType, internalFee, externalFee, paymentSystem, description, LocalDateTime.now());
     }
@@ -90,8 +89,7 @@ public class Check {
         ExternalFeeAmount zeroedFee = new ExternalFeeAmount(BigDecimal.ZERO);
         if (cardID == null) throw new IllegalArgumentException("CardID can`t be null");
 
-        validateInputs(orderID, buyerID, cardID, spentAmount,
-                currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
+        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
         return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType,
                 internalFee, zeroedFee, paymentSystem, description, LocalDateTime.now());
     }
@@ -118,7 +116,6 @@ public class Check {
     private static void validateInputs(
             long orderID,
             BuyerID buyerID,
-            CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -129,7 +126,6 @@ public class Check {
 
         if (orderID <= 0) throw new IllegalArgumentException("orderID must be positive");
         if (buyerID == null) throw new IllegalArgumentException("buyerID must not be null");
-        if (cardID == null) throw new IllegalArgumentException("cardID must not be null");
         if (spentAmount == null) throw new IllegalArgumentException("spentAmount must not be null");
         if (currency == null) throw new IllegalArgumentException("currency must not be null");
         if (paymentType == null) throw new IllegalArgumentException("paymentType must not be null");
@@ -151,8 +147,8 @@ public class Check {
         return buyerID;
     }
 
-    public CardID cardID() {
-        return cardID;
+    public Optional<CardID> cardID() {
+        return Optional.ofNullable(cardID);
     }
 
     public Optional<StoreID> storeID() {
