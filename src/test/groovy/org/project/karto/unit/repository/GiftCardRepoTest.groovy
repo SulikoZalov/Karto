@@ -4,13 +4,13 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
-import org.junit.Ignore
 import org.project.karto.domain.card.value_objects.Fee
 import org.project.karto.domain.card.value_objects.UserActivitySnapshot
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
+import spock.lang.Ignore
 import spock.lang.Specification
 
 @Dependent

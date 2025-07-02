@@ -1,6 +1,5 @@
 package org.project.karto.unit.domain
 
-import org.junit.Ignore
 import org.project.karto.domain.card.enumerations.GiftCardStatus
 import org.project.karto.domain.card.enumerations.GiftCardType
 import org.project.karto.domain.card.value_objects.Balance
@@ -9,6 +8,7 @@ import org.project.karto.domain.card.value_objects.OwnerID
 import org.project.karto.domain.card.value_objects.UserActivitySnapshot
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.util.TestDataGenerator
+import spock.lang.Ignore
 import spock.lang.Specification
 
 @Ignore("Due to reimplementation of aggregate")
