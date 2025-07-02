@@ -3,6 +3,7 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.value_objects.BuyerID;
 import org.project.karto.domain.card.value_objects.CardID;
+import org.project.karto.domain.card.value_objects.ExternalPayeeDescription;
 import org.project.karto.domain.card.value_objects.StoreID;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
@@ -23,6 +24,7 @@ public class PaymentIntent {
     private @Nullable LocalDateTime resultDate;
     private PurchaseStatus status;
     private boolean isConfirmed;
+    private @Nullable ExternalPayeeDescription description;
 
     private PaymentIntent(
             UUID id,
@@ -34,7 +36,8 @@ public class PaymentIntent {
             LocalDateTime creationDate,
             LocalDateTime resultDate,
             PurchaseStatus status,
-            boolean isConfirmed) {
+            boolean isConfirmed,
+            ExternalPayeeDescription description) {
 
         this.id = id;
         this.buyerID = buyerID;
@@ -46,6 +49,7 @@ public class PaymentIntent {
         this.resultDate = resultDate;
         this.status = status;
         this.isConfirmed = isConfirmed;
+        this.description = description;
     }
 
     static PaymentIntent of(
@@ -61,7 +65,7 @@ public class PaymentIntent {
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
 
         return new PaymentIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
-                LocalDateTime.now(), null, PurchaseStatus.PENDING, false);
+                LocalDateTime.now(), null, PurchaseStatus.PENDING, false, null);
     }
 
     public static PaymentIntent fromRepository(
@@ -74,9 +78,11 @@ public class PaymentIntent {
             LocalDateTime creationDate,
             LocalDateTime resultDate,
             PurchaseStatus status,
-            boolean isConfirmed) {
+            boolean isConfirmed,
+            ExternalPayeeDescription payeeDescription) {
 
-        return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount, creationDate, resultDate, status, isConfirmed);
+        return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount,
+                creationDate, resultDate, status, isConfirmed, payeeDescription);
     }
 
     public UUID id() {
@@ -119,7 +125,8 @@ public class PaymentIntent {
         return isConfirmed;
     }
 
-    public void markAsSuccess() {
+    public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
+        if (description == null) throw new IllegalArgumentException("Description cannot be null");
         isStatusPending();
 
         this.status = PurchaseStatus.SUCCESS;

@@ -294,6 +294,7 @@ public class GiftCard {
     }
 
     public synchronized void applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
+        // TODO create and return check
         if (intent == null) throw new IllegalArgumentException("Payment intent cannot be null");
         if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
 

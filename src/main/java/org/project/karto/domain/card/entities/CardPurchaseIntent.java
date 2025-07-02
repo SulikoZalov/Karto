@@ -116,7 +116,7 @@ public class CardPurchaseIntent {
         return Optional.ofNullable(removedFee);
     }
 
-    public void markAsSuccess(Fee removedFee) {
+    public void markAsSuccess(Fee removedFee) { // TODO need to create and return check
         if (removedFee == null) throw new IllegalArgumentException("Removed fee cannot be null");
         isPendingCard();
 
