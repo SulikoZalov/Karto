@@ -125,6 +125,10 @@ public class PaymentIntent {
         return isConfirmed;
     }
 
+    public ExternalPayeeDescription paymentDescription() {
+        return description;
+    }
+
     public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
         if (description == null) throw new IllegalArgumentException("Description cannot be null");
         isStatusPending();
