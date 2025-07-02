@@ -134,7 +134,7 @@ public class PaymentIntent {
     }
 
     public InternalFeeAmount feeAmount() {
-        return null;
+        return feeAmount;
     }
 
     public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
