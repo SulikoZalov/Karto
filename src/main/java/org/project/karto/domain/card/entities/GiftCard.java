@@ -3,6 +3,7 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
 import org.project.karto.domain.card.enumerations.GiftCardStatus;
 import org.project.karto.domain.card.enumerations.GiftCardType;
+import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.events.CashbackEvent;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
@@ -33,11 +34,11 @@ public class GiftCard {
     private final Deque<KartoDomainEvent> events;
 
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
-    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.02);        // 2%
-    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.12);       // 12%
-    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);             // 50 units of spending
-    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0025);      // 0.25%
-    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.0003);   // 0.03% for every consecutive usage day
+    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.02);           // 2%
+    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.12);          // 12%
+    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);                // 50 units of spending
+    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0025);         // 0.25%
+    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.0003);      // 0.03% for every consecutive usage day
 
     private GiftCard(
             CardID id,
@@ -256,35 +257,47 @@ public class GiftCard {
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
     }
 
-    public boolean hasSufficientBalance(Amount amount) {
+    public PaymentIntent validateSpendAbility(Amount amount, Fee externalFee, StoreID storeID, long orderID) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
-        return balance.value().compareTo(amount.value()) >= 0;
-    }
+        if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
 
-    public void spend(Amount amount, UserActivitySnapshot activitySnapshot, Fee externalFee) {
-        validateSpendAbility(amount, activitySnapshot, externalFee);
+        if (isExpired()) throw new IllegalStateException("You can`t use expired card");
+
+        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
+        if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
 
         Amount totalAmount = calculateTotalAmount(amount, externalFee);
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
+        return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount);
+    }
+
+    public void applySpentMutation(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
+        if (intent == null) throw new IllegalArgumentException("Payment intent cannot be null");
+        if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
+
+        if (intent.cardID() != id) throw new IllegalArgumentException("Payment intent do not match the card");
+        if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalArgumentException("UserID do not match");
+
+        if (intent.isConfirmed())
+            throw new IllegalStateException("Payment intent is already confirmed");
+
+        intent.confirm();
+        if (intent.status() != PurchaseStatus.SUCCESS)
+            throw new IllegalStateException("Payment intent is not successful");
+
         countOfUses++;
-        balance = calculateBalance(totalAmount);
+        balance = calculateBalance(intent.totalAmount());
         lastUsage = LocalDateTime.now();
 
-        BigDecimal cashback = calculateCashback(totalAmount.value(), activitySnapshot);
+        BigDecimal cashback = calculateCashback(intent.totalAmount().value(), activitySnapshot);
         events.addFirst(new CashbackEvent(id, ownerID, cashback));
     }
 
-    private void validateSpendAbility(Amount amount, UserActivitySnapshot activitySnapshot, Fee externalFee) {
+    private boolean hasSufficientBalance(Amount amount) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
-        if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
-        if (externalFee == null) throw new IllegalArgumentException("External fee can`t be null");
-        if (!activitySnapshot.userID().equals(ownerID.value()))
-            throw new IllegalArgumentException("UserID do not match");
-        if (isExpired()) throw new IllegalStateException("You can`t use expired card");
-        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
-        if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
+        return balance.value().compareTo(amount.value()) >= 0;
     }
 
     private Balance calculateBalance(Amount totalAmount) {
