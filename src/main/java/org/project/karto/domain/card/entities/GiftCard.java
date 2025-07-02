@@ -32,6 +32,7 @@ public class GiftCard {
     private KeyAndCounter keyAndCounter;
     private LocalDateTime lastUsage;
     private long version;
+    private final long oldVersion;
     private final Deque<KartoDomainEvent> events;
 
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
@@ -70,6 +71,7 @@ public class GiftCard {
         this.lastUsage = lastUsage;
         this.events = new ArrayDeque<>();
         this.version = version;
+        this.oldVersion = version;
     }
 
     public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, StoreID storeID,
@@ -223,7 +225,7 @@ public class GiftCard {
     }
 
     public long oldVersion() {
-        return version - 1;
+        return oldVersion;
     }
 
     public List<KartoDomainEvent> pullEvents() {
