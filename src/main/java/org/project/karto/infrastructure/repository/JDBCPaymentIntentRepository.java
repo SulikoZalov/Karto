@@ -6,10 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.PaymentIntent;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.repositories.PaymentIntentRepository;
-import org.project.karto.domain.card.value_objects.BuyerID;
-import org.project.karto.domain.card.value_objects.CardID;
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription;
-import org.project.karto.domain.card.value_objects.StoreID;
+import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Amount;
 
@@ -40,6 +37,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
             .column("status")
             .column("is_confirmed")
             .column("description")
+            .column("fee")
             .values()
             .build()
             .sql();
@@ -91,7 +89,8 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.resultDate().orElse(null),
                 paymentIntent.status(),
                 paymentIntent.isConfirmed(),
-                paymentIntent.paymentDescription()
+                paymentIntent.paymentDescription(),
+                paymentIntent.feeAmount()
         ));
     }
 
@@ -136,7 +135,8 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 resultDate == null ? null : resultDate.toLocalDateTime(),
                 PurchaseStatus.valueOf(rs.getString("status")),
                 rs.getBoolean("is_confirmed"),
-                description == null ? null : new ExternalPayeeDescription(description)
+                description == null ? null : new ExternalPayeeDescription(description),
+                new InternalFeeAmount(rs.getBigDecimal("fee"))
         );
     }
 

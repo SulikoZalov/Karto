@@ -1,9 +1,6 @@
 package org.project.karto.domain.card.entities;
 
-import org.project.karto.domain.card.enumerations.GiftCardRecipientType;
-import org.project.karto.domain.card.enumerations.GiftCardStatus;
-import org.project.karto.domain.card.enumerations.GiftCardType;
-import org.project.karto.domain.card.enumerations.PurchaseStatus;
+import org.project.karto.domain.card.enumerations.*;
 import org.project.karto.domain.card.events.CashbackEvent;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
@@ -16,6 +13,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static org.project.karto.domain.common.util.Utils.required;
 
 public class GiftCard {
     private final CardID id;
@@ -284,19 +283,27 @@ public class GiftCard {
         if (storeID != null && !storeID.equals(this.storeID))
             throw new IllegalArgumentException("Store-specific card cannot be used in another store");
 
-        Amount totalAmount = calculateTotalAmount(amount);
+        BigDecimal fee = calculateInternalFee(amount);
+        Amount totalAmount = new Amount(amount.value().add(fee));
+
         if (!hasSufficientBalance(totalAmount))
             throw new IllegalArgumentException("There is not enough money on the balance");
 
         countOfUses++;
         incrementVersion();
-        return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount);
+        return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount, new InternalFeeAmount(fee));
     }
 
-    public synchronized void applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot) {
-        // TODO create and return check
-        if (intent == null) throw new IllegalArgumentException("Payment intent cannot be null");
-        if (activitySnapshot == null) throw new IllegalArgumentException("User activity snapshot cannot be null");
+    public synchronized Check applyTransaction(
+            PaymentIntent intent, UserActivitySnapshot activitySnapshot, Currency currency,
+            PaymentType paymentType, PaymentSystem paymentSystem, ExternalPayeeDescription description) {
+
+        required("paymentIntent", intent);
+        required("userActivitySnapshot", activitySnapshot);
+        required("currency", currency);
+        required("paymentType", paymentType);
+        required("paymentSystem", paymentSystem);
+        required("externalPayeeDescription", description);
 
         if (intent.cardID() != id) throw new IllegalArgumentException("Payment intent do not match the card");
         if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalArgumentException("UserID do not match");
@@ -317,6 +324,9 @@ public class GiftCard {
         BigDecimal cashback = calculateCashback(intent.totalAmount().value(), activitySnapshot);
         events.addFirst(new CashbackEvent(id, ownerID, cashback));
         incrementVersion();
+
+        return Check.paymentCheck(intent.orderID(), intent.buyerID(), storeID, id, intent.totalAmount(), currency,
+                paymentType, intent.feeAmount(), paymentSystem, description);
     }
 
     private void incrementVersion() {
@@ -332,14 +342,8 @@ public class GiftCard {
         return new Balance(balance.value().subtract(totalAmount.value()));
     }
 
-    private Amount calculateTotalAmount(Amount amount) {
-        if (giftCardType() != GiftCardType.COMMON) return amount;
-
-        BigDecimal fee = calculateInternalFee(amount);
-        return new Amount(amount.value().add(fee));
-    }
-
     private BigDecimal calculateInternalFee(Amount amount) {
+        if (giftCardType() == GiftCardType.COMMON) return BigDecimal.ZERO;
         return amount.value().multiply(KARTO_COMMON_CARD_FEE_RATE);
     }
 

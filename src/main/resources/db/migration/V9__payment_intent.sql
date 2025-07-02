@@ -10,5 +10,6 @@ CREATE TABLE payment_intent (
     status VARCHAR(7) NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'CANCEL', 'FAILURE')),
     is_confirmed BOOLEAN NOT NULL,
     description TEXT,
+    fee NUMERIC NOT NULL,
     PRIMARY KEY (id)
 );

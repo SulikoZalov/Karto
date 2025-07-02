@@ -1,10 +1,7 @@
 package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
-import org.project.karto.domain.card.value_objects.BuyerID;
-import org.project.karto.domain.card.value_objects.CardID;
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription;
-import org.project.karto.domain.card.value_objects.StoreID;
+import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
 
@@ -19,6 +16,7 @@ public class PaymentIntent {
     private final @Nullable StoreID storeID;
     private final long orderID;
     private final Amount totalAmount;
+    private final InternalFeeAmount feeAmount;
     private final LocalDateTime creationDate;
 
     private @Nullable LocalDateTime resultDate;
@@ -37,7 +35,8 @@ public class PaymentIntent {
             LocalDateTime resultDate,
             PurchaseStatus status,
             boolean isConfirmed,
-            ExternalPayeeDescription description) {
+            ExternalPayeeDescription description,
+            InternalFeeAmount feeAmount) {
 
         this.id = id;
         this.buyerID = buyerID;
@@ -50,6 +49,7 @@ public class PaymentIntent {
         this.status = status;
         this.isConfirmed = isConfirmed;
         this.description = description;
+        this.feeAmount = feeAmount;
     }
 
     static PaymentIntent of(
@@ -57,15 +57,18 @@ public class PaymentIntent {
             CardID cardID,
             StoreID storeID,
             long orderID,
-            Amount totalAmount) {
+            Amount totalAmount,
+            InternalFeeAmount feeAmount) {
 
         if (buyerID == null) throw new IllegalArgumentException("BuyerID cannot be null");
         if (cardID == null) throw new IllegalArgumentException("CardID cannot be null");
         if (totalAmount == null) throw new IllegalArgumentException("TotalAmount cannot be null");
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
+        if (feeAmount.value().compareTo(totalAmount.value()) > 0)
+            throw new IllegalArgumentException("Fee amount cannot be more than total pay");
 
         return new PaymentIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
-                LocalDateTime.now(), null, PurchaseStatus.PENDING, false, null);
+                LocalDateTime.now(), null, PurchaseStatus.PENDING, false, null, feeAmount);
     }
 
     public static PaymentIntent fromRepository(
@@ -79,10 +82,11 @@ public class PaymentIntent {
             LocalDateTime resultDate,
             PurchaseStatus status,
             boolean isConfirmed,
-            ExternalPayeeDescription payeeDescription) {
+            ExternalPayeeDescription payeeDescription,
+            InternalFeeAmount feeAmount) {
 
         return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount,
-                creationDate, resultDate, status, isConfirmed, payeeDescription);
+                creationDate, resultDate, status, isConfirmed, payeeDescription, feeAmount);
     }
 
     public UUID id() {
@@ -127,6 +131,10 @@ public class PaymentIntent {
 
     public ExternalPayeeDescription paymentDescription() {
         return description;
+    }
+
+    public InternalFeeAmount feeAmount() {
+        return null;
     }
 
     public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
