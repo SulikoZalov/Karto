@@ -31,6 +31,7 @@ public class GiftCard {
     private int countOfUses;
     private KeyAndCounter keyAndCounter;
     private LocalDateTime lastUsage;
+    private long version;
     private final Deque<KartoDomainEvent> events;
 
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
@@ -52,7 +53,8 @@ public class GiftCard {
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate,
             LocalDateTime expirationDate,
-            LocalDateTime lastUsage) {
+            LocalDateTime lastUsage,
+            long version) {
 
         this.id = id;
         this.buyerID = buyerID;
@@ -67,6 +69,7 @@ public class GiftCard {
         this.expirationDate = expirationDate;
         this.lastUsage = lastUsage;
         this.events = new ArrayDeque<>();
+        this.version = version;
     }
 
     public static GiftCard selfBoughtCard(BuyerID buyerID, Balance balance, StoreID storeID,
@@ -80,7 +83,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
     }
 
     public static GiftCard boughtAsAGift(BuyerID buyerID, Balance balance, StoreID storeID,
@@ -94,7 +97,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
     }
 
     public static GiftCard selfBoughtCommonCard(BuyerID buyerID, Balance balance,
@@ -107,7 +110,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), null, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
     }
 
     public static GiftCard giftedCommonCard(BuyerID buyerID, Balance balance,
@@ -120,7 +123,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, null, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
     }
 
     private static void validateInputs(BuyerID buyerID, Balance balance, String secretKey,
@@ -144,10 +147,11 @@ public class GiftCard {
             KeyAndCounter keyAndCounter,
             LocalDateTime creationDate,
             LocalDateTime expirationDate,
-            LocalDateTime lastUsage) {
+            LocalDateTime lastUsage,
+            long version) {
 
         return new GiftCard(id, buyerID, ownerID, storeID, maxCountOfUses,
-                giftCardStatus, balance, countOfUses, keyAndCounter, creationDate, expirationDate, lastUsage);
+                giftCardStatus, balance, countOfUses, keyAndCounter, creationDate, expirationDate, lastUsage, version);
     }
 
     public CardID id() {
@@ -212,6 +216,14 @@ public class GiftCard {
 
     public LocalDateTime lastUsage() {
         return lastUsage;
+    }
+
+    public long version() {
+        return version;
+    }
+
+    public long oldVersion() {
+        return version - 1;
     }
 
     public List<KartoDomainEvent> pullEvents() {

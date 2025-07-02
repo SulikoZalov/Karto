@@ -37,7 +37,8 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                     "counter",
                     "creation_date",
                     "expiration_date",
-                    "last_usage")
+                    "last_usage",
+                    "version")
             .values()
             .build()
             .sql();
@@ -47,11 +48,12 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                   gift_card_status = ?,
                   balance = ?,
                   count_of_uses = ?,
-                  secret_key = ?,
                   counter = ?,
-                  last_usage = ?
+                  last_usage = ?,
+                  version = ?
                   """)
             .where("id = ?")
+            .and("version = ?")
             .build()
             .sql();
 
@@ -102,7 +104,8 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.keyAndCounter().counter(),
                 giftCard.creationDate(),
                 giftCard.expirationDate(),
-                giftCard.lastUsage()
+                giftCard.lastUsage(),
+                giftCard.version()
         ));
     }
 
@@ -112,10 +115,11 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.giftCardStatus(),
                 giftCard.balance().value(),
                 giftCard.countOfUses(),
-                giftCard.keyAndCounter().key(),
                 giftCard.keyAndCounter().counter(),
                 giftCard.lastUsage(),
-                giftCard.id().toString()
+                giftCard.version(),
+                giftCard.id().toString(),
+                giftCard.oldVersion()
         ));
     }
 
@@ -161,7 +165,8 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 ),
                 rs.getTimestamp("creation_date").toLocalDateTime(),
                 rs.getTimestamp("expiration_date").toLocalDateTime(),
-                rs.getTimestamp("last_usage").toLocalDateTime()
+                rs.getTimestamp("last_usage").toLocalDateTime(),
+                rs.getLong("version")
         );
     }
 }

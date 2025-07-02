@@ -12,5 +12,6 @@ CREATE TABLE gift_card (
     creation_date TIMESTAMP NOT NULL,
     expiration_date TIMESTAMP NOT NULL,
     last_usage TIMESTAMP NOT NULL,
+    version BIGINT NOT NULL,
     PRIMARY KEY (id)
 );
