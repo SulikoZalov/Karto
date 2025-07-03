@@ -123,6 +123,27 @@ class PaymentIntentTest extends Specification {
         ex.cause.message == "OrderID cannot be lower than or equal zero"
     }
 
+    def "should fail when creating PaymentIntent with null external fee amount"() {
+        given:
+        BuyerID buyerID = new BuyerID(UUID.randomUUID())
+        CardID cardID = new CardID(UUID.randomUUID())
+        StoreID storeID = new StoreID(UUID.randomUUID())
+        Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = null
+
+        and:
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
+        ofMethod.setAccessible(true)
+
+        when:
+        ofMethod.invoke(null, buyerID, cardID, storeID, 2L, amount, fee)
+
+        then:
+        def ex = thrown(InvocationTargetException)
+        ex.cause instanceof IllegalArgumentException
+        ex.cause.message == "Fee amount cannot be null"
+    }
+
     def "should successfully change status from PENDING to SUCCESS"() {
         given:
         def payment = createValidPaymentIntent()
