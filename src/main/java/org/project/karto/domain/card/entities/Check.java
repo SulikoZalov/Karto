@@ -7,7 +7,6 @@ import org.project.karto.domain.common.value_objects.Amount;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.Optional;
 import java.util.UUID;
 

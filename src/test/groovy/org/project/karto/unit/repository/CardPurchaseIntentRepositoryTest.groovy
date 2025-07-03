@@ -6,10 +6,7 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.enumerations.PurchaseStatus
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
-import org.project.karto.domain.card.value_objects.Fee
-import org.project.karto.domain.card.value_objects.PaymentSystem
-import org.project.karto.domain.card.value_objects.StoreID
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCCardPurchaseIntentRepository
 import org.project.karto.infrastructure.repository.JDBCOrderIDRepository
@@ -66,7 +63,7 @@ class CardPurchaseIntentRepositoryTest extends Specification {
 
         when:
         Fee fee = new Fee(new BigDecimal("0.1"))
-        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+        intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("United Payment"), new ExternalPayeeDescription("Starbucks"))
         repository.update(intent)
         def updated = repository.findBy(intent.id())

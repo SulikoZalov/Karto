@@ -63,7 +63,7 @@ class CardPurchaseIntentTest extends Specification {
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
 
         when:
-        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+        intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
@@ -78,7 +78,7 @@ class CardPurchaseIntentTest extends Specification {
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(100))
 
         when:
-        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+        intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
@@ -91,7 +91,7 @@ class CardPurchaseIntentTest extends Specification {
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
         def fee = new Fee(BigDecimal.valueOf(0.05))
 
-        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+        intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         when:
@@ -145,7 +145,7 @@ class CardPurchaseIntentTest extends Specification {
         thrown(IllegalStateException)
 
         when:
-        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+        intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
