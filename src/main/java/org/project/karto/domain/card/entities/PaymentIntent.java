@@ -55,7 +55,7 @@ public class PaymentIntent {
     static PaymentIntent of(
             BuyerID buyerID,
             CardID cardID,
-            StoreID storeID,
+            @Nullable StoreID storeID,
             long orderID,
             Amount totalAmount,
             InternalFeeAmount feeAmount) {
@@ -64,6 +64,7 @@ public class PaymentIntent {
         if (cardID == null) throw new IllegalArgumentException("CardID cannot be null");
         if (totalAmount == null) throw new IllegalArgumentException("TotalAmount cannot be null");
         if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
+        if (feeAmount == null) throw new IllegalArgumentException("Fee amount cannot be null");
         if (feeAmount.value().compareTo(totalAmount.value()) > 0)
             throw new IllegalArgumentException("Fee amount cannot be more than total pay");
 
@@ -75,14 +76,14 @@ public class PaymentIntent {
             UUID id,
             BuyerID buyerID,
             CardID cardID,
-            StoreID storeID,
+            @Nullable StoreID storeID,
             long orderID,
             Amount totalAmount,
             LocalDateTime creationDate,
-            LocalDateTime resultDate,
+            @Nullable LocalDateTime resultDate,
             PurchaseStatus status,
             boolean isConfirmed,
-            ExternalPayeeDescription payeeDescription,
+            @Nullable ExternalPayeeDescription payeeDescription,
             InternalFeeAmount feeAmount) {
 
         return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount,
