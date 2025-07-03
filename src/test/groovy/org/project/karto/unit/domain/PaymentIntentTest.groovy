@@ -2,10 +2,7 @@ package org.project.karto.unit.domain
 
 import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
-import org.project.karto.domain.card.value_objects.BuyerID
-import org.project.karto.domain.card.value_objects.CardID
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
-import org.project.karto.domain.card.value_objects.StoreID
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import spock.lang.Specification
 
@@ -21,13 +18,14 @@ class PaymentIntentTest extends Specification {
         StoreID storeID = new StoreID(UUID.randomUUID())
         long orderID = 123L
         Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
         and: "Prepare reflection for PaymentIntent.of()"
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
 
         when:
-        PaymentIntent intent = (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount)
+        PaymentIntent intent = (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount, fee)
 
         then:
         intent.id() != null
@@ -47,13 +45,14 @@ class PaymentIntentTest extends Specification {
         StoreID storeID = new StoreID(UUID.randomUUID())
         long orderID = 123L
         Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
         and:
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
 
         when:
-        ofMethod.invoke(null, null, cardID, storeID, orderID, amount)
+        ofMethod.invoke(null, null, cardID, storeID, orderID, amount, fee)
 
         then:
         def ex = thrown(InvocationTargetException)
@@ -67,13 +66,14 @@ class PaymentIntentTest extends Specification {
         StoreID storeID = new StoreID(UUID.randomUUID())
         long orderID = 123L
         Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
         and:
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
 
         when:
-        ofMethod.invoke(null, buyerID, null, storeID, orderID, amount)
+        ofMethod.invoke(null, buyerID, null, storeID, orderID, amount, fee)
 
         then:
         def ex = thrown(InvocationTargetException)
@@ -87,13 +87,14 @@ class PaymentIntentTest extends Specification {
         CardID cardID = new CardID(UUID.randomUUID())
         StoreID storeID = new StoreID(UUID.randomUUID())
         long orderID = 123L
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
         and:
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
 
         when:
-        ofMethod.invoke(null, buyerID, cardID, storeID, orderID, null)
+        ofMethod.invoke(null, buyerID, cardID, storeID, orderID, null, fee)
 
         then:
         def ex = thrown(InvocationTargetException)
@@ -107,13 +108,14 @@ class PaymentIntentTest extends Specification {
         CardID cardID = new CardID(UUID.randomUUID())
         StoreID storeID = new StoreID(UUID.randomUUID())
         Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
         and:
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
 
         when:
-        ofMethod.invoke(null, buyerID, cardID, storeID, 0L, amount)
+        ofMethod.invoke(null, buyerID, cardID, storeID, 0L, amount, fee)
 
         then:
         def ex = thrown(InvocationTargetException)
@@ -231,9 +233,10 @@ class PaymentIntentTest extends Specification {
         StoreID storeID = new StoreID(UUID.randomUUID())
         long orderID = 123L
         Amount amount = new Amount(1000L)
+        InternalFeeAmount fee = new InternalFeeAmount(10L)
 
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
-        return (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount)
+        return (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount, fee)
     }
 }

@@ -330,7 +330,7 @@ public class TestDataGenerator {
                 UUID.randomUUID(),
                 new BuyerID(UUID.randomUUID()),
                 null,
-                RANDOM.nextInt(1, 100),
+                RANDOM.nextInt(1, 10000),
                 totalPayedAmount
         );
     }

@@ -1,10 +1,9 @@
 package org.project.karto.unit.domain
 
 import org.project.karto.domain.card.entities.CardPurchaseIntent
+import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.enumerations.PurchaseStatus
-import org.project.karto.domain.card.value_objects.BuyerID
-import org.project.karto.domain.card.value_objects.Fee
-import org.project.karto.domain.card.value_objects.StoreID
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
@@ -64,7 +63,8 @@ class CardPurchaseIntentTest extends Specification {
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
 
         when:
-        intent.markAsSuccess(fee)
+        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
         intent.status() == PurchaseStatus.SUCCESS
@@ -77,9 +77,9 @@ class CardPurchaseIntentTest extends Specification {
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(50))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(100))
 
-
         when:
-        intent.markAsSuccess(fee)
+        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
         def ex = thrown(IllegalArgumentException)
@@ -91,7 +91,8 @@ class CardPurchaseIntentTest extends Specification {
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
         def fee = new Fee(BigDecimal.valueOf(0.05))
 
-        intent.markAsSuccess(fee)
+        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         when:
         def netAmount = intent.calculateNetAmount()
@@ -144,7 +145,8 @@ class CardPurchaseIntentTest extends Specification {
         thrown(IllegalStateException)
 
         when:
-        intent.markAsSuccess(fee)
+        intent.markAsSuccess(fee, Currency.getInstance("AZN"),
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
         thrown(IllegalStateException)
@@ -155,7 +157,7 @@ class CardPurchaseIntentTest extends Specification {
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
 
         when:
-        intent.markAsSuccess(null)
+        intent.markAsSuccess(null, null, null, null, null)
 
         then:
         thrown(IllegalArgumentException)

@@ -6,10 +6,7 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
-import org.project.karto.domain.card.value_objects.BuyerID
-import org.project.karto.domain.card.value_objects.CardID
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
-import org.project.karto.domain.card.value_objects.StoreID
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCPaymentIntentRepository
 import org.project.karto.util.PostgresTestResource
@@ -134,9 +131,10 @@ class PaymentIntentRepositoryTest extends Specification {
         def storeID = new StoreID(UUID.randomUUID())
         def orderID = System.currentTimeMillis()
         def amount = new Amount(1000L)
+        def fee = new InternalFeeAmount(10L)
 
-        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount)
+        Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
-        return (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount)
+        return (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount, fee)
     }
 }
