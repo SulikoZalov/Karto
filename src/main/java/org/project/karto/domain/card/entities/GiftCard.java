@@ -223,6 +223,7 @@ public class GiftCard {
     }
 
     public long previousVersion() {
+        if (version == 1) return 1;
         return version - 1;
     }
 

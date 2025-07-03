@@ -189,7 +189,7 @@ class GiftCardTest extends Specification {
         giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
         giftCard.lastUsage() == giftCard.creationDate()
         giftCard.version() == 1
-        giftCard.oldVersion() == 1
+        giftCard.previousVersion() == 1
         giftCard.recipientType() == GiftCardRecipientType.SELF
         giftCard.giftCardType() == GiftCardType.STORE_SPECIFIC
     }
@@ -220,7 +220,7 @@ class GiftCardTest extends Specification {
         giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
         giftCard.lastUsage() == giftCard.creationDate()
         giftCard.version() == 1
-        giftCard.oldVersion() == 1
+        giftCard.previousVersion() == 1
         giftCard.recipientType() == GiftCardRecipientType.OTHER
         giftCard.giftCardType() == GiftCardType.STORE_SPECIFIC
     }
@@ -249,7 +249,7 @@ class GiftCardTest extends Specification {
         giftCard.keyAndCounter().counter() == 0
         giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
         giftCard.version() == 1
-        giftCard.oldVersion() == 1
+        giftCard.previousVersion() == 1
         giftCard.recipientType() == GiftCardRecipientType.SELF
         giftCard.giftCardType() == GiftCardType.COMMON
     }
@@ -277,7 +277,7 @@ class GiftCardTest extends Specification {
         giftCard.keyAndCounter().counter() == 0
         giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
         giftCard.version() == 1
-        giftCard.oldVersion() == 1
+        giftCard.previousVersion() == 1
         giftCard.recipientType() == GiftCardRecipientType.OTHER
         giftCard.giftCardType() == GiftCardType.COMMON
     }
@@ -587,6 +587,6 @@ class GiftCardTest extends Specification {
         giftCard.expirationDate() == expirationDate
         giftCard.lastUsage() == lastUsage
         giftCard.version() == version
-        giftCard.oldVersion() == version
+        giftCard.previousVersion() == version
     }
 }
