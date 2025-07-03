@@ -274,15 +274,12 @@ public class GiftCard {
         incrementVersion();
     }
 
-    public synchronized PaymentIntent initializeTransaction(Amount amount, StoreID storeID, long orderID) {
+    public synchronized PaymentIntent initializeTransaction(Amount amount, long orderID) {
         if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
         if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t use expired card");
 
         if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
         if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
-
-        if (storeID != null && !storeID.equals(this.storeID))
-            throw new IllegalArgumentException("Store-specific card cannot be used in another store");
 
         BigDecimal fee = calculateInternalFee(amount);
         Amount totalAmount = new Amount(amount.value().add(fee));
