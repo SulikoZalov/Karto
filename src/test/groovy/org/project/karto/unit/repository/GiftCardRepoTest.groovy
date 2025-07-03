@@ -4,19 +4,23 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
-import org.project.karto.domain.card.value_objects.Fee
+import org.project.karto.domain.card.enumerations.PaymentType
+import org.project.karto.domain.card.value_objects.Currency
+import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
+import org.project.karto.domain.card.value_objects.PaymentSystem
 import org.project.karto.domain.card.value_objects.UserActivitySnapshot
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
-import spock.lang.Ignore
 import spock.lang.Specification
+
+import java.math.RoundingMode
+import java.time.LocalDateTime
 
 @Dependent
 @QuarkusSpockTest
 @QuarkusTestResource(value = PostgresTestResource.class)
-@Ignore("Due to reimplementation of repository")
 class GiftCardRepoTest extends Specification {
 
     @Inject
@@ -83,72 +87,76 @@ class GiftCardRepoTest extends Specification {
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
     }
 
-
-    void "update gift card"() {
-        when:
+    void "update gift card after transaction"() {
+        given: "An activated gift card"
         giftCard.activate()
-        def result = repo.save(giftCard)
+        repo.save(giftCard)
 
-        then:
-        result.success()
-
-        when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
+        when: "Initialize and complete a transaction"
+        def amount = new Amount(giftCard.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
+        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
+        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        def check = giftCard.applyTransaction(
+                paymentIntent,
+                new UserActivitySnapshot(
+                        giftCard.ownerID().get().value(),
+                        new BigDecimal("1000"),
+                        30,
+                        LocalDateTime.now(),
+                        5
+                ),
+                Currency.getInstance("USD"),
+                PaymentType.KARTO_PAYMENT,
+                new PaymentSystem("UP")
+        )
         def updateResult = repo.update(giftCard)
 
-        then:
+        then: "Update should be successful"
         notThrown(Exception)
         updateResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
     }
 
-    void "update amount of activated gift card"() {
-        when:
-        def result = repo.save(giftCard)
+    void "update amount of activated gift card through full lifecycle"() {
+        given: "A newly created gift card"
+        def saveResult = repo.save(giftCard)
 
-        then:
-        result.success()
+        expect: "Initial save should succeed"
+        saveResult.success()
 
-        when:
+        when: "Activating the card"
         giftCard.activate()
         def activationResult = repo.update(giftCard)
 
-        then:
+        then: "Activation update should succeed"
         activationResult.success()
 
-        when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
-        def updateResult = repo.update(giftCard)
+        when: "Performing a transaction"
+        def amount = new Amount(giftCard.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
+        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
+        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        giftCard.applyTransaction(
+                paymentIntent,
+                new UserActivitySnapshot(
+                        giftCard.ownerID().get().value(),
+                        new BigDecimal("5000"),
+                        60,
+                        LocalDateTime.now(),
+                        10
+                ),
+                Currency.getInstance("USD"),
+                PaymentType.KARTO_PAYMENT,
+                new PaymentSystem("UP")
+        )
+        def transactionResult = repo.update(giftCard)
 
-        then:
-        updateResult.success()
-
-        where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
-    }
-
-    void "update gift card twice"() {
-        when:
-        giftCard.activate()
-        def result = repo.save(giftCard)
-
-        then:
-        result.success()
-
-        when:
-        giftCard.spend(new Amount(BigDecimal.valueOf(giftCard.balance().value() / 10)), UserActivitySnapshot.defaultSnapshot(giftCard.ownerID().get().value()), Fee.defaultFee())
-        def updateResult1 = repo.update(giftCard)
-        def updateResult2 = repo.update(giftCard)
-
-        then:
-        notThrown(Exception)
-        updateResult1.success()
-        updateResult2.success()
+        then: "Transaction update should succeed"
+        transactionResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
     }
 
     void "successful find by card ID"() {

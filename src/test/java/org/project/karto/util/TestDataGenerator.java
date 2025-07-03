@@ -384,4 +384,8 @@ public class TestDataGenerator {
         int mod = sum % 10;
         return ((mod == 0) ? 0 : 10 - mod);
     }
+
+    public static long orderID() {
+        return RANDOM.nextInt(1, 10000);
+    }
 }
