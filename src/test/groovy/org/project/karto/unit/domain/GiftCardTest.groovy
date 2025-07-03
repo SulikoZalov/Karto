@@ -587,6 +587,6 @@ class GiftCardTest extends Specification {
         giftCard.expirationDate() == expirationDate
         giftCard.lastUsage() == lastUsage
         giftCard.version() == version
-        giftCard.previousVersion() == version
+        giftCard.previousVersion() == version - 1
     }
 }
