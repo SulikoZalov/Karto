@@ -300,7 +300,7 @@ public class GiftCard {
         required("paymentType", paymentType);
         required("paymentSystem", paymentSystem);
 
-        if (intent.cardID() != id) throw new IllegalArgumentException("Payment intent do not match the card");
+        if (!intent.cardID().equals(id)) throw new IllegalArgumentException("Payment intent do not match the card");
         if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalArgumentException("UserID do not match");
 
         if (intent.isConfirmed())
