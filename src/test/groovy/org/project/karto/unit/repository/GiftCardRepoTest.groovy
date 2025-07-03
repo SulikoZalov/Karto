@@ -32,6 +32,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        result.value() == 1
         repo.findBy(giftCard.id()).success()
 
         where:
@@ -44,6 +45,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        result.value() == 1
         repo.findBy(giftCard.id()).success()
 
         where:
@@ -56,6 +58,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        result.value() == 1
         repo.findBy(giftCard.id()).success()
 
         where:
@@ -68,6 +71,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        result.value() == 1
         repo.findBy(giftCard.id()).success()
 
         where:
@@ -114,6 +118,7 @@ class GiftCardRepoTest extends Specification {
         then: "Update should be successful"
         notThrown(Exception)
         updateResult.success()
+        updateResult.value() == 1
 
         where:
         giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
@@ -125,6 +130,7 @@ class GiftCardRepoTest extends Specification {
 
         expect: "Initial save should succeed"
         saveResult.success()
+        saveResult.value() == 1
 
         when: "Activating the card"
         giftCard.activate()
@@ -132,6 +138,7 @@ class GiftCardRepoTest extends Specification {
 
         then: "Activation update should succeed"
         activationResult.success()
+        activationResult.value() == 1
 
         when: "Performing a transaction"
         def amount = new Amount(giftCard.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
@@ -154,6 +161,7 @@ class GiftCardRepoTest extends Specification {
 
         then: "Transaction update should succeed"
         transactionResult.success()
+        transactionResult.value() == 1
 
         where:
         giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
@@ -165,6 +173,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         def findResult = repo.findBy(giftCard.id())
