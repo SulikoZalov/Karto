@@ -118,7 +118,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
                 giftCard.keyAndCounter().counter(),
                 giftCard.lastUsage(),
                 giftCard.version(),
-                giftCard.id().toString(),
+                giftCard.id(),
                 giftCard.previousVersion()
         ));
     }
