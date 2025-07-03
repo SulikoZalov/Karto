@@ -85,7 +85,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), storeID, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 1);
     }
 
     public static GiftCard boughtAsAGift(BuyerID buyerID, Balance balance, StoreID storeID,
@@ -99,7 +99,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, storeID, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 1);
     }
 
     public static GiftCard selfBoughtCommonCard(BuyerID buyerID, Balance balance,
@@ -112,7 +112,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, new OwnerID(buyerID.value()), null, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 1);
     }
 
     public static GiftCard giftedCommonCard(BuyerID buyerID, Balance balance,
@@ -125,7 +125,7 @@ public class GiftCard {
 
         int maxCountOfUses = cardUsageLimitations.maxUsageCount();
         return new GiftCard(new CardID(UUID.randomUUID()), buyerID, null, null, maxCountOfUses,
-                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 0);
+                GiftCardStatus.PENDING, balance, 0, new KeyAndCounter(secretKey, 0), creationDate, expirationDate, creationDate, 1);
     }
 
     private static void validateInputs(BuyerID buyerID, Balance balance, String secretKey,

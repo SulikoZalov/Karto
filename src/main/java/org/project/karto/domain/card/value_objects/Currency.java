@@ -16,6 +16,10 @@ public record Currency(String code) {
         code = upperCode;
     }
 
+    public static Currency getInstance(String code) {
+        return new Currency(code);
+    }
+
     @Override
     public String toString() {
         return code;
