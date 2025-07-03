@@ -1,17 +1,22 @@
 package org.project.karto.unit.domain
 
+
+import org.project.karto.domain.card.entities.GiftCard
+import org.project.karto.domain.card.enumerations.GiftCardRecipientType
 import org.project.karto.domain.card.enumerations.GiftCardStatus
 import org.project.karto.domain.card.enumerations.GiftCardType
-import org.project.karto.domain.card.value_objects.Balance
-import org.project.karto.domain.card.value_objects.Fee
-import org.project.karto.domain.card.value_objects.OwnerID
-import org.project.karto.domain.card.value_objects.UserActivitySnapshot
+import org.project.karto.domain.card.enumerations.PaymentType
+import org.project.karto.domain.card.events.CashbackEvent
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
+import org.project.karto.domain.common.value_objects.KeyAndCounter
 import org.project.karto.util.TestDataGenerator
-import spock.lang.Ignore
 import spock.lang.Specification
+import spock.lang.Unroll
 
-@Ignore("Due to reimplementation of aggregate")
+import java.math.RoundingMode
+import java.time.LocalDateTime
+
 class GiftCardTest extends Specification {
 
     def "should create self-bought card with correct initial values"() {
@@ -157,151 +162,434 @@ class GiftCardTest extends Specification {
         e.getMessage() == "The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID"
     }
 
-    def "should successfully spend money from self bought card"() {
-        given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate()
-        def amount = new Amount(BigDecimal.valueOf(50L))
+    def "should create self-bought store-specific gift card with correct initial state"() {
+        given: "Test data"
+        def buyerID = TestDataGenerator.generateBuyerID()
+        def balance = TestDataGenerator.generateBalance()
+        def storeID = new StoreID(UUID.randomUUID())
+        def secretKey = TestDataGenerator.generateSecretKey()
+        def cardLimits = TestDataGenerator.generateCardLimits()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Creating a self-bought store-specific gift card"
+        def giftCard = GiftCard.selfBoughtCard(buyerID, balance, storeID, secretKey, cardLimits)
 
-        then:
-        card.balance().value() == BigDecimal.valueOf(50L)
-        card.countOfUses() == 1
+        then: "The card should have correct initial state"
+        giftCard.id() != null
+        giftCard.buyerID() == buyerID
+        giftCard.ownerID().isPresent()
+        giftCard.ownerID().get().value() == buyerID.value()
+        giftCard.storeID().isPresent()
+        giftCard.storeID().get() == storeID
+        giftCard.maxCountOfUses() == cardLimits.maxUsageCount()
+        giftCard.giftCardStatus() == GiftCardStatus.PENDING
+        giftCard.balance() == balance
+        giftCard.countOfUses() == 0
+        giftCard.keyAndCounter().key() == secretKey
+        giftCard.keyAndCounter().counter() == 0
+        giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
+        giftCard.lastUsage() == giftCard.creationDate()
+        giftCard.version() == 1
+        giftCard.oldVersion() == 1
+        giftCard.recipientType() == GiftCardRecipientType.SELF
+        giftCard.giftCardType() == GiftCardType.STORE_SPECIFIC
     }
 
-    def "should successfully spend money from bought as gift card"() {
-        given:
-        def card = TestDataGenerator.generateBoughtAsGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate(new OwnerID(UUID.randomUUID()))
-        def amount = new Amount(BigDecimal.valueOf(50L))
+    def "should create gift card for someone else with correct initial state"() {
+        given: "Test data"
+        def buyerID = TestDataGenerator.generateBuyerID()
+        def balance = TestDataGenerator.generateBalance()
+        def storeID = new StoreID(UUID.randomUUID())
+        def secretKey = TestDataGenerator.generateSecretKey()
+        def cardLimits = TestDataGenerator.generateCardLimits()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Creating a gift card for someone else"
+        def giftCard = GiftCard.boughtAsAGift(buyerID, balance, storeID, secretKey, cardLimits)
 
-        then:
-        card.balance().value() == BigDecimal.valueOf(50L)
-        card.countOfUses() == 1
+        then: "The card should have correct initial state"
+        giftCard.id() != null
+        giftCard.buyerID() == buyerID
+        !giftCard.ownerID().isPresent()
+        giftCard.storeID().isPresent()
+        giftCard.storeID().get() == storeID
+        giftCard.maxCountOfUses() == cardLimits.maxUsageCount()
+        giftCard.giftCardStatus() == GiftCardStatus.PENDING
+        giftCard.balance() == balance
+        giftCard.countOfUses() == 0
+        giftCard.keyAndCounter().key() == secretKey
+        giftCard.keyAndCounter().counter() == 0
+        giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
+        giftCard.lastUsage() == giftCard.creationDate()
+        giftCard.version() == 1
+        giftCard.oldVersion() == 1
+        giftCard.recipientType() == GiftCardRecipientType.OTHER
+        giftCard.giftCardType() == GiftCardType.STORE_SPECIFIC
     }
 
-    def "should successfully spend money from self bought common type gift card"() {
-        given:
-        def card = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate()
-        def amount = new Amount(BigDecimal.valueOf(50L))
-        Balance initialBalance = card.balance();
+    def "should create self-bought common gift card with correct initial state"() {
+        given: "Test data"
+        def buyerID = TestDataGenerator.generateBuyerID()
+        def balance = TestDataGenerator.generateBalance()
+        def secretKey = TestDataGenerator.generateSecretKey()
+        def cardLimits = TestDataGenerator.generateCardLimits()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Creating a self-bought common gift card"
+        def giftCard = GiftCard.selfBoughtCommonCard(buyerID, balance, secretKey, cardLimits)
 
-        then:
-        def fee = amount.value() * BigDecimal.valueOf(0.02)
-        def subtractedAmount = amount.value() + fee
-        card.balance().value() == initialBalance.value() - subtractedAmount
-        card.countOfUses() == 1
+        then: "The card should have correct initial state"
+        giftCard.id() != null
+        giftCard.buyerID() == buyerID
+        giftCard.ownerID().isPresent()
+        giftCard.ownerID().get().value() == buyerID.value()
+        !giftCard.storeID().isPresent()
+        giftCard.maxCountOfUses() == cardLimits.maxUsageCount()
+        giftCard.giftCardStatus() == GiftCardStatus.PENDING
+        giftCard.balance() == balance
+        giftCard.countOfUses() == 0
+        giftCard.keyAndCounter().key() == secretKey
+        giftCard.keyAndCounter().counter() == 0
+        giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
+        giftCard.version() == 1
+        giftCard.oldVersion() == 1
+        giftCard.recipientType() == GiftCardRecipientType.SELF
+        giftCard.giftCardType() == GiftCardType.COMMON
     }
 
-    def "should successfully spend money from bought as gift common type gift card"() {
-        given:
-        def card = TestDataGenerator.generateBoughtAsGiftCommonCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate(new OwnerID(UUID.randomUUID()))
-        def amount = new Amount(BigDecimal.valueOf(50L))
-        Balance initialBalance = card.balance();
+    def "should create common gift card for someone else with correct initial state"() {
+        given: "Test data"
+        def buyerID = TestDataGenerator.generateBuyerID()
+        def balance = TestDataGenerator.generateBalance()
+        def secretKey = TestDataGenerator.generateSecretKey()
+        def cardLimits = TestDataGenerator.generateCardLimits()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Creating a common gift card for someone else"
+        def giftCard = GiftCard.giftedCommonCard(buyerID, balance, secretKey, cardLimits)
 
-        then:
-        def fee = amount.value() * BigDecimal.valueOf(0.02)
-        def subtractedAmount = amount.value() + fee
-        card.balance().value() == initialBalance.value() - subtractedAmount
-        card.countOfUses() == 1
+        then: "The card should have correct initial state"
+        giftCard.id() != null
+        giftCard.buyerID() == buyerID
+        !giftCard.ownerID().isPresent()
+        !giftCard.storeID().isPresent()
+        giftCard.maxCountOfUses() == cardLimits.maxUsageCount()
+        giftCard.giftCardStatus() == GiftCardStatus.PENDING
+        giftCard.balance() == balance
+        giftCard.countOfUses() == 0
+        giftCard.keyAndCounter().key() == secretKey
+        giftCard.keyAndCounter().counter() == 0
+        giftCard.creationDate().isBefore(LocalDateTime.now().plusSeconds(1))
+        giftCard.version() == 1
+        giftCard.oldVersion() == 1
+        giftCard.recipientType() == GiftCardRecipientType.OTHER
+        giftCard.giftCardType() == GiftCardType.COMMON
     }
 
-    def "should thrown an exception: has no sufficient balance for fee on self bought card"() {
-        given:
-        def card = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(BigDecimal.valueOf(50L)))
-        card.activate()
-        def amount = new Amount(BigDecimal.valueOf(50L))
+    @Unroll
+    def "should throw IllegalArgumentException when creating gift card with invalid parameters: #scenario"() {
+        when: "Creating a gift card with invalid parameters"
+        creationMethod.call()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        then: "An IllegalArgumentException should be thrown"
+        thrown(IllegalArgumentException)
 
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.getMessage() == "There is not enough money on the balance"
+        where:
+        scenario                              | creationMethod
+        "null buyerID"                        | { -> GiftCard.selfBoughtCard(null, TestDataGenerator.generateBalance(), new StoreID(UUID.randomUUID()), TestDataGenerator.generateSecretKey(), TestDataGenerator.generateCardLimits()) }
+        "null balance"                        | { -> GiftCard.selfBoughtCard(TestDataGenerator.generateBuyerID(), null, new StoreID(UUID.randomUUID()), TestDataGenerator.generateSecretKey(), TestDataGenerator.generateCardLimits()) }
+        "null secretKey"                      | { -> GiftCard.selfBoughtCard(TestDataGenerator.generateBuyerID(), TestDataGenerator.generateBalance(), new StoreID(UUID.randomUUID()), null, TestDataGenerator.generateCardLimits()) }
+        "null cardLimits"                     | { -> GiftCard.selfBoughtCard(TestDataGenerator.generateBuyerID(), TestDataGenerator.generateBalance(), new StoreID(UUID.randomUUID()), TestDataGenerator.generateSecretKey(), null) }
+        "null storeID for store-specific"     | { -> GiftCard.selfBoughtCard(TestDataGenerator.generateBuyerID(), TestDataGenerator.generateBalance(), null, TestDataGenerator.generateSecretKey(), TestDataGenerator.generateCardLimits()) }
     }
 
-    def "should thrown an exception: has no sufficient balance for fee on bought as a gift card"() {
-        given:
-        def card = TestDataGenerator.generateBoughtAsGiftCommonCard(new Balance(BigDecimal.valueOf(50L)))
-        card.activate(new OwnerID(UUID.randomUUID()))
-        def amount = new Amount(BigDecimal.valueOf(50L))
+    def "should activate self-bought gift card successfully"() {
+        given: "A self-bought gift card"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Activating the card"
+        giftCard.activate()
 
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.getMessage() == "There is not enough money on the balance"
+        then: "The card should be activated"
+        giftCard.giftCardStatus() == GiftCardStatus.ACTIVE
+        giftCard.keyAndCounter().counter() == 1
+        giftCard.version() == 2
+        giftCard.isVerified()
     }
 
-    def "should thrown an exception: can`t spend from unverified card"() {
-        given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        def amount = TestDataGenerator.generateAmount(BigDecimal.valueOf(100L))
+    def "should activate gifted card with ownerID successfully"() {
+        given: "A gifted card and an ownerID"
+        def giftCard = TestDataGenerator.generateBoughtAsGiftCard()
+        def ownerID = TestDataGenerator.generateOwnerID()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Activating the card with ownerID"
+        giftCard.activate(ownerID)
 
-        then:
-        def e = thrown(IllegalStateException)
-        e.getMessage() == "Card is not activated"
+        then: "The card should be activated with the new owner"
+        giftCard.giftCardStatus() == GiftCardStatus.ACTIVE
+        giftCard.ownerID().isPresent()
+        giftCard.ownerID().get() == ownerID
+        giftCard.keyAndCounter().counter() == 1
+        giftCard.version() == 2
+        giftCard.isVerified()
     }
 
-    def "should thrown an exception: has no sufficient balance"() {
-        given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate()
-        def amount = new Amount(BigDecimal.valueOf(120L))
+    def "should initialize transaction successfully when conditions are met"() {
+        given: "An active gift card with sufficient balance"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        giftCard.activate()
+        def amount = new Amount(new BigDecimal("500"))
+        def orderID = 12345L
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        when: "Initializing a transaction"
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
 
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.getMessage() == "There is not enough money on the balance"
+        then: "A payment intent should be created"
+        paymentIntent != null
+        paymentIntent.cardID() == giftCard.id()
+        paymentIntent.buyerID() == giftCard.buyerID()
+        paymentIntent.storeID().get() == giftCard.storeID().get()
+        paymentIntent.orderID() == orderID
+        paymentIntent.totalAmount().value() == amount.value().add(amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE)
+        paymentIntent.feeAmount().value() == amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE
+        !paymentIntent.isConfirmed()
+        giftCard.countOfUses() == 1
+        giftCard.version() == 3
     }
 
-    def "should thrown an exception: has no sufficient balance for external fee"() {
-        given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)))
-        card.activate()
-        def amount = new Amount(BigDecimal.valueOf(100L))
+    @Unroll
+    def "should throw exception when initializing transaction with invalid conditions: #scenario"() {
+        given: "A gift card in specific state"
+        def giftCard = initialCard.call()
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), new Fee(BigDecimal.valueOf(0.2)))
+        when: "Initializing a transaction"
+        giftCard.initializeTransaction(amount, 12345L)
 
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.getMessage() == "There is not enough money on the balance"
+        then: "An exception should be thrown"
+        thrown(expectedException)
+
+        where:
+        scenario                              | initialCard                                                                 | amount                    | expectedException
+        "null amount"                         | {
+            def c = TestDataGenerator.generateSelfBougthGiftCard()
+            c.activate()
+            return c
+        }                                                                 | null                      | IllegalArgumentException
+        "not activated card"                  | {
+            TestDataGenerator.generateSelfBougthGiftCard()
+        }                                                                 | new Amount(BigDecimal.TEN) | IllegalStateException
+        "max uses reached"                    | {
+            def c = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")), 1)
+            c.activate()
+            c.initializeTransaction(new Amount(new BigDecimal("500")), 1)
+            return c
+        }                                                                 | new Amount(new BigDecimal("500")) | IllegalArgumentException
+        "insufficient balance"                | {
+            def c = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("100")))
+            c.activate()
+            return c
+        }                                                                 | new Amount(new BigDecimal("200")) | IllegalArgumentException
     }
 
-    def "should throw if card reached max count of uses"() {
-        given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(100L)), 3)
-        card.activate()
-        Amount amount = new Amount(BigDecimal.valueOf(1L))
+    def "should apply transaction successfully and calculate cashback"() {
+        given: "An active gift card with payment intent"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        giftCard.activate()
+        def amount = new Amount(new BigDecimal("500"))
+        def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
+        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
 
-        when:
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
-        card.spend(amount, UserActivitySnapshot.defaultSnapshot(card.ownerID().get().value()), Fee.defaultFee())
+        and: "User activity snapshot"
+        def userID = giftCard.ownerID().get().value()
+        def activitySnapshot = new UserActivitySnapshot(
+                userID,
+                new BigDecimal("5000"),
+                1000,
+                LocalDateTime.now(),
+                10
+        )
 
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.message == "Card reached max count of uses"
+        when: "Applying the transaction"
+        def check = giftCard.applyTransaction(
+                paymentIntent,
+                activitySnapshot,
+                Currency.getInstance("USD"),
+                PaymentType.KARTO_PAYMENT,
+                new PaymentSystem("UP"),
+                new ExternalPayeeDescription("Test merchant")
+        )
+
+        then: "The transaction should be applied successfully"
+        check != null
+        check.orderID() == 12345L
+        check.buyerID() == giftCard.buyerID()
+        check.storeID().get() == giftCard.storeID().get()
+        check.cardID().get() == giftCard.id()
+        check.totalAmount() == paymentIntent.totalAmount()
+        check.currency() == new Currency("USD")
+        check.paymentType() == PaymentType.KARTO_PAYMENT
+        check.internalFee() == paymentIntent.feeAmount()
+        check.paymentSystem() == new PaymentSystem("UP")
+        check.description() == new ExternalPayeeDescription("Test merchant")
+
+        and: "The gift card balance should be updated"
+        giftCard.balance().value() == new BigDecimal("1000").subtract(paymentIntent.totalAmount().value())
+
+        and: "The last usage date should be updated"
+        giftCard.lastUsage().isAfter(giftCard.creationDate())
+
+        and: "A cashback event should be generated"
+        def events = giftCard.pullEvents()
+        events.size() == 1
+        events[0] instanceof CashbackEvent
+        (events[0] as CashbackEvent).cardID() == giftCard.id()
+        (events[0] as CashbackEvent).ownerID() == giftCard.ownerID().get()
+
+        and: "Version should be incremented"
+        giftCard.version() == 4
+    }
+
+    def "should throw exception when applying transaction with invalid conditions"() {
+        given: "An active gift card"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        giftCard.activate()
+
+        and: "A payment intent"
+        def paymentIntent = giftCard.initializeTransaction(new Amount(new BigDecimal("500")), 12345L)
+
+        and: "User activity snapshot"
+        def userID = giftCard.ownerID().get().value()
+        def activitySnapshot = new UserActivitySnapshot(
+                userID,
+                new BigDecimal("5000"),
+                1000,
+                LocalDateTime.now(),
+                10
+        )
+
+        when: "Trying to apply transaction with invalid parameters"
+        giftCard.applyTransaction(
+                invalidIntent.call(giftCard, paymentIntent),
+                activitySnapshot,
+                Currency.getInstance("USD"),
+                PaymentType.KARTO_PAYMENT,
+                new PaymentSystem("UP"),
+                new ExternalPayeeDescription("Test merchant")
+        )
+
+        then: "An exception should be thrown"
+        thrown(expectedException)
+
+        where:
+        scenario                              | invalidIntent                                                                 | expectedException
+        "null payment intent"                | { g, p -> null }                                                             | IllegalArgumentException
+        "intent for different card"          | { g, p ->
+            def otherCard = TestDataGenerator.generateSelfBougthGiftCard()
+            otherCard.activate()
+            otherCard.initializeTransaction(new Amount(new BigDecimal("100")), 54321)
+        }                                                                   | IllegalArgumentException
+        "userID mismatch"                    | { g, p -> p }                                                                 | IllegalArgumentException
+    }
+
+    def "should calculate cashback correctly with maximum cap"() {
+        given: "An active gift card with payment intent"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("10000")))
+        giftCard.activate()
+        def amount = new Amount(new BigDecimal("1000"))
+        def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
+        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+
+        and: "User activity snapshot with very high values to trigger max cashback"
+        def userID = giftCard.ownerID().get().value()
+        def activitySnapshot = new UserActivitySnapshot(
+                userID,
+                new BigDecimal("5000"),
+                1000,
+                LocalDateTime.now(),
+                10
+        )
+
+        when: "Applying the transaction"
+        giftCard.applyTransaction(
+                paymentIntent,
+                activitySnapshot,
+                Currency.getInstance("USD"),
+                PaymentType.KARTO_PAYMENT,
+                new PaymentSystem("UP"),
+                new ExternalPayeeDescription("Test merchant")
+        )
+
+        and: "Getting cashback event"
+        def events = giftCard.pullEvents()
+        def cashback = (events[0] as CashbackEvent).amount()
+
+        then: "The cashback should be capped at MAX_CASHBACK_RATE"
+        cashback == (paymentIntent.totalAmount().value() * GiftCard.MAX_CASHBACK_RATE).setScale(2, RoundingMode.HALF_UP)
+    }
+
+    def "should not charge fee for common gift cards"() {
+        given: "An active common gift card"
+        def giftCard = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(new BigDecimal("1000")))
+        giftCard.activate()
+        def amount = new Amount(new BigDecimal("500"))
+        def orderID = 12345L
+
+        when: "Initializing a transaction"
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
+
+        then: "No fee should be charged"
+        paymentIntent.feeAmount().value() == BigDecimal.ZERO
+        paymentIntent.totalAmount() == amount
+    }
+
+    def "should charge fee for store-specific gift cards"() {
+        given: "An active store-specific gift card"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        giftCard.activate()
+        def amount = new Amount(new BigDecimal("500"))
+        def orderID = 12345L
+
+        when: "Initializing a transaction"
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
+
+        then: "Fee should be charged"
+        paymentIntent.feeAmount().value() == amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE
+        paymentIntent.totalAmount().value() == amount.value().add(amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE)
+    }
+
+    def "should restore gift card from repository with correct state"() {
+        given: "Gift card parameters"
+        def cardID = new CardID(UUID.randomUUID())
+        def buyerID = TestDataGenerator.generateBuyerID()
+        def ownerID = TestDataGenerator.generateOwnerID()
+        def storeID = new StoreID(UUID.randomUUID())
+        def status = GiftCardStatus.ACTIVE
+        def balance = TestDataGenerator.generateBalance()
+        def countOfUses = 3
+        def maxCountOfUses = 10
+        def keyAndCounter = new KeyAndCounter(TestDataGenerator.generateSecretKey(), 2)
+        def creationDate = LocalDateTime.now().minusDays(5)
+        def expirationDate = creationDate.plusDays(30)
+        def lastUsage = LocalDateTime.now().minusDays(1)
+        def version = 5L
+
+        when: "Restoring gift card from repository"
+        def giftCard = GiftCard.fromRepository(
+                cardID, buyerID, ownerID, storeID, status, balance,
+                countOfUses, maxCountOfUses, keyAndCounter,
+                creationDate, expirationDate, lastUsage, version
+        )
+
+        then: "The card should have correct restored state"
+        giftCard.id() == cardID
+        giftCard.buyerID() == buyerID
+        giftCard.ownerID().get() == ownerID
+        giftCard.storeID().get() == storeID
+        giftCard.giftCardStatus() == status
+        giftCard.balance() == balance
+        giftCard.countOfUses() == countOfUses
+        giftCard.maxCountOfUses() == maxCountOfUses
+        giftCard.keyAndCounter() == keyAndCounter
+        giftCard.creationDate() == creationDate
+        giftCard.expirationDate() == expirationDate
+        giftCard.lastUsage() == lastUsage
+        giftCard.version() == version
+        giftCard.oldVersion() == version
     }
 }
