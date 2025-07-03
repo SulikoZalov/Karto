@@ -292,16 +292,14 @@ public class GiftCard {
         return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount, new InternalFeeAmount(fee));
     }
 
-    public synchronized Check applyTransaction(
-            PaymentIntent intent, UserActivitySnapshot activitySnapshot, Currency currency,
-            PaymentType paymentType, PaymentSystem paymentSystem, ExternalPayeeDescription description) {
+    public synchronized Check applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot,
+                                               Currency currency, PaymentType paymentType, PaymentSystem paymentSystem) {
 
         required("paymentIntent", intent);
         required("userActivitySnapshot", activitySnapshot);
         required("currency", currency);
         required("paymentType", paymentType);
         required("paymentSystem", paymentSystem);
-        required("externalPayeeDescription", description);
 
         if (intent.cardID() != id) throw new IllegalArgumentException("Payment intent do not match the card");
         if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalArgumentException("UserID do not match");
@@ -324,7 +322,7 @@ public class GiftCard {
         incrementVersion();
 
         return Check.paymentCheck(intent.orderID(), intent.buyerID(), storeID, id, intent.totalAmount(), currency,
-                paymentType, intent.feeAmount(), paymentSystem, description);
+                paymentType, intent.feeAmount(), paymentSystem, intent.paymentDescription());
     }
 
     private void incrementVersion() {

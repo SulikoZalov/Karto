@@ -411,8 +411,7 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP"),
-                new ExternalPayeeDescription("Test merchant")
+                new PaymentSystem("UP")
         )
 
         then: "The transaction should be applied successfully"
@@ -426,7 +425,7 @@ class GiftCardTest extends Specification {
         check.paymentType() == PaymentType.KARTO_PAYMENT
         check.internalFee() == paymentIntent.feeAmount()
         check.paymentSystem() == new PaymentSystem("UP")
-        check.description() == new ExternalPayeeDescription("Test merchant")
+        check.description() == new ExternalPayeeDescription("desc")
 
         and: "The gift card balance should be updated"
         giftCard.balance().value() == new BigDecimal("1000").subtract(paymentIntent.totalAmount().value())
@@ -469,8 +468,7 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP"),
-                new ExternalPayeeDescription("Test merchant")
+                new PaymentSystem("UP")
         )
 
         then: "An exception should be thrown"
@@ -511,8 +509,7 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP"),
-                new ExternalPayeeDescription("Test merchant")
+                new PaymentSystem("UP")
         )
 
         and: "Getting cashback event"
