@@ -85,6 +85,7 @@ class GiftCardRepoTest extends Specification {
 
         then:
         result1.success()
+        result1.value() == 1
         !result2.success()
 
         where:
@@ -92,18 +93,35 @@ class GiftCardRepoTest extends Specification {
     }
 
     void "update gift card after transaction"() {
-        given: "An activated gift card"
+        given: "A newly created gift card"
+        def saveResult = repo.save(giftCard)
+
+        expect: "Gift card is saved"
+        saveResult.success()
+        saveResult.value() == 1
+
+        when: "Activating the gift card"
         giftCard.activate()
-        repo.save(giftCard)
+        def activationResult = repo.update(giftCard)
+
+        then: "Activation update should succeed"
+        activationResult.success()
+        activationResult.value() == 1
 
         when: "Initialize and complete a transaction"
-        def amount = new Amount(giftCard.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
-        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
+        def reloadedCard1 = repo.findBy(giftCard.id()).value()
+        def amount = new Amount(reloadedCard1.balance().value()
+                .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
+        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
         paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
-        def check = giftCard.applyTransaction(
+        repo.update(reloadedCard1)
+
+        def reloadedCard2 = repo.findBy(reloadedCard1.id()).value()
+
+        reloadedCard2.applyTransaction(
                 paymentIntent,
                 new UserActivitySnapshot(
-                        giftCard.ownerID().get().value(),
+                        reloadedCard1.ownerID().get().value(),
                         new BigDecimal("1000"),
                         30,
                         LocalDateTime.now(),
@@ -113,10 +131,9 @@ class GiftCardRepoTest extends Specification {
                 PaymentType.KARTO_PAYMENT,
                 new PaymentSystem("UP")
         )
-        def updateResult = repo.update(giftCard)
+        def updateResult = repo.update(reloadedCard2)
 
-        then: "Update should be successful"
-        notThrown(Exception)
+        then: "Transaction update should succeed"
         updateResult.success()
         updateResult.value() == 1
 
@@ -141,13 +158,19 @@ class GiftCardRepoTest extends Specification {
         activationResult.value() == 1
 
         when: "Performing a transaction"
-        def amount = new Amount(giftCard.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
-        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
+        def reloadedCard1 = repo.findBy(giftCard.id()).value()
+        def amount = new Amount(reloadedCard1.balance().value()
+                .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
+        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
         paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
-        giftCard.applyTransaction(
+        repo.update(reloadedCard1)
+
+        def reloadedCard2 = repo.findBy(reloadedCard1.id()).value()
+
+        reloadedCard2.applyTransaction(
                 paymentIntent,
                 new UserActivitySnapshot(
-                        giftCard.ownerID().get().value(),
+                        reloadedCard2.ownerID().get().value(),
                         new BigDecimal("5000"),
                         60,
                         LocalDateTime.now(),
@@ -157,7 +180,7 @@ class GiftCardRepoTest extends Specification {
                 PaymentType.KARTO_PAYMENT,
                 new PaymentSystem("UP")
         )
-        def transactionResult = repo.update(giftCard)
+        def transactionResult = repo.update(reloadedCard2)
 
         then: "Transaction update should succeed"
         transactionResult.success()
