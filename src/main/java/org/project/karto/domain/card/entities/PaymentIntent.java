@@ -6,6 +6,7 @@ import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -176,5 +177,17 @@ public class PaymentIntent {
     private void isStatusPending() {
         if (status != PurchaseStatus.PENDING)
             throw new IllegalArgumentException("You can`t change status twice");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PaymentIntent that = (PaymentIntent) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

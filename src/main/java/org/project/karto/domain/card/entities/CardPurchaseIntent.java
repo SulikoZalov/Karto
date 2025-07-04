@@ -9,6 +9,7 @@ import org.project.karto.domain.common.value_objects.Amount;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -161,5 +162,17 @@ public class CardPurchaseIntent {
 
     private void isPendingCard() {
         if (status != PurchaseStatus.PENDING) throw new IllegalStateException("Transaction cannot change it`s status twice.");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        CardPurchaseIntent that = (CardPurchaseIntent) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

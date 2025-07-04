@@ -355,4 +355,16 @@ public class GiftCard {
         if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) totalRate = MAX_CASHBACK_RATE;
         return spentAmount.multiply(totalRate).setScale(2, RoundingMode.HALF_UP);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        GiftCard giftCard = (GiftCard) o;
+        return Objects.equals(id, giftCard.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

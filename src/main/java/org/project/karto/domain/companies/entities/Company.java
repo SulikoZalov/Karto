@@ -182,14 +182,11 @@ public class Company {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Company company = (Company) o;
-        return Objects.equals(id, company.id) && Objects.equals(registrationNumber, company.registrationNumber) &&
-                Objects.equals(companyName, company.companyName) && Objects.equals(email, company.email) &&
-                Objects.equals(phone, company.phone) && Objects.equals(creationDate, company.creationDate) &&
-                Objects.equals(password, company.password);
+        return Objects.equals(id, company.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, registrationNumber, companyName, email, phone, creationDate, password);
+        return Objects.hash(id);
     }
 }

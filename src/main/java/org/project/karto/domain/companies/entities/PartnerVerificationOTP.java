@@ -2,6 +2,7 @@ package org.project.karto.domain.companies.entities;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public class PartnerVerificationOTP {
@@ -89,5 +90,17 @@ public class PartnerVerificationOTP {
 
     public boolean isExpired() {
         return expirationDate.isBefore(LocalDateTime.now());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PartnerVerificationOTP that = (PartnerVerificationOTP) o;
+        return Objects.equals(otp, that.otp) && Objects.equals(companyID, that.companyID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(otp, companyID);
     }
 }

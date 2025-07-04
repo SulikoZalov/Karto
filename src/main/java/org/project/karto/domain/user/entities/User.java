@@ -188,18 +188,14 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return isVerified == user.isVerified &&
-                Objects.equals(id, user.id) &&
-                Objects.equals(personalData, user.personalData) &&
-                Objects.equals(creationDate, user.creationDate);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personalData, isVerified, creationDate);
+        return Objects.hashCode(id);
     }
 
     @Override

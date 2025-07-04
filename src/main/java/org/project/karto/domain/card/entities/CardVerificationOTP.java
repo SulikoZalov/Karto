@@ -4,6 +4,7 @@ import org.project.karto.domain.card.value_objects.CardID;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class CardVerificationOTP {
     private final String otp;
@@ -74,5 +75,17 @@ public class CardVerificationOTP {
 
     public boolean isExpired() {
         return expirationDate.isBefore(LocalDateTime.now());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        CardVerificationOTP that = (CardVerificationOTP) o;
+        return Objects.equals(otp, that.otp) && Objects.equals(cardID, that.cardID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(otp, cardID);
     }
 }
