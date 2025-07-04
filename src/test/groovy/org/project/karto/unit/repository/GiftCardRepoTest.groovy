@@ -14,6 +14,7 @@ import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -26,7 +27,17 @@ class GiftCardRepoTest extends Specification {
     @Inject
     JDBCGiftCardRepository repo
 
-    void "save gift card: self bought"() {
+    @Inject
+    Util util
+
+    @Unroll
+    def "save gift card: self bought [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -36,10 +47,17 @@ class GiftCardRepoTest extends Specification {
         repo.findBy(giftCard.id()).success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "save gift card: bought as gift"() {
+    @Unroll
+    def  "save gift card: bought as gift [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -49,10 +67,17 @@ class GiftCardRepoTest extends Specification {
         repo.findBy(giftCard.id()).success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateBoughtAsGiftCard()})
+        index << (1..10)
     }
 
-    void "save gift card: self bought common type"() {
+    @Unroll
+    def "save gift card: self bought common type [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -62,10 +87,17 @@ class GiftCardRepoTest extends Specification {
         repo.findBy(giftCard.id()).success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBoughtCommonGiftCard()})
+        index << (1..10)
     }
 
-    void "save gift card: bought as gift common type"() {
+    @Unroll
+    def "save gift card: bought as gift common type [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -75,10 +107,17 @@ class GiftCardRepoTest extends Specification {
         repo.findBy(giftCard.id()).success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateBoughtAsGiftCommonCard()})
+        index << (1..10)
     }
 
-    void "fail saving same card twice"() {
+    @Unroll
+    def "fail saving same card twice [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result1 = repo.save(giftCard)
         def result2 = repo.save(giftCard)
@@ -89,11 +128,16 @@ class GiftCardRepoTest extends Specification {
         !result2.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "update gift card after transaction"() {
+    @Unroll
+    def "update gift card after transaction [#index]"() {
         given: "A newly created gift card"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def saveResult = repo.save(giftCard)
 
         expect: "Gift card is saved"
@@ -138,11 +182,17 @@ class GiftCardRepoTest extends Specification {
         updateResult.value() == 1
 
         where:
-        giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
+        index << (1..10)
     }
 
-    void "update amount of activated gift card through full lifecycle"() {
+    @Unroll
+    def "update amount of activated gift card through full lifecycle [#index]"() {
         given: "A newly created gift card"
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         def saveResult = repo.save(giftCard)
 
         expect: "Initial save should succeed"
@@ -187,10 +237,17 @@ class GiftCardRepoTest extends Specification {
         transactionResult.value() == 1
 
         where:
-        giftCard << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard() }
+        index << (1..10)
     }
 
-    void "successful find by card ID"() {
+    @Unroll
+    def "successful find by card ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -206,10 +263,17 @@ class GiftCardRepoTest extends Specification {
         findResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "fail find by non existent card ID"() {
+    @Unroll
+    def "fail find by non existent card ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def findResult = repo.findBy(giftCard.id())
 
@@ -218,10 +282,17 @@ class GiftCardRepoTest extends Specification {
         !findResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "successful find by buyer ID"() {
+    @Unroll
+    def "successful find by buyer ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -236,10 +307,17 @@ class GiftCardRepoTest extends Specification {
         findResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "fail find by non existent buyer ID: empty list"() {
+    @Unroll
+    def "fail find by non existent buyer ID: empty list [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def findResult = repo.findBy(giftCard.buyerID())
 
@@ -250,10 +328,17 @@ class GiftCardRepoTest extends Specification {
         value.size() == 0
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "successful find by owner ID"() {
+    @Unroll
+    def "successful find by owner ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -268,10 +353,17 @@ class GiftCardRepoTest extends Specification {
         findResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "fail find by non existent owner ID"() {
+    @Unroll
+    def "fail find by non existent owner ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def findResult = repo.findBy(giftCard.ownerID().get())
 
@@ -282,10 +374,17 @@ class GiftCardRepoTest extends Specification {
         value.size() == 0
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "successful find by store ID"() {
+    @Unroll
+    def "successful find by store ID [#index]"() {
+        given:
+        def giftCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+
         when:
         def result = repo.save(giftCard)
 
@@ -300,10 +399,10 @@ class GiftCardRepoTest extends Specification {
         findResult.success()
 
         where:
-        giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+        index << (1..10)
     }
 
-    void "fail find by non existent store ID"() {
+    def "fail find by non existent store ID"() {
         when:
         def findResult = repo.findBy(giftCard.storeID().get())
 
