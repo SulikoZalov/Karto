@@ -17,4 +17,9 @@ public record CompanyName(String companyName) {
         if (!matcher.matches())
             throw new IllegalArgumentException("Company name contains invalid characters.");
     }
+
+    @Override
+    public String toString() {
+        return companyName;
+    }
 }

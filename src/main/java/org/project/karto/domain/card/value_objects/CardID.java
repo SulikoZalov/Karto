@@ -7,7 +7,13 @@ public record CardID(UUID value) {
         if (value == null)
             throw new IllegalArgumentException("Card id can`t be null");
     }
+
     public static CardID fromString(String uuidStr) {
         return new CardID(UUID.fromString(uuidStr));
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

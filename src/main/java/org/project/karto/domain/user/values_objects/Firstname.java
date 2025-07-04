@@ -25,4 +25,9 @@ public record Firstname(String firstname) {
         Matcher matcher = FIRST_NAME_PATTERN.matcher(firstname);
         if (!matcher.matches()) throw new IllegalArgumentException("First Name should match regex.");
     }
+
+    @Override
+    public String toString() {
+        return firstname;
+    }
 }

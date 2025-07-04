@@ -7,7 +7,13 @@ public record OwnerID(UUID value) {
         if (value == null)
             throw new IllegalArgumentException("Owner ID can't be null");
     }
+
     public static OwnerID fromString(String uuidStr) {
         return new OwnerID(UUID.fromString(uuidStr));
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

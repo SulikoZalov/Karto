@@ -31,4 +31,9 @@ public record Email(String email) {
         if (!matcher.matches())
             throw new IllegalArgumentException("Email format error");
     }
+
+    @Override
+    public String toString() {
+        return email;
+    }
 }

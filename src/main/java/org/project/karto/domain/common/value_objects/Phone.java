@@ -19,4 +19,9 @@ public record Phone(String phoneNumber) {
         Matcher matcher = PHONE_NUMBER_PATTERN.matcher(phoneNumber);
         if (!matcher.matches()) throw new IllegalArgumentException("Invalid phone number.");
     }
+
+    @Override
+    public String toString() {
+        return phoneNumber;
+    }
 }

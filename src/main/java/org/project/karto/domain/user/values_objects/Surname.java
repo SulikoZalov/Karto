@@ -26,4 +26,9 @@ public record Surname(String surname) {
         Matcher matcher = SURNAME_PATTERN.matcher(surname);
         if (!matcher.matches()) throw new IllegalArgumentException("Surname should match the pattern.");
     }
+
+    @Override
+    public String toString() {
+        return surname;
+    }
 }

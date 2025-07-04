@@ -7,4 +7,9 @@ public record PaymentSystem(String value) {
         if (value.isBlank())
             throw new IllegalArgumentException("Payment system value can`t be blank");
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

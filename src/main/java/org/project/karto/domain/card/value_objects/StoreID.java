@@ -11,4 +11,9 @@ public record StoreID(UUID value) {
     public static StoreID fromString(String storeID) {
         return new StoreID(UUID.fromString(storeID));
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }
