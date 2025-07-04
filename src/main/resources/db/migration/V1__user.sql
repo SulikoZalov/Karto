@@ -4,7 +4,7 @@ CREATE TABLE user_account (
     surname VARCHAR(56) NOT NULL,
     phone VARCHAR(22),
     email VARCHAR(256) NOT NULL,
-    password VARCHAR(64),
+    password VARCHAR,
     birth_date TIMESTAMP NOT NULL,
     is_verified BOOLEAN NOT NULL,
     is_2fa_enabled BOOLEAN NOT NULL,

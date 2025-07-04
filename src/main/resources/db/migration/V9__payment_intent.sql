@@ -9,7 +9,7 @@ CREATE TABLE payment_intent (
     result_date TIMESTAMP,
     status VARCHAR(7) NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'CANCEL', 'FAILURE')),
     is_confirmed BOOLEAN NOT NULL,
-    description TEXT,
+    description VARCHAR(255),
     fee NUMERIC NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT fk_payment_buyer_account FOREIGN KEY (buyer_id) REFERENCES user_account(id) ON DELETE CASCADE,

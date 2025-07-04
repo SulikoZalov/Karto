@@ -10,7 +10,7 @@ CREATE TABLE chck (
     internal_fee NUMERIC NOT NULL,
     external_fee NUMERIC NOT NULL,
     payment_system VARCHAR(48),
-    description TEXT,
+    description VARCHAR(255),
     creation_date TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT fk_chck_buyer_account FOREIGN KEY (buyer_id) REFERENCES user_account(id) ON DELETE CASCADE,

@@ -1,5 +1,5 @@
 CREATE TABLE gift_card_otp (
-    otp VARCHAR NOT NULL,
+    otp CHAR(6) NOT NULL,
     card_id CHAR(36) NOT NULL,
     is_confirmed BOOLEAN NOT NULL,
     creation_date TIMESTAMP NOT NULL,

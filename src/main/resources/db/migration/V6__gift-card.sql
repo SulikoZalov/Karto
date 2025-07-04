@@ -7,7 +7,7 @@ CREATE TABLE gift_card (
     balance NUMERIC NOT NULL,
     count_of_uses SMALLINT NOT NULL,
     max_count_of_uses SMALLINT NOT NULL,
-    secret_key VARCHAR NOT NULL,
+    secret_key VARCHAR(28) NOT NULL,
     counter BIGINT NOT NULL,
     creation_date TIMESTAMP NOT NULL,
     expiration_date TIMESTAMP NOT NULL,
