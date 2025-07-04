@@ -247,6 +247,36 @@ public class TestDataGenerator {
         );
     }
 
+    public static GiftCard generateSelfBougthGiftCard(UUID userID, Balance balance, UUID storeID) {
+        return GiftCard.selfBoughtCard(
+                new BuyerID(userID),
+                balance,
+                new StoreID(storeID),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateSelfBougthGiftCard(UUID userID, UUID storeID) {
+        return GiftCard.selfBoughtCard(
+                new BuyerID(userID),
+                generateBalance(),
+                new StoreID(storeID),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
+    public static GiftCard generateSelfBougthGiftCard(UUID userID) {
+        return GiftCard.selfBoughtCard(
+                new BuyerID(UUID.randomUUID()),
+                generateBalance(),
+                new StoreID(UUID.randomUUID()),
+                generateSecretKey(),
+                generateCardLimits()
+        );
+    }
+
     public static GiftCard generateSelfBougthGiftCard(Balance balance, int maxCountOfUsage) {
         CardUsageLimitations cardUsageLimitations = CardUsageLimitations.of(generateCardExpirationDays(), maxCountOfUsage);
         return GiftCard.selfBoughtCard(

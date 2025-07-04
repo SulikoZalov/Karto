@@ -11,6 +11,7 @@ import org.project.karto.infrastructure.security.HOTPGenerator
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @Dependent
 @QuarkusSpockTest
@@ -23,14 +24,22 @@ class CardVerificationOTPRepoTest extends Specification {
     @Inject
     JDBCGiftCardRepository cardRepository
 
+    @Inject
+    Util util
+
     HOTPGenerator hotpGenerator
 
     def setup() {
         hotpGenerator = new HOTPGenerator()
     }
 
-    void "successfully save card otp"() {
+    @Unroll
+    def "successfully save card otp [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         def writeResult = cardRepository.save(card)
@@ -48,11 +57,16 @@ class CardVerificationOTPRepoTest extends Specification {
         saveResult.value() == 1
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "fail saving card otp twice"() {
+    @Unroll
+    def "fail saving card otp twice [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         def writeResult = cardRepository.save(card)
@@ -72,11 +86,16 @@ class CardVerificationOTPRepoTest extends Specification {
         !saveResult2.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful card OTP update"() {
+    @Unroll
+    def "successful card OTP update [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         def writeResult = cardRepository.save(card)
@@ -103,11 +122,16 @@ class CardVerificationOTPRepoTest extends Specification {
         confirmResult.value() == 1
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful remove OTP"() {
+    @Unroll
+    def "successful remove OTP [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         def writeResult = cardRepository.save(card)
@@ -133,11 +157,16 @@ class CardVerificationOTPRepoTest extends Specification {
         removeResult.value() == 1
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful find by card OTP"() {
+    @Unroll
+    def "successful find by card OTP [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         def writeResult = cardRepository.save(card)
@@ -162,11 +191,16 @@ class CardVerificationOTPRepoTest extends Specification {
         findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "fail find by non existent card OTP"() {
+    @Unroll
+    def "fail find by non existent card OTP [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -179,11 +213,16 @@ class CardVerificationOTPRepoTest extends Specification {
         !findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful find by card OTP string"() {
+    @Unroll
+    def "successful find by card OTP string [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -203,11 +242,16 @@ class CardVerificationOTPRepoTest extends Specification {
         findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "fail find by non existent card OTP string"() {
+    @Unroll
+    def "fail find by non existent card OTP string [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -220,11 +264,16 @@ class CardVerificationOTPRepoTest extends Specification {
         !findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful find by owner ID"() {
+    @Unroll
+    def "successful find by owner ID [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -244,12 +293,20 @@ class CardVerificationOTPRepoTest extends Specification {
         findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "fail find by non existent owner ID"() {
+    @Unroll
+    def "fail find by non existent owner ID [#index]"() {
         given:
-        def noNameCard = TestDataGenerator.generateSelfBougthGiftCard()
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+        def noNameCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -269,11 +326,16 @@ class CardVerificationOTPRepoTest extends Specification {
         !findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "successful find by card ID"() {
+    @Unroll
+    def "successful find by card ID [#index]"() {
         given:
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -293,12 +355,20 @@ class CardVerificationOTPRepoTest extends Specification {
         findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
 
-    void "fail find by non existent card ID"() {
+    @Unroll
+    def "fail find by non existent card ID [#index]"() {
         given:
-        def noNameCard = TestDataGenerator.generateSelfBougthGiftCard()
+        def card = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
+        def noNameCard = TestDataGenerator.generateSelfBougthGiftCard(
+                util.generateActivateAndSaveUser(),
+                util.generateActivateAndSaveCompany()
+        )
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
         cardRepository.save(card)
@@ -318,6 +388,7 @@ class CardVerificationOTPRepoTest extends Specification {
         !findResult.success()
 
         where:
-        card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
+        index << (1..10)
     }
+
 }
