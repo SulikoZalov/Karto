@@ -24,7 +24,7 @@ public class JDBCCheckRepository implements CheckRepository {
     private final JetQuerious jet;
 
     static final String SAVE_CHECK = insert().
-            into("check")
+            into("chck")
             .columns("id",
                     "order_id",
                     "buyer_id",
@@ -44,21 +44,21 @@ public class JDBCCheckRepository implements CheckRepository {
 
     static final String FIND_BY_CHECK_ID = select()
             .all()
-            .from("check")
+            .from("chck")
             .where("id = ?")
             .build()
             .sql();
 
     static final String FIND_BY_BUYER_ID = select()
             .all()
-            .from("check")
+            .from("chck")
             .where("buyer_id = ?")
             .build()
             .sql();
 
     static final String FIND_BY_STORE_ID = select()
             .all()
-            .from("check")
+            .from("chck")
             .where("store_id = ?")
             .build()
             .sql();
@@ -74,8 +74,8 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.id(),
                 check.orderID(),
                 check.buyerID(),
-                check.storeID(),
-                check.cardID(),
+                check.storeID().orElse(null),
+                check.cardID().orElse(null),
                 check.totalAmount(),
                 check.currency(),
                 check.paymentType(),
@@ -106,12 +106,15 @@ public class JDBCCheckRepository implements CheckRepository {
     }
 
     private Check mapCheck(ResultSet rs) throws SQLException {
+        String storeID = rs.getString("store_id");
+        String cardID = rs.getString("card_id");
+
         return Check.fromRepository(
                 UUID.fromString(rs.getString("id")),
                 rs.getLong("order_id"),
                 BuyerID.fromString(rs.getString("buyer_id")),
-                StoreID.fromString(rs.getString("store_id")),
-                CardID.fromString(rs.getString("card_id")),
+                storeID != null ? StoreID.fromString(storeID) : null,
+                cardID != null ? CardID.fromString(cardID) : null,
                 new Amount(rs.getBigDecimal("total_amount")),
                 new Currency(rs.getString("currency")),
                 PaymentType.valueOf(rs.getString("payment_type")),
