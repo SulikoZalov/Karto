@@ -345,6 +345,26 @@ public class TestDataGenerator {
         );
     }
 
+    public static CardPurchaseIntent generateCardPurchaseIntent(UUID userID, Amount totalPayedAmount) {
+        return CardPurchaseIntent.of(
+                UUID.randomUUID(),
+                new BuyerID(userID),
+                new StoreID(UUID.randomUUID()),
+                RANDOM.nextInt(1, 100),
+                totalPayedAmount
+        );
+    }
+
+    public static CardPurchaseIntent generateCardPurchaseIntent(UUID userID, Amount totalPayedAmount, UUID storeID) {
+        return CardPurchaseIntent.of(
+                UUID.randomUUID(),
+                new BuyerID(userID),
+                new StoreID(storeID),
+                RANDOM.nextInt(1, 100),
+                totalPayedAmount
+        );
+    }
+
     public static Fee generateFee(double maxRate) {
         return new Fee(BigDecimal.valueOf(RANDOM.nextDouble(0.01, maxRate)));
     }

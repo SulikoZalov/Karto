@@ -6,7 +6,10 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.enumerations.PurchaseStatus
-import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.card.value_objects.Currency
+import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
+import org.project.karto.domain.card.value_objects.Fee
+import org.project.karto.domain.card.value_objects.PaymentSystem
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCCardPurchaseIntentRepository
 import org.project.karto.infrastructure.repository.JDBCOrderIDRepository
@@ -20,14 +23,18 @@ import spock.lang.Specification
 class CardPurchaseIntentRepositoryTest extends Specification {
 
     @Inject
-    JDBCOrderIDRepository orderIDRepository;
+    JDBCOrderIDRepository orderIDRepository
 
     @Inject
     JDBCCardPurchaseIntentRepository repository
 
+    @Inject
+    Util util
+
     def "should save and retrieve CardPurchaseIntent by ID"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        def intent = TestDataGenerator.generateCardPurchaseIntent(util.generateActivateAndSaveUser(),
+                new Amount(new BigDecimal("100.00")), util.generateActivateAndSaveCompany())
         def writeResult = repository.save(intent)
 
         expect:
@@ -47,7 +54,8 @@ class CardPurchaseIntentRepositoryTest extends Specification {
     def "should save and retrieve CardPurchaseIntent by ID with specified storeID"() {
         given:
         def intent = TestDataGenerator
-                .generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")), new StoreID(UUID.randomUUID()))
+                .generateCardPurchaseIntent(util.generateActivateAndSaveUser(),
+                        new Amount(new BigDecimal("100.00")), util.generateActivateAndSaveCompany())
         def writeResult = repository.save(intent)
 
         expect:
@@ -66,7 +74,8 @@ class CardPurchaseIntentRepositoryTest extends Specification {
 
     def "should update CardPurchaseIntent status and fee"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
+        def intent = TestDataGenerator.generateCardPurchaseIntent(util.generateActivateAndSaveUser(),
+                new Amount(new BigDecimal("100.00")),  util.generateActivateAndSaveCompany())
         def writeResult = repository.save(intent)
 
         expect:
@@ -101,20 +110,26 @@ class CardPurchaseIntentRepositoryTest extends Specification {
 
     def "should find by buyerID"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("50.00")))
-        repository.save(intent)
+        def intent = TestDataGenerator.generateCardPurchaseIntent(util.generateActivateAndSaveUser(),
+                new Amount(new BigDecimal("50.00")), util.generateActivateAndSaveCompany())
+        def saveResult = repository.save(intent)
+
+        expect:
+        saveResult.success()
+        saveResult.value() == 1
 
         when:
         def found = repository.findBy(intent.buyerID())
 
         then:
         found.success()
-        found.value().id().equals(intent.id())
+        found.value().id() == intent.id()
     }
 
     def "should find by orderID"() {
         given:
-        def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("70.00")))
+        def intent = TestDataGenerator.generateCardPurchaseIntent(util.generateActivateAndSaveUser(),
+                new Amount(new BigDecimal("70.00")),  util.generateActivateAndSaveCompany())
         repository.save(intent)
 
         when:
