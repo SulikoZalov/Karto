@@ -22,6 +22,9 @@ class PaymentIntentRepositoryTest extends Specification {
     @Inject
     JDBCPaymentIntentRepository repo
 
+    @Inject
+    Util util
+
     def "successfully save and find by id"() {
         given:
         def payment = createPaymentIntent()
@@ -138,16 +141,14 @@ class PaymentIntentRepositoryTest extends Specification {
         !result.success()
     }
 
-    private static PaymentIntent createPaymentIntent() {
-        def buyerID = new BuyerID(UUID.randomUUID())
-        def cardID = new CardID(UUID.randomUUID())
-        def storeID = new StoreID(UUID.randomUUID())
+    private PaymentIntent createPaymentIntent() {
+        def card = util.generateActivateAndSaveSelfBoughtGiftCard()
         def orderID = System.currentTimeMillis()
         def amount = new Amount(1000L)
         def fee = new InternalFeeAmount(10L)
 
         Method ofMethod = PaymentIntent.getDeclaredMethod("of", BuyerID, CardID, StoreID, long, Amount, InternalFeeAmount)
         ofMethod.setAccessible(true)
-        return (PaymentIntent) ofMethod.invoke(null, buyerID, cardID, storeID, orderID, amount, fee)
+        return (PaymentIntent) ofMethod.invoke(null, card.buyerID(), card.id(), card.storeID().orElse(null), orderID, amount, fee)
     }
 }
