@@ -38,6 +38,7 @@ class OTPRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def result = otpRepo.save(otp)
@@ -45,6 +46,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -74,6 +76,7 @@ class OTPRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def result = otpRepo.save(otp)
@@ -81,6 +84,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         when:
         otp.confirm()
@@ -89,6 +93,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         updateResult.success()
+        updateResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -103,6 +108,7 @@ class OTPRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def result = otpRepo.save(otp)
@@ -110,6 +116,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         when:
         def removeResult = otpRepo.remove(otp)
@@ -117,6 +124,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         removeResult.success()
+        removeResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -131,6 +139,7 @@ class OTPRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def result = otpRepo.save(otp)
@@ -138,6 +147,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         when:
         def containsResult = otpRepo.contains(user.id())
@@ -159,6 +169,7 @@ class OTPRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def result = otpRepo.save(otp)
@@ -166,6 +177,7 @@ class OTPRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         when:
         def findResult = otpRepo.findBy(otp)

@@ -27,6 +27,7 @@ class CompanyRepoTest extends Specification{
 
         then:
         save_result.success()
+        save_result.value() == 1
 
         and:
         def result = repo.findBy(company.id())
@@ -57,6 +58,7 @@ class CompanyRepoTest extends Specification{
 
         then:
         firstSaveResult.success()
+        firstSaveResult.value() == 1
         !secondSaveResult.success()
 
         where:
@@ -74,6 +76,7 @@ class CompanyRepoTest extends Specification{
         then: "verify success"
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         when: "update company's card limitations"
         company.specifyCardUsageLimitations(card_limits)
@@ -81,6 +84,7 @@ class CompanyRepoTest extends Specification{
 
         then: "verify success"
         updateResult.success()
+        updateResult.value() == 1
 
         and: "retrieve updated company"
         def result = repo.findBy(company.id())
@@ -104,6 +108,7 @@ class CompanyRepoTest extends Specification{
         then: "verify success"
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         when: "update company's card limitations"
         company.specifyCardUsageLimitations(card_limits)
@@ -128,6 +133,7 @@ class CompanyRepoTest extends Specification{
 
         then: "verify success"
         saveResult.success()
+        saveResult.value() == 1
 
         when: "update password"
         company.changePassword(password)
@@ -135,6 +141,7 @@ class CompanyRepoTest extends Specification{
 
         then: "verify success"
         updateResult.success()
+        updateResult.value() == 1
 
         and: "retrieve updated company"
         def findResult = repo.findBy(company.id())
@@ -150,6 +157,13 @@ class CompanyRepoTest extends Specification{
     }
 
     void "update company counter"() {
+        given:
+        def saveResult = repo.save(company)
+
+        expect:
+        saveResult.success()
+        saveResult.value() == 1
+
         when:
         company.incrementCounter()
         def result = repo.updateCounter(company)
@@ -157,12 +171,20 @@ class CompanyRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
     }
 
     void "update company verification"() {
+        given:
+        def saveResult = repo.save(company)
+
+        expect:
+        saveResult.success()
+        saveResult.value() == 1
+
         when:
         company.incrementCounter()
         company.enable()
@@ -171,6 +193,7 @@ class CompanyRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})
@@ -183,6 +206,7 @@ class CompanyRepoTest extends Specification{
         then:
         notThrown(Exception)
         result.success()
+        result.value() == 1
 
         when:
         def findResult = repo.findBy(company.id())

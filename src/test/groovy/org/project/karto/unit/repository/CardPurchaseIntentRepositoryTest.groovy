@@ -28,7 +28,11 @@ class CardPurchaseIntentRepositoryTest extends Specification {
     def "should save and retrieve CardPurchaseIntent by ID"() {
         given:
         def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        repository.save(intent)
+        def writeResult = repository.save(intent)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def result = repository.findBy(intent.id())
@@ -44,7 +48,11 @@ class CardPurchaseIntentRepositoryTest extends Specification {
         given:
         def intent = TestDataGenerator
                 .generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")), new StoreID(UUID.randomUUID()))
-        repository.save(intent)
+        def writeResult = repository.save(intent)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def result = repository.findBy(intent.id())
@@ -59,17 +67,22 @@ class CardPurchaseIntentRepositoryTest extends Specification {
     def "should update CardPurchaseIntent status and fee"() {
         given:
         def intent = TestDataGenerator.generateCardPurchaseIntent(new Amount(new BigDecimal("100.00")))
-        repository.save(intent)
+        def writeResult = repository.save(intent)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         Fee fee = new Fee(new BigDecimal("0.1"))
         intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("United Payment"), new ExternalPayeeDescription("Starbucks"))
-        repository.update(intent)
+        def updateResult = repository.update(intent)
         def updated = repository.findBy(intent.id())
 
         then:
         updated.success()
+        updateResult.value() == 1
         updated.value().status() == PurchaseStatus.SUCCESS
         updated.value().removedFee().get().rate() == fee.rate()
         updated.value().resultDate().isPresent()

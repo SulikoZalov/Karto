@@ -33,7 +33,11 @@ class CardVerificationOTPRepoTest extends Specification {
         given:
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
-        cardRepository.save(card)
+        def writeResult = cardRepository.save(card)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def saveResult = verificationOTPRepository.save(otp)
@@ -41,6 +45,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         where:
         card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
@@ -50,7 +55,11 @@ class CardVerificationOTPRepoTest extends Specification {
         given:
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
-        cardRepository.save(card)
+        def writeResult = cardRepository.save(card)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def saveResult1 = verificationOTPRepository.save(otp)
@@ -59,6 +68,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         saveResult1.success()
+        saveResult1.value() == 1
         !saveResult2.success()
 
         where:
@@ -69,7 +79,11 @@ class CardVerificationOTPRepoTest extends Specification {
         given:
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
-        cardRepository.save(card)
+        def writeResult = cardRepository.save(card)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def saveResult = verificationOTPRepository.save(otp)
@@ -77,6 +91,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         when:
         otp.confirm()
@@ -85,6 +100,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         confirmResult.success()
+        confirmResult.value() == 1
 
         where:
         card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
@@ -94,7 +110,11 @@ class CardVerificationOTPRepoTest extends Specification {
         given:
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
-        cardRepository.save(card)
+        def writeResult = cardRepository.save(card)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def saveResult = verificationOTPRepository.save(otp)
@@ -102,6 +122,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         when:
         def removeResult = verificationOTPRepository.remove(otp)
@@ -109,6 +130,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         removeResult.success()
+        removeResult.value() == 1
 
         where:
         card << (1..10).collect { TestDataGenerator.generateSelfBougthGiftCard()}
@@ -118,7 +140,11 @@ class CardVerificationOTPRepoTest extends Specification {
         given:
         def otp = CardVerificationOTP.of(card.id(),
                 hotpGenerator.generateHOTP(card.keyAndCounter().key(), card.keyAndCounter().counter()))
-        cardRepository.save(card)
+        def writeResult = cardRepository.save(card)
+
+        expect:
+        writeResult.success()
+        writeResult.value() == 1
 
         when:
         def saveResult = verificationOTPRepository.save(otp)
@@ -126,6 +152,7 @@ class CardVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         saveResult.success()
+        saveResult.value() == 1
 
         when:
         def findResult = verificationOTPRepository.findBy(otp)

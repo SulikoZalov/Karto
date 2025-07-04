@@ -31,6 +31,7 @@ class PaymentIntentRepositoryTest extends Specification {
 
         then:
         saveResult.success()
+        saveResult.value() == 1
 
         when:
         def findResult = repo.findBy(payment.id())
@@ -57,6 +58,7 @@ class PaymentIntentRepositoryTest extends Specification {
 
         then:
         saveResult.success()
+        saveResult.value() == 1
 
         when:
         def findResult = repo.findBy(payment.orderID())
@@ -69,7 +71,11 @@ class PaymentIntentRepositoryTest extends Specification {
     def "successfully update status and resultDate"() {
         given:
         def payment = createPaymentIntent()
-        repo.save(payment)
+        def saveResult = repo.save(payment)
+
+        expect:
+        saveResult.success()
+        saveResult.value() == 1
 
         when:
         payment.markAsSuccess(new ExternalPayeeDescription("some description"))
@@ -77,6 +83,7 @@ class PaymentIntentRepositoryTest extends Specification {
 
         then:
         updateResult.success()
+        updateResult.value() == 1
 
         when:
         def findResult = repo.findBy(payment.id())
@@ -90,7 +97,11 @@ class PaymentIntentRepositoryTest extends Specification {
     def "successfully update confirmation"() {
         given:
         def payment = createPaymentIntent()
-        repo.save(payment)
+        def saveResult = repo.save(payment)
+
+        expect:
+        saveResult.success()
+        saveResult.value() == 1
 
         when:
         payment.markAsSuccess(new ExternalPayeeDescription("some description"))
@@ -98,6 +109,7 @@ class PaymentIntentRepositoryTest extends Specification {
 
         then:
         updateResult.success()
+        updateResult.value() == 1
 
         when:
         Method confirm = PaymentIntent.getDeclaredMethod("confirm")
@@ -107,6 +119,7 @@ class PaymentIntentRepositoryTest extends Specification {
 
         then:
         confirmation.success()
+        confirmation.value() == 1
     }
 
     def "fail find by non-existent id"() {

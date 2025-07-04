@@ -28,6 +28,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
 
         then:
         companySaveResult.success()
+        companySaveResult.value() == 1
 
         when:
         def otpSaveResult = otpRepository.save(otp)
@@ -35,6 +36,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Throwable)
         otpSaveResult.success()
+        otpSaveResult.value() == 1
 
         when:
         def findBy = otpRepository.findBy(otp)
@@ -57,6 +59,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
 
         then:
         companySaveResult.success()
+        companySaveResult.value() == 1
 
         when:
         def otpSaveResult1 = otpRepository.save(otp)
@@ -65,6 +68,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Throwable)
         otpSaveResult1.success()
+        otpSaveResult1.value() == 1
         !otpSaveResult2.success()
 
         where:
@@ -78,6 +82,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
 
         then:
         companySaveResult.success()
+        companySaveResult.value() == 1
 
         when:
         def otpSaveResult = otpRepository.save(otp)
@@ -85,6 +90,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Throwable)
         otpSaveResult.success()
+        otpSaveResult.value() == 1
 
         when:
         otp.confirm()
@@ -93,6 +99,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         confirmResult.success()
+        confirmResult.value() == 1
 
         where:
         company << (1..10).collect({ TestDataGenerator.generateCompany()})
@@ -105,6 +112,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
 
         then:
         companySaveResult.success()
+        companySaveResult.value() == 1
 
         when:
         def otpSaveResult = otpRepository.save(otp)
@@ -112,6 +120,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Throwable)
         otpSaveResult.success()
+        otpSaveResult.value() == 1
 
         when:
         def removeResult = otpRepository.remove(otp)
@@ -119,6 +128,7 @@ class PartnerVerificationOTPRepoTest extends Specification {
         then:
         notThrown(Exception)
         removeResult.success()
+        removeResult.value() == 1
 
         where:
         company << (1..10).collect({ TestDataGenerator.generateCompany()})

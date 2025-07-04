@@ -30,6 +30,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -44,12 +45,14 @@ class UserRepoTest extends Specification{
 
         then:
         userSaveResult.success()
+        userSaveResult.value() == 1
 
         when:
         def refreshTokenSaveResult = repo.saveRefreshToken(token)
 
         then:
         refreshTokenSaveResult.success()
+        refreshTokenSaveResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -61,6 +64,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         user.registerPhoneForVerification(phone)
@@ -69,6 +73,7 @@ class UserRepoTest extends Specification{
         then:
         notThrown(Exception)
         updatePhoneResult.success()
+        updatePhoneResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUserWithoutPhoneAndPassword()})
@@ -81,6 +86,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         user.incrementCounter()
@@ -89,6 +95,7 @@ class UserRepoTest extends Specification{
         then:
         notThrown(Exception)
         updateCounterResult.success()
+        updateCounterResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -100,6 +107,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         user.incrementCounter()
@@ -111,6 +119,7 @@ class UserRepoTest extends Specification{
         then:
         notThrown(Exception)
         _2faResult.success()
+        _2faResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -122,6 +131,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         user.incrementCounter()
@@ -131,6 +141,7 @@ class UserRepoTest extends Specification{
         then:
         notThrown(Exception)
         verificationResult.success()
+        verificationResult.value() == 1
 
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
@@ -143,6 +154,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         user.incrementCounter()
@@ -153,6 +165,7 @@ class UserRepoTest extends Specification{
         then:
         notThrown(Exception)
         storageUpdateResult.success()
+        storageUpdateResult.value() == 1
         user.cashbackStorage().amount() == oldCash.add(amount.value())
 
         where:
@@ -166,6 +179,7 @@ class UserRepoTest extends Specification{
 
         then:
         result.success()
+        result.value() == 1
 
         when:
         def isExistsResult = repo.isEmailExists(new Email(user.personalData().email()))
