@@ -1,6 +1,7 @@
 package org.project.karto.util;
 
 import net.datafaker.Faker;
+import org.jetbrains.annotations.NotNull;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.domain.card.entities.CardPurchaseIntent;
@@ -83,12 +84,26 @@ public class TestDataGenerator {
 
     public static CompanyName generateCompanyName() {
         while (true) {
-            var companyName = Result.ofThrowable(() -> new CompanyName(faker.company().name()));
-            if (!companyName.success()) continue;
-            return companyName.value();
+            String base = faker.company().name()
+                    .replaceAll("[^\\p{L}\\p{N} .,'&()\\-+/]", "")
+                    .trim();
+
+            String suffix = String.valueOf(RANDOM.nextInt(1000, 9999));
+            String name = getCompanyName(base, suffix);
+
+            var companyName = Result.ofThrowable(() -> new CompanyName(name));
+            if (companyName.success()) return companyName.value();
         }
     }
-    
+
+    private static @NotNull String getCompanyName(String base, String suffix) {
+        String name = base + " " + suffix;
+
+        if (name.length() > 255)
+            name = name.substring(0, 251);
+        return name;
+    }
+
     public static String generateRegistrationCountryCode() {
         var codes = Locale.getISOCountries();
         return codes[faker.random().nextInt(codes.length)];
