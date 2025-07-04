@@ -11,5 +11,16 @@ CREATE TABLE payment_intent (
     is_confirmed BOOLEAN NOT NULL,
     description TEXT,
     fee NUMERIC NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT fk_payment_buyer_account FOREIGN KEY (buyer_id) REFERENCES user_account(id) ON DELETE CASCADE,
+    CONSTRAINT fk_payment_store_account FOREIGN KEY (store_id) REFERENCES companies(id) ON DELETE CASCADE,
+    CONSTRAINT fk_payment_card_account FOREIGN KEY (card_id) REFERENCES gift_card(id) ON DELETE CASCADE
 );
+
+CREATE INDEX payment_buyer_index ON payment_intent (buyer_id);
+
+CREATE INDEX payment_card_index ON payment_intent (card_id);
+
+CREATE INDEX payment_store_index ON payment_intent (store_id);
+
+CREATE UNIQUE INDEX payment_order_index ON payment_intent (order_id);

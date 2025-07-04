@@ -13,5 +13,12 @@ CREATE TABLE gift_card (
     expiration_date TIMESTAMP NOT NULL,
     last_usage TIMESTAMP NOT NULL,
     version BIGINT NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT fk_buyer_account FOREIGN KEY (buyer_id) REFERENCES user_account(id) ON DELETE CASCADE,
+    CONSTRAINT fk_owner_account FOREIGN KEY (owner_id) REFERENCES user_account(id) ON DELETE CASCADE,
+    CONSTRAINT fk_store_account FOREIGN KEY (store_id) REFERENCES companies(id) ON DELETE CASCADE
 );
+
+CREATE INDEX gift_card_buyer_index ON gift_card (buyer_id);
+
+CREATE INDEX gift_card_owner_index ON gift_card (owner_id);
