@@ -10,6 +10,8 @@ public record Email(String email) {
 
     private static final Pattern pattern = Pattern.compile(emailRegex);
 
+    public static final int MAX_SIZE = 256;
+
     public Email {
         validate(email);
     }
@@ -17,6 +19,7 @@ public record Email(String email) {
     public static void validate(String email) {
         if (Objects.isNull(email)) throw new IllegalArgumentException("Email can`t be null");
         if (email.isBlank()) throw new IllegalArgumentException("Email can`t be blank");
+        if (email.length() > MAX_SIZE) throw new IllegalArgumentException("Email is too long");
 
         String[] splitEmail = email.split("@");
 
