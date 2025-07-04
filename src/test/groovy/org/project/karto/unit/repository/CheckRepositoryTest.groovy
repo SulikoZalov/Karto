@@ -6,19 +6,18 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.entities.CardPurchaseIntent
 import org.project.karto.domain.card.enumerations.PaymentType
-import org.project.karto.domain.card.value_objects.BuyerID
-import org.project.karto.domain.card.value_objects.Currency
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
-import org.project.karto.domain.card.value_objects.PaymentSystem
-import org.project.karto.domain.card.value_objects.StoreID
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCCheckRepository
+import org.project.karto.infrastructure.repository.JDBCCompanyRepository
+import org.project.karto.infrastructure.repository.JDBCUserRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
 
+import static org.project.karto.util.TestDataGenerator.orderID
 
 @Dependent
 @QuarkusSpockTest
@@ -28,9 +27,16 @@ class CheckRepositoryTest extends Specification{
     @Inject
     JDBCCheckRepository repo
 
+    @Inject
+    JDBCCompanyRepository companyRepo
+
+    @Inject
+    JDBCUserRepository userRepo
+
     void "successful save"() {
         given:
-        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def userID = generateActivateAndSaveUser()
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(userID), null, 1L, new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
         def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
@@ -45,7 +51,7 @@ class CheckRepositoryTest extends Specification{
 
     void "fail saving twice"() {
         given:
-        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
         def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
@@ -64,7 +70,7 @@ class CheckRepositoryTest extends Specification{
 
     void "successful find by check id"() {
         given:
-        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
         def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
@@ -109,7 +115,7 @@ class CheckRepositoryTest extends Specification{
 
     void "successful find by buyer id"() {
         given:
-        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
         def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
@@ -154,7 +160,7 @@ class CheckRepositoryTest extends Specification{
 
     void "successful find by store id"() {
         given:
-        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), new StoreID(UUID.randomUUID()), 1L, new Amount(100))
+        def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(generateActivateAndSaveUser()), new StoreID(generateActivateAndSaveCompany()), orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
         def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
@@ -195,5 +201,21 @@ class CheckRepositoryTest extends Specification{
             found_check.cardID() == check.cardID()
         }
 
+    }
+
+    UUID generateActivateAndSaveUser() {
+        def user = TestDataGenerator.generateUser()
+        user.incrementCounter()
+        user.enable()
+        userRepo.save(user)
+        user.id()
+    }
+
+    UUID generateActivateAndSaveCompany() {
+        def company = TestDataGenerator.generateCompany()
+        company.incrementCounter()
+        company.enable()
+        companyRepo.save(company)
+        company.id()
     }
 }
