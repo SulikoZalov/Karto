@@ -13,7 +13,7 @@ public record UserActivitySnapshot(
         int consecutiveActiveDays,
         boolean lastUsageReachedMaximumCashbackRate) {
 
-    public static final Period DECAY = Period.ofDays(21);
+    public static final Period DECAY = Period.ofDays(14);
 
     public UserActivitySnapshot {
         if (userID == null) throw new IllegalArgumentException("User id cannot be null");
@@ -23,6 +23,8 @@ public record UserActivitySnapshot(
             throw new IllegalArgumentException("decaySpent must be non-negative");
         if (decayGiftCardsBought < 0) throw new IllegalArgumentException("decayGiftCardsBought must be non-negative");
         if (consecutiveActiveDays < 0) throw new IllegalArgumentException("consecutiveActiveDays must be non-negative");
+
+        if (consecutiveActiveDays > DECAY.getDays()) consecutiveActiveDays = DECAY.getDays();
     }
 
     public static UserActivitySnapshot defaultSnapshot(UUID userID) {

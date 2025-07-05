@@ -37,8 +37,6 @@ public class GiftCard {
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
     public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.015);            // 1.5%
     public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.075);           // 7.5%
-    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);                  // 50 units of spending
-    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0015);           // 0.15%
     public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.010);         // 0.10% for every consecutive usage day
 
     private GiftCard(
@@ -345,16 +343,13 @@ public class GiftCard {
     private BigDecimal calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
         if (snapshot.lastUsageReachedMaximumCashbackRate()) return DEFAULT_CASHBACK;
 
-        BigDecimal totalSpentFactor = snapshot.totalAmountSpent()
-                .divide(SPENT_DIVISOR, 4, RoundingMode.HALF_UP)
-                .multiply(SPENT_MULTIPLIER);
+        LoyaltyLevel level = LoyaltyLevel.determineLevel(snapshot);
+        BigDecimal loyaltyBonus = level.cashbackBonus();
+        BigDecimal activityBonus = BigDecimal.valueOf(snapshot.consecutiveActiveDays()).multiply(ACTIVITY_MULTIPLIER);
 
-        BigDecimal activityFactor = BigDecimal.valueOf(snapshot.consecutiveActiveDays())
-                .multiply(ACTIVITY_MULTIPLIER);
-
-        BigDecimal totalRate = DEFAULT_CASHBACK.add(totalSpentFactor).add(activityFactor);
-
+        BigDecimal totalRate = DEFAULT_CASHBACK.add(loyaltyBonus).add(activityBonus);
         if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) totalRate = MAX_CASHBACK_RATE;
+
         return spentAmount.multiply(totalRate).setScale(2, RoundingMode.HALF_UP);
     }
 
