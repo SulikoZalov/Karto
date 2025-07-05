@@ -35,11 +35,11 @@ public class GiftCard {
     private final Deque<KartoDomainEvent> events;
 
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
-    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.02);           // 2%
-    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.12);          // 12%
-    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);                // 50 units of spending
-    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0025);         // 0.25%
-    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.0003);      // 0.03% for every consecutive usage day
+    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.015);            // 1.5%
+    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.075);           // 7.5%
+    public static final BigDecimal SPENT_DIVISOR = BigDecimal.valueOf(50);                  // 50 units of spending
+    public static final BigDecimal SPENT_MULTIPLIER = BigDecimal.valueOf(0.0015);           // 0.15%
+    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.010);         // 0.10% for every consecutive usage day
 
     private GiftCard(
             CardID id,
@@ -343,6 +343,8 @@ public class GiftCard {
     }
 
     private BigDecimal calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
+        if (snapshot.lastUsageReachedMaximumCashbackRate()) return DEFAULT_CASHBACK;
+
         BigDecimal totalSpentFactor = snapshot.totalAmountSpent()
                 .divide(SPENT_DIVISOR, 4, RoundingMode.HALF_UP)
                 .multiply(SPENT_MULTIPLIER);

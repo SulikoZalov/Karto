@@ -92,7 +92,7 @@ class CheckRepositoryTest extends Specification {
                         new BigDecimal("5000"),
                         60,
                         LocalDateTime.now(),
-                        10
+                        10, false
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,

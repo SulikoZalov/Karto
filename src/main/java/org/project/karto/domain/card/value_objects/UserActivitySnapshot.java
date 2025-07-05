@@ -9,7 +9,8 @@ public record UserActivitySnapshot(
         BigDecimal totalAmountSpent,
         long totalGiftCardsBought,
         LocalDateTime lastTransactionDate,
-        int consecutiveActiveDays) {
+        int consecutiveActiveDays,
+        boolean lastUsageReachedMaximumCashbackRate) {
 
     public UserActivitySnapshot {
         if (userID == null) throw new IllegalArgumentException("User id cannot be null");
@@ -22,6 +23,6 @@ public record UserActivitySnapshot(
     }
 
     public static UserActivitySnapshot defaultSnapshot(UUID userID) {
-        return new UserActivitySnapshot(userID, BigDecimal.ZERO, 0, LocalDateTime.now(), 0);
+        return new UserActivitySnapshot(userID, BigDecimal.ZERO, 0, LocalDateTime.now(), 0, false);
     }
 }

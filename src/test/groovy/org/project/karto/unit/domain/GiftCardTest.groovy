@@ -402,7 +402,7 @@ class GiftCardTest extends Specification {
                 new BigDecimal("5000"),
                 1000,
                 LocalDateTime.now(),
-                10
+                10, false
         )
 
         when: "Applying the transaction"
@@ -459,7 +459,7 @@ class GiftCardTest extends Specification {
                 new BigDecimal("5000"),
                 1000,
                 LocalDateTime.now(),
-                10
+                10, false
         )
 
         when: "Trying to apply transaction with invalid parameters"
@@ -500,7 +500,7 @@ class GiftCardTest extends Specification {
                 new BigDecimal("5000"),
                 1000,
                 LocalDateTime.now(),
-                10
+                10, false
         )
 
         when: "Applying the transaction"

@@ -169,7 +169,7 @@ class GiftCardRepoTest extends Specification {
                         new BigDecimal("1000"),
                         30,
                         LocalDateTime.now(),
-                        5
+                        5, false
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
@@ -224,7 +224,7 @@ class GiftCardRepoTest extends Specification {
                         new BigDecimal("5000"),
                         60,
                         LocalDateTime.now(),
-                        10
+                        10, false
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
