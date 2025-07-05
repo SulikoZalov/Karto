@@ -11,7 +11,6 @@ import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,9 +34,9 @@ public class GiftCard {
     private final Deque<KartoDomainEvent> events;
 
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
-    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.015);            // 1.5%
-    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.075);           // 7.5%
-    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.010);         // 0.10% for every consecutive usage day
+    public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.01);            // 1%
+    public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.035);           // 3.5%
+    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.001);         // 0.01% for every consecutive usage day
 
     private GiftCard(
             CardID id,
@@ -350,7 +349,7 @@ public class GiftCard {
         BigDecimal totalRate = DEFAULT_CASHBACK.add(loyaltyBonus).add(activityBonus);
         if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) totalRate = MAX_CASHBACK_RATE;
 
-        return spentAmount.multiply(totalRate).setScale(2, RoundingMode.HALF_UP);
+        return spentAmount.multiply(totalRate);
     }
 
     @Override

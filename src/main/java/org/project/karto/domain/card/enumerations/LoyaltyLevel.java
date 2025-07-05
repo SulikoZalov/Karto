@@ -6,11 +6,11 @@ import java.math.BigDecimal;
 
 public enum LoyaltyLevel {
     NONE(BigDecimal.ZERO, BigDecimal.ZERO, "Beginner"),
-    BRONZE(BigDecimal.valueOf(100), BigDecimal.valueOf(0.005), "Bronze Member"),
-    SILVER(BigDecimal.valueOf(250), BigDecimal.valueOf(0.010), "Silver Member"),
-    GOLD(BigDecimal.valueOf(500), BigDecimal.valueOf(0.015), "Gold Member"),
-    PLATINUM(BigDecimal.valueOf(1000), BigDecimal.valueOf(0.020), "Platinum Member"),
-    DIAMOND(BigDecimal.valueOf(2000), BigDecimal.valueOf(0.025), "Diamond Member");
+    BRONZE(BigDecimal.valueOf(100), BigDecimal.valueOf(0.005), "Bronze Member"),                // 0.5%
+    SILVER(BigDecimal.valueOf(250), BigDecimal.valueOf(0.010), "Silver Member"),                // 0.10%
+    GOLD(BigDecimal.valueOf(500), BigDecimal.valueOf(0.015), "Gold Member"),                    // 0.15%
+    PLATINUM(BigDecimal.valueOf(1000), BigDecimal.valueOf(0.020), "Platinum Member"),           // 0.20%
+    DIAMOND(BigDecimal.valueOf(2000), BigDecimal.valueOf(0.025), "Diamond Member");             // 0.25%
 
     private static final LoyaltyLevel[] LEVELS = values();
     private final BigDecimal minDecaySpent;
