@@ -5,6 +5,8 @@ import org.project.karto.domain.card.events.CashbackEvent;
 import org.project.karto.domain.card.value_objects.Currency;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.interfaces.KartoDomainEvent;
 import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
@@ -73,7 +75,7 @@ public class GiftCard {
                                           String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
-        if (storeID == null) throw new IllegalArgumentException("StoreID cannot be null for store-specific gift cards.");
+        if (storeID == null) throw new IllegalDomainArgumentException("StoreID cannot be null for store-specific gift cards.");
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
@@ -87,7 +89,7 @@ public class GiftCard {
                                          String secretKey, CardUsageLimitations cardUsageLimitations) {
 
         validateInputs(buyerID, balance, secretKey, cardUsageLimitations);
-        if (storeID == null) throw new IllegalArgumentException("StoreID cannot be null for store-specific gift cards.");
+        if (storeID == null) throw new IllegalDomainArgumentException("StoreID cannot be null for store-specific gift cards.");
 
         LocalDateTime creationDate = LocalDateTime.now();
         LocalDateTime expirationDate = creationDate.plus(cardUsageLimitations.expirationPeriod());
@@ -126,10 +128,10 @@ public class GiftCard {
     private static void validateInputs(BuyerID buyerID, Balance balance, String secretKey,
                                        CardUsageLimitations cardUsageLimitations) {
 
-        if (buyerID == null) throw new IllegalArgumentException("Buyer id can`t be null");
-        if (balance == null) throw new IllegalArgumentException("Balance can`t be null");
-        if (secretKey == null) throw new IllegalArgumentException("Secret key can`t be null");
-        if (cardUsageLimitations == null) throw new IllegalArgumentException("Card limitations can`t be null");
+        if (buyerID == null) throw new IllegalDomainArgumentException("Buyer id can`t be null");
+        if (balance == null) throw new IllegalDomainArgumentException("Balance can`t be null");
+        if (secretKey == null) throw new IllegalDomainArgumentException("Secret key can`t be null");
+        if (cardUsageLimitations == null) throw new IllegalDomainArgumentException("Card limitations can`t be null");
     }
 
     public static GiftCard fromRepository(
@@ -241,11 +243,11 @@ public class GiftCard {
     }
 
     public void activate() {
-        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t activate expired card");
-        if (isVerified()) throw new IllegalStateException("You can`t enable already active card");
-        if (ownerID == null) throw new IllegalStateException("You can`t activate account without owner id.");
+        if (markExpiredIfNeeded()) throw new IllegalDomainStateException("You can`t activate expired card");
+        if (isVerified()) throw new IllegalDomainStateException("You can`t enable already active card");
+        if (ownerID == null) throw new IllegalDomainStateException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
-            throw new IllegalStateException("Only cards in PENDING state can be verified.");
+            throw new IllegalDomainStateException("Only cards in PENDING state can be verified.");
 
         this.giftCardStatus = GiftCardStatus.ACTIVE;
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
@@ -253,16 +255,16 @@ public class GiftCard {
     }
 
     public void activate(OwnerID ownerID) {
-        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t activate expired card.");
-        if (isVerified()) throw new IllegalStateException("You can`t enable already active card.");
-        if (ownerID == null) throw new IllegalArgumentException("You can`t activate account without owner id.");
+        if (markExpiredIfNeeded()) throw new IllegalDomainStateException("You can`t activate expired card.");
+        if (isVerified()) throw new IllegalDomainStateException("You can`t enable already active card.");
+        if (ownerID == null) throw new IllegalDomainArgumentException("You can`t activate account without owner id.");
         if (giftCardStatus != GiftCardStatus.PENDING)
-            throw new IllegalStateException("Only cards in PENDING state can be verified.");
+            throw new IllegalDomainStateException("Only cards in PENDING state can be verified.");
 
         if (this.ownerID != null)
-            throw new IllegalStateException("You can`t change owner id. It can be specified only once.");
+            throw new IllegalDomainStateException("You can`t change owner id. It can be specified only once.");
         if (ownerID.value().equals(this.buyerID.value()))
-            throw new IllegalStateException("The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID");
+            throw new IllegalDomainStateException("The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID");
 
         this.ownerID = ownerID;
         this.giftCardStatus = GiftCardStatus.ACTIVE;
@@ -271,17 +273,17 @@ public class GiftCard {
     }
 
     public synchronized PaymentIntent initializeTransaction(Amount amount, long orderID) {
-        if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
-        if (markExpiredIfNeeded()) throw new IllegalStateException("You can`t use expired card");
+        if (amount == null) throw new IllegalDomainArgumentException("Amount can`t be null");
+        if (markExpiredIfNeeded()) throw new IllegalDomainStateException("You can`t use expired card");
 
-        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalStateException("Card is not activated");
-        if (countOfUses >= maxCountOfUses) throw new IllegalArgumentException("Card reached max count of uses");
+        if (giftCardStatus != GiftCardStatus.ACTIVE) throw new IllegalDomainStateException("Card is not activated");
+        if (countOfUses >= maxCountOfUses) throw new IllegalDomainArgumentException("Card reached max count of uses");
 
         BigDecimal fee = calculateInternalFee(amount);
         Amount totalAmount = new Amount(amount.value().add(fee));
 
         if (!hasSufficientBalance(totalAmount))
-            throw new IllegalArgumentException("There is not enough money on the balance");
+            throw new IllegalDomainArgumentException("There is not enough money on the balance");
 
         countOfUses++;
         incrementVersion();
@@ -297,17 +299,17 @@ public class GiftCard {
         required("paymentType", paymentType);
         required("paymentSystem", paymentSystem);
 
-        if (!intent.cardID().equals(id)) throw new IllegalArgumentException("Payment intent do not match the card");
-        if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalArgumentException("UserID do not match");
+        if (!intent.cardID().equals(id)) throw new IllegalDomainArgumentException("Payment intent do not match the card");
+        if (!activitySnapshot.userID().equals(ownerID.value())) throw new IllegalDomainArgumentException("UserID do not match");
 
         if (intent.isConfirmed())
-            throw new IllegalStateException("Payment intent is already confirmed");
+            throw new IllegalDomainStateException("Payment intent is already confirmed");
 
         intent.confirm();
         if (intent.status() != PurchaseStatus.SUCCESS) {
             countOfUses--;
             incrementVersion();
-            throw new IllegalStateException("Payment intent is not successful");
+            throw new IllegalDomainStateException("Payment intent is not successful");
         }
 
         balance = calculateBalance(intent.totalAmount());
@@ -326,7 +328,7 @@ public class GiftCard {
     }
 
     private boolean hasSufficientBalance(Amount amount) {
-        if (amount == null) throw new IllegalArgumentException("Amount can`t be null");
+        if (amount == null) throw new IllegalDomainArgumentException("Amount can`t be null");
         return balance.value().compareTo(amount.value()) >= 0;
     }
 

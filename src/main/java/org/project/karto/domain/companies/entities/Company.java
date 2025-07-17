@@ -1,5 +1,7 @@
 package org.project.karto.domain.companies.entities;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.value_objects.CompanyName;
@@ -35,17 +37,17 @@ public class Company {
             CompanyStatus companyStatus,
             CardUsageLimitations cardUsageLimitation) {
 
-        if (id == null) throw new IllegalArgumentException("id must not be null");
-        if (registrationNumber == null) throw new IllegalArgumentException("registrationNumber must not be null");
-        if (companyName == null) throw new IllegalArgumentException("companyName must not be null");
-        if (email == null) throw new IllegalArgumentException("email must not be null");
-        if (phone == null) throw new IllegalArgumentException("phone must not be null");
-        if (creationDate == null) throw new IllegalArgumentException("creationDate must not be null");
-        if (lastUpdated == null) throw new IllegalArgumentException("lastUpdate must not be null");
-        if (password == null) throw new IllegalArgumentException("password must not be null");
-        if (keyAndCounter == null) throw new IllegalArgumentException("keyAndCounter must not be null");
-        if (companyStatus == null) throw new IllegalArgumentException("companyStatus must not be null");
-        if (cardUsageLimitation == null) throw new IllegalArgumentException("cardUsagesLimitation must not be null");
+        if (id == null) throw new IllegalDomainArgumentException("id must not be null");
+        if (registrationNumber == null) throw new IllegalDomainArgumentException("registrationNumber must not be null");
+        if (companyName == null) throw new IllegalDomainArgumentException("companyName must not be null");
+        if (email == null) throw new IllegalDomainArgumentException("email must not be null");
+        if (phone == null) throw new IllegalDomainArgumentException("phone must not be null");
+        if (creationDate == null) throw new IllegalDomainArgumentException("creationDate must not be null");
+        if (lastUpdated == null) throw new IllegalDomainArgumentException("lastUpdate must not be null");
+        if (password == null) throw new IllegalDomainArgumentException("password must not be null");
+        if (keyAndCounter == null) throw new IllegalDomainArgumentException("keyAndCounter must not be null");
+        if (companyStatus == null) throw new IllegalDomainArgumentException("companyStatus must not be null");
+        if (cardUsageLimitation == null) throw new IllegalDomainArgumentException("cardUsagesLimitation must not be null");
 
         this.id = id;
         this.registrationNumber = registrationNumber;
@@ -137,9 +139,9 @@ public class Company {
 
     public void enable() {
         if (isActive())
-            throw new IllegalStateException("You can`t active already verified user.");
+            throw new IllegalDomainStateException("You can`t active already verified user.");
         if (keyAndCounter.counter() == 0)
-            throw new IllegalStateException("It is prohibited to activate an account that has not been verified.");
+            throw new IllegalDomainStateException("It is prohibited to activate an account that has not been verified.");
 
         this.companyStatus = CompanyStatus.ACTIVE;
         touch();
@@ -152,9 +154,9 @@ public class Company {
 
     public void changePassword(Password password) {
         if (password == null)
-            throw new IllegalArgumentException("Password can`t be null");
+            throw new IllegalDomainArgumentException("Password can`t be null");
         if (companyStatus != CompanyStatus.ACTIVE)
-            throw new IllegalArgumentException("Company account is not verified");
+            throw new IllegalDomainArgumentException("Company account is not verified");
 
         this.password = password;
         touch();
@@ -166,9 +168,9 @@ public class Company {
 
     public void specifyCardUsageLimitations(CardUsageLimitations cardUsageLimitations) {
         if (cardUsageLimitations == null)
-            throw new IllegalArgumentException("Card usage limitations can`t be null");
+            throw new IllegalDomainArgumentException("Card usage limitations can`t be null");
         if (companyStatus != CompanyStatus.ACTIVE)
-            throw new IllegalArgumentException("Company account is not verified");
+            throw new IllegalDomainArgumentException("Company account is not verified");
 
         this.cardUsageLimitation = cardUsageLimitations;
         touch();

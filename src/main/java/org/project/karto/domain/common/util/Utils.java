@@ -1,11 +1,15 @@
 package org.project.karto.domain.common.util;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 public class Utils {
 
     private Utils() {}
 
-    public static void required(String fieldName, Object value) {
+    public static <T> T required(String fieldName, T value) {
         if (value == null)
-            throw new IllegalArgumentException(String.format("%s must not be null", fieldName));
+            throw new IllegalDomainArgumentException(String.format("%s must not be null", fieldName));
+
+        return value;
     }
 }

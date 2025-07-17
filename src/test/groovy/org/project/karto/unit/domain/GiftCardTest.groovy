@@ -8,6 +8,8 @@ import org.project.karto.domain.card.enumerations.GiftCardType
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.events.CashbackEvent
 import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.domain.common.value_objects.KeyAndCounter
 import org.project.karto.util.TestDataGenerator
@@ -106,7 +108,7 @@ class GiftCardTest extends Specification {
         card.activate()
 
         then:
-        def e = thrown(IllegalStateException)
+        def e = thrown(IllegalDomainStateException)
         e.getMessage() == "You can`t activate account without owner id."
     }
 
@@ -118,7 +120,7 @@ class GiftCardTest extends Specification {
         card.activate(null)
 
         then:
-        def e = thrown(IllegalArgumentException)
+        def e = thrown(IllegalDomainArgumentException)
         e.getLocalizedMessage() == "You can`t activate account without owner id."
     }
 
@@ -132,7 +134,7 @@ class GiftCardTest extends Specification {
         card.activate(ownerID)
 
         then:
-        def e = thrown(IllegalStateException)
+        def e = thrown(IllegalDomainStateException)
         e.getMessage() == "You can`t enable already active card."
     }
 
@@ -146,7 +148,7 @@ class GiftCardTest extends Specification {
         card.activate(newOwnerID)
 
         then:
-        thrown(IllegalStateException)
+        thrown(IllegalDomainStateException)
     }
 
     def "should thrown an exception: buyer can`t be an owner when card bought as a gift"() {
@@ -158,7 +160,7 @@ class GiftCardTest extends Specification {
         card.activate(ownerID)
 
         then:
-        def e = thrown(IllegalStateException)
+        def e = thrown(IllegalDomainStateException)
         e.getMessage() == "The card was purchased as a gift, the owner's ID cannot be equal to the buyer's ID"
     }
 
@@ -283,12 +285,12 @@ class GiftCardTest extends Specification {
     }
 
     @Unroll
-    def "should throw IllegalArgumentException when creating gift card with invalid parameters: #scenario"() {
+    def "should throw org.project.karto.domain.common.exceptions.IllegalDomainArgumentException when creating gift card with invalid parameters: #scenario"() {
         when: "Creating a gift card with invalid parameters"
         creationMethod.call()
 
-        then: "An IllegalArgumentException should be thrown"
-        thrown(IllegalArgumentException)
+        then: "An IllegalDomainArgumentException should be org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        thrown(IllegalDomainArgumentException)
 
         where:
         scenario                              | creationMethod
@@ -370,21 +372,21 @@ class GiftCardTest extends Specification {
             def c = TestDataGenerator.generateSelfBougthGiftCard()
             c.activate()
             return c
-        }                                                                 | null                      | IllegalArgumentException
+        }                                                                 | null                      | IllegalDomainArgumentException
         "not activated card"                  | {
             TestDataGenerator.generateSelfBougthGiftCard()
-        }                                                                 | new Amount(BigDecimal.TEN) | IllegalStateException
+        }                                                                 | new Amount(BigDecimal.TEN) | IllegalDomainStateException
         "max uses reached"                    | {
             def c = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")), 1)
             c.activate()
             c.initializeTransaction(new Amount(new BigDecimal("500")), 1)
             return c
-        }                                                                 | new Amount(new BigDecimal("500")) | IllegalArgumentException
+        }                                                                 | new Amount(new BigDecimal("500")) | IllegalDomainArgumentException
         "insufficient balance"                | {
             def c = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("100")))
             c.activate()
             return c
-        }                                                                 | new Amount(new BigDecimal("200")) | IllegalArgumentException
+        }                                                                 | new Amount(new BigDecimal("200")) | IllegalDomainArgumentException
     }
 
     def "should apply transaction successfully and calculate cashback"() {
@@ -476,13 +478,13 @@ class GiftCardTest extends Specification {
 
         where:
         scenario                              | invalidIntent                                                                 | expectedException
-        "null payment intent"                | { g, p -> null }                                                             | IllegalArgumentException
+        "null payment intent"                | { g, p -> null }                                                             | IllegalDomainArgumentException
         "intent for different card"          | { g, p ->
             def otherCard = TestDataGenerator.generateSelfBougthGiftCard()
             otherCard.activate()
             otherCard.initializeTransaction(new Amount(new BigDecimal("100")), 54321)
-        }                                                                   | IllegalArgumentException
-        "userID mismatch"                    | { g, p -> p }                                                                 | IllegalArgumentException
+        }                                                                   | IllegalDomainArgumentException
+        "userID mismatch"                    | { g, p -> p }                                                                 | IllegalDomainArgumentException
     }
 
     def "should calculate cashback correctly with maximum cap"() {

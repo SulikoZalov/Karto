@@ -8,6 +8,7 @@ import jakarta.ws.rs.WebApplicationException
 import org.eclipse.microprofile.config.ConfigProvider
 import org.project.karto.application.dto.auth.CompanyRegistrationForm
 import org.project.karto.application.service.AdminService
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
 import org.project.karto.domain.common.value_objects.Email
 import org.project.karto.domain.common.value_objects.Phone
 import org.project.karto.domain.companies.value_objects.CompanyName
@@ -95,7 +96,7 @@ class AdminServiceTest extends Specification {
         service.registerPartner(form)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
     }
 
     void "fail registration: company name invalid"() {
@@ -116,7 +117,7 @@ class AdminServiceTest extends Specification {
         service.registerPartner(form)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
     }
 
     void "fail registration: company name exists"() {

@@ -1,5 +1,7 @@
 package org.project.karto.domain.card.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.math.BigDecimal;
@@ -8,8 +10,8 @@ import java.math.RoundingMode;
 public record Fee(BigDecimal rate) {
 
     public Fee {
-        if (rate == null) throw new IllegalArgumentException("Fee rate cannot be null");
-        if (rate.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Fee rate cannot be negative");
+        if (rate == null) throw new IllegalDomainArgumentException("Fee rate cannot be null");
+        if (rate.compareTo(BigDecimal.ZERO) < 0) throw new IllegalDomainArgumentException("Fee rate cannot be negative");
     }
 
     public static Fee defaultFee() {
@@ -24,10 +26,10 @@ public record Fee(BigDecimal rate) {
      *
      * @param amount the base amount on which the fee is calculated (must not be null)
      * @return the calculated fee as an {@link Amount}
-     * @throws IllegalArgumentException if {@code amount} is null
+     * @throws IllegalDomainArgumentException if {@code amount} is null
      */
     public Amount calculateFee(Amount amount) {
-        if (amount == null) throw new IllegalArgumentException("Amount cannot be null");
+        if (amount == null) throw new IllegalDomainArgumentException("Amount cannot be null");
 
         BigDecimal feeValue = amount.value()
                 .multiply(rate)
@@ -46,15 +48,15 @@ public record Fee(BigDecimal rate) {
      *
      * @param targetAmount the desired net amount after fee deduction (must not be null)
      * @return the gross amount needed to achieve the target net amount
-     * @throws IllegalArgumentException if {@code targetAmount} is null
-     * @throws IllegalStateException if the fee rate is 100% or more (divisor ≤ 0)
+     * @throws IllegalDomainArgumentException if {@code targetAmount} is null
+     * @throws IllegalDomainStateException if the fee rate is 100% or more (divisor ≤ 0)
      */
     public Amount grossAmountForNet(Amount targetAmount) {
-        if (targetAmount == null) throw new IllegalArgumentException("Target amount cannot be null");
+        if (targetAmount == null) throw new IllegalDomainArgumentException("Target amount cannot be null");
 
         BigDecimal divisor = BigDecimal.ONE.subtract(rate);
         if (divisor.compareTo(BigDecimal.ZERO) <= 0)
-            throw new IllegalStateException("Fee rate is too high for calculation (divisor <= 0)");
+            throw new IllegalDomainStateException("Fee rate is too high for calculation (divisor <= 0)");
 
         BigDecimal gross = targetAmount.value()
                 .divide(divisor, 2, RoundingMode.UP);

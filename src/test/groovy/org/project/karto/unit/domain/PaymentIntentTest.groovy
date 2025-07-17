@@ -3,6 +3,7 @@ package org.project.karto.unit.domain
 import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
 import org.project.karto.domain.common.value_objects.Amount
 import spock.lang.Specification
 
@@ -56,7 +57,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "BuyerID cannot be null"
     }
 
@@ -77,7 +78,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "CardID cannot be null"
     }
 
@@ -98,7 +99,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "TotalAmount cannot be null"
     }
 
@@ -119,7 +120,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "OrderID cannot be lower than or equal zero"
     }
 
@@ -140,7 +141,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "Fee amount cannot be null"
     }
 
@@ -190,7 +191,7 @@ class PaymentIntentTest extends Specification {
         payment.markAsCancel()
 
         then:
-        def ex = thrown(IllegalArgumentException)
+        def ex = thrown(IllegalDomainArgumentException)
         ex.message == "You can`t change status twice"
     }
 
@@ -223,7 +224,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "You can`t confirm payment intent with PENDING status"
     }
 
@@ -244,7 +245,7 @@ class PaymentIntentTest extends Specification {
 
         then:
         def ex = thrown(InvocationTargetException)
-        ex.cause instanceof IllegalArgumentException
+        ex.cause instanceof IllegalDomainArgumentException
         ex.cause.message == "PaymentIntent is already confirmed"
     }
 

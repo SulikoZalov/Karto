@@ -1,5 +1,8 @@
 package org.project.karto.domain.companies.entities;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -48,14 +51,14 @@ public class PartnerVerificationOTP {
     }
 
     public static void validate(String otp) {
-        if (otp == null) throw new IllegalArgumentException("OTP is null");
-        if (otp.isBlank()) throw new IllegalArgumentException("OTP is blank");
+        if (otp == null) throw new IllegalDomainArgumentException("OTP is null");
+        if (otp.isBlank()) throw new IllegalDomainArgumentException("OTP is blank");
         if (otp.length() < MIN_SIZE || otp.length() > MAX_SIZE)
-            throw new IllegalArgumentException("Invalid OTP length");
+            throw new IllegalDomainArgumentException("Invalid OTP length");
 
         boolean containsNotDigitCharacters = otp.chars().anyMatch(codePoint -> !Character.isDigit(codePoint));
         if (containsNotDigitCharacters)
-            throw new IllegalArgumentException("OTP must contains only digits");
+            throw new IllegalDomainArgumentException("OTP must contains only digits");
     }
 
     public String otp() {
@@ -72,10 +75,10 @@ public class PartnerVerificationOTP {
 
     public void confirm() {
         if (isConfirmed)
-            throw new IllegalArgumentException("OTP is already confirmed");
+            throw new IllegalDomainArgumentException("OTP is already confirmed");
 
         if (isExpired())
-            throw new IllegalStateException("You can`t confirm expired otp");
+            throw new IllegalDomainStateException("You can`t confirm expired otp");
 
         this.isConfirmed = true;
     }

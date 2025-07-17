@@ -1,6 +1,8 @@
 package org.project.karto.unit.domain
 
 import org.project.karto.domain.card.value_objects.Fee
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException
 import org.project.karto.domain.common.value_objects.Amount
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -17,7 +19,7 @@ class FeeTest extends Specification {
         new Fee(null)
 
         then:
-        IllegalArgumentException e = thrown()
+        IllegalDomainArgumentException e = thrown()
         e.message == "Fee rate cannot be null"
     }
 
@@ -26,7 +28,7 @@ class FeeTest extends Specification {
         new Fee(BigDecimal.valueOf(-0.05))
 
         then:
-        IllegalArgumentException e = thrown()
+        IllegalDomainArgumentException e = thrown()
         e.message == "Fee rate cannot be negative"
     }
 
@@ -59,7 +61,7 @@ class FeeTest extends Specification {
         fee.calculateFee(null)
 
         then:
-        IllegalArgumentException e = thrown()
+        IllegalDomainArgumentException e = thrown()
         e.message == "Amount cannot be null"
     }
 
@@ -87,7 +89,7 @@ class FeeTest extends Specification {
         fee.grossAmountForNet(null)
 
         then:
-        IllegalArgumentException e = thrown()
+        IllegalDomainArgumentException e = thrown()
         e.message == "Target amount cannot be null"
     }
 
@@ -99,7 +101,7 @@ class FeeTest extends Specification {
         fee.grossAmountForNet(new Amount(BigDecimal.valueOf(100)))
 
         then:
-        IllegalStateException e = thrown()
+        IllegalDomainStateException e = thrown()
         e.message == "Fee rate is too high for calculation (divisor <= 0)"
 
         where:

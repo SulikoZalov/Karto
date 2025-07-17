@@ -1,6 +1,8 @@
 package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.value_objects.CardID;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -57,10 +59,10 @@ public class CardVerificationOTP {
 
     public void confirm() {
         if (isConfirmed)
-            throw new IllegalArgumentException("OTP is already confirmed");
+            throw new IllegalDomainArgumentException("OTP is already confirmed");
 
         if (isExpired())
-            throw new IllegalStateException("You can`t confirm expired otp");
+            throw new IllegalDomainStateException("You can`t confirm expired otp");
 
         this.isConfirmed = true;
     }

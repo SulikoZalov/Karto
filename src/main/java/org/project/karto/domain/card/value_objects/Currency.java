@@ -1,5 +1,7 @@
 package org.project.karto.domain.card.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 import static org.project.karto.domain.common.util.Utils.required;
 
 public record Currency(String code) {
@@ -10,7 +12,7 @@ public record Currency(String code) {
         try {
             java.util.Currency.getInstance(upperCode);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid currency code: " + code, e);
+            throw new IllegalDomainArgumentException("Invalid currency code: " + code, e);
         }
 
         code = upperCode;

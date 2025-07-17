@@ -1,6 +1,8 @@
 package org.project.karto.domain.user.entities;
 
 import org.project.karto.domain.common.enumerations.Role;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
@@ -33,12 +35,12 @@ public class User {
             LocalDateTime creationDate,
             LocalDateTime lastUpdated) {
 
-        if (id == null) throw new IllegalArgumentException("id must not be null");
-        if (personalData == null) throw new IllegalArgumentException("personalData must not be null");
-        if (keyAndCounter == null) throw new IllegalArgumentException("keyAndCounter must not be null");
-        if (cashbackStorage == null) throw new IllegalArgumentException("cashbackStorage must not be null");
-        if (creationDate == null) throw new IllegalArgumentException("creationDate must not be null");
-        if (lastUpdated == null) throw new IllegalArgumentException("lastUpdated must not be null");
+        if (id == null) throw new IllegalDomainArgumentException("id must not be null");
+        if (personalData == null) throw new IllegalDomainArgumentException("personalData must not be null");
+        if (keyAndCounter == null) throw new IllegalDomainArgumentException("keyAndCounter must not be null");
+        if (cashbackStorage == null) throw new IllegalDomainArgumentException("cashbackStorage must not be null");
+        if (creationDate == null) throw new IllegalDomainArgumentException("creationDate must not be null");
+        if (lastUpdated == null) throw new IllegalDomainArgumentException("lastUpdated must not be null");
 
         this.id = id;
         this.personalData = personalData;
@@ -96,10 +98,10 @@ public class User {
 
     public void registerPhoneForVerification(Phone phone) {
         if (phone == null)
-            throw new IllegalArgumentException("Phone is null");
+            throw new IllegalDomainArgumentException("Phone is null");
 
         if (this.personalData.phone().isPresent())
-            throw new IllegalArgumentException("Phone number already registered.");
+            throw new IllegalDomainArgumentException("Phone number already registered.");
 
         this.personalData = new PersonalData(
                 personalData().firstname(),
@@ -117,19 +119,19 @@ public class User {
 
     public void enable() {
         if (isVerified)
-            throw new IllegalStateException("You can`t active already verified user.");
+            throw new IllegalDomainStateException("You can`t active already verified user.");
         if (keyAndCounter.counter() == 0)
-            throw new IllegalStateException("It is prohibited to activate an account that has not been verified.");
+            throw new IllegalDomainStateException("It is prohibited to activate an account that has not been verified.");
         this.isVerified = true;
     }
 
     public void enable2FA() {
         if (!isVerified)
-            throw new IllegalStateException("You can`t enable 2FA on not verified account");
+            throw new IllegalDomainStateException("You can`t enable 2FA on not verified account");
         if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
-            throw new IllegalStateException("Counter need to be incremented");
+            throw new IllegalDomainStateException("Counter need to be incremented");
         if (is2FAEnabled)
-            throw new IllegalStateException("You can`t activate 2FA twice");
+            throw new IllegalDomainStateException("You can`t activate 2FA twice");
 
         this.is2FAEnabled = true;
     }
@@ -140,7 +142,7 @@ public class User {
 
     public void disable() {
         if (!isVerified)
-            throw new IllegalStateException("You can't deactivate a user who is already deactivated.");
+            throw new IllegalDomainStateException("You can't deactivate a user who is already deactivated.");
         this.isVerified = false;
     }
 
@@ -158,22 +160,22 @@ public class User {
 
     public void addCashback(Amount amount) {
         if (amount == null)
-            throw new IllegalArgumentException("Amount can`t be null");
+            throw new IllegalDomainArgumentException("Amount can`t be null");
         if (!isVerified)
-            throw new IllegalArgumentException("Account is not verified");
+            throw new IllegalDomainArgumentException("Account is not verified");
 
         cashbackStorage = new CashbackStorage(cashbackStorage.amount().add(amount.value()));
     }
 
     public void removeCashFromStorage(Amount amount) {
         if (amount == null)
-            throw new IllegalArgumentException("Amount can`t be null");
+            throw new IllegalDomainArgumentException("Amount can`t be null");
         if (!isVerified)
-            throw new IllegalArgumentException("Account is not verified");
+            throw new IllegalDomainArgumentException("Account is not verified");
 
         BigDecimal remainingSum = cashbackStorage.amount().subtract(amount.value());
         if (remainingSum.compareTo(BigDecimal.ZERO) < 0)
-            throw new IllegalArgumentException("Insufficient funds in cashback storage");
+            throw new IllegalDomainArgumentException("Insufficient funds in cashback storage");
 
         cashbackStorage = new CashbackStorage(remainingSum);
     }

@@ -4,6 +4,8 @@ import org.project.karto.domain.card.entities.CardPurchaseIntent
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
@@ -36,25 +38,25 @@ class CardPurchaseIntentTest extends Specification {
         CardPurchaseIntent.of(null, new BuyerID(UUID.randomUUID()), null, 1L, new Amount(10))
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
 
         when:
         CardPurchaseIntent.of(UUID.randomUUID(), null, null, 1L, new Amount(10))
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
 
         when:
         CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, -1L, new Amount(10))
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
 
         when:
         CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
     }
 
     def "should mark intent as SUCCESS and set removed fee"() {
@@ -82,7 +84,7 @@ class CardPurchaseIntentTest extends Specification {
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
-        def ex = thrown(IllegalArgumentException)
+        def ex = thrown(IllegalDomainArgumentException)
         ex.message.contains("commission cannot be greater")
     }
 
@@ -109,7 +111,7 @@ class CardPurchaseIntentTest extends Specification {
         intent.calculateNetAmount()
 
         then:
-        thrown(IllegalStateException)
+        thrown(IllegalDomainStateException)
     }
 
     def "should allow marking as CANCEL or FAILURE only when pending"() {
@@ -142,14 +144,14 @@ class CardPurchaseIntentTest extends Specification {
         intent.markAsFailure()
 
         then:
-        thrown(IllegalStateException)
+        thrown(IllegalDomainStateException)
 
         when:
         intent.markAsSuccess(fee, new Currency("AZN"),
                 PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
 
         then:
-        thrown(IllegalStateException)
+        thrown(IllegalDomainStateException)
     }
 
     def "should fail when marking success with null fee"() {
@@ -160,6 +162,6 @@ class CardPurchaseIntentTest extends Specification {
         intent.markAsSuccess(null, null, null, null, null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
     }
 }

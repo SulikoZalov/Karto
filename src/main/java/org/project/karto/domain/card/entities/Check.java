@@ -3,6 +3,7 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.PaymentType;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.math.BigDecimal;
@@ -86,7 +87,7 @@ public class Check {
             ExternalPayeeDescription description) {
 
         ExternalFeeAmount zeroedFee = new ExternalFeeAmount(BigDecimal.ZERO);
-        if (cardID == null) throw new IllegalArgumentException("CardID can`t be null");
+        if (cardID == null) throw new IllegalDomainArgumentException("CardID can`t be null");
 
         validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
         return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType,
@@ -123,15 +124,15 @@ public class Check {
             PaymentSystem paymentSystem,
             ExternalPayeeDescription description) {
 
-        if (orderID <= 0) throw new IllegalArgumentException("orderID must be positive");
-        if (buyerID == null) throw new IllegalArgumentException("buyerID must not be null");
-        if (spentAmount == null) throw new IllegalArgumentException("spentAmount must not be null");
-        if (currency == null) throw new IllegalArgumentException("currency must not be null");
-        if (paymentType == null) throw new IllegalArgumentException("paymentType must not be null");
-        if (internalFee == null) throw new IllegalArgumentException("internalFee must not be null");
-        if (externalFee == null) throw new IllegalArgumentException("externalFee must not be null");
-        if (paymentSystem == null) throw new IllegalArgumentException("paymentSystem must not be null");
-        if (description == null) throw new IllegalArgumentException("description must not be null");
+        if (orderID <= 0) throw new IllegalDomainArgumentException("orderID must be positive");
+        if (buyerID == null) throw new IllegalDomainArgumentException("buyerID must not be null");
+        if (spentAmount == null) throw new IllegalDomainArgumentException("spentAmount must not be null");
+        if (currency == null) throw new IllegalDomainArgumentException("currency must not be null");
+        if (paymentType == null) throw new IllegalDomainArgumentException("paymentType must not be null");
+        if (internalFee == null) throw new IllegalDomainArgumentException("internalFee must not be null");
+        if (externalFee == null) throw new IllegalDomainArgumentException("externalFee must not be null");
+        if (paymentSystem == null) throw new IllegalDomainArgumentException("paymentSystem must not be null");
+        if (description == null) throw new IllegalDomainArgumentException("description must not be null");
     }
 
     public UUID id() {

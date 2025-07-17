@@ -1,5 +1,7 @@
 package org.project.karto.domain.common.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,22 +19,22 @@ public record Email(String email) {
     }
 
     public static void validate(String email) {
-        if (Objects.isNull(email)) throw new IllegalArgumentException("Email can`t be null");
-        if (email.isBlank()) throw new IllegalArgumentException("Email can`t be blank");
-        if (email.length() > MAX_SIZE) throw new IllegalArgumentException("Email is too long");
+        if (Objects.isNull(email)) throw new IllegalDomainArgumentException("Email can`t be null");
+        if (email.isBlank()) throw new IllegalDomainArgumentException("Email can`t be blank");
+        if (email.length() > MAX_SIZE) throw new IllegalDomainArgumentException("Email is too long");
 
         String[] splitEmail = email.split("@");
 
-        if (splitEmail.length != 2) throw new IllegalArgumentException("Invalid email format.");
+        if (splitEmail.length != 2) throw new IllegalDomainArgumentException("Invalid email format.");
         if (splitEmail[0].isEmpty() || splitEmail[0].length() > 64)
-            throw new IllegalArgumentException("Invalid email format.");
+            throw new IllegalDomainArgumentException("Invalid email format.");
 
         if (splitEmail[1].isEmpty() || (splitEmail[1].length() < 3 || splitEmail[1].length() > 252))
-            throw new IllegalArgumentException("Invalid email format.");
+            throw new IllegalDomainArgumentException("Invalid email format.");
 
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches())
-            throw new IllegalArgumentException("Email format error");
+            throw new IllegalDomainArgumentException("Email format error");
     }
 
     @Override

@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.Token;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.Password;
 import org.project.karto.domain.common.value_objects.Phone;
@@ -82,7 +83,7 @@ public class CompanyService {
             companyRepository.updateVerification(company)
                     .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                             "Unable to update verification status. Please try again."));
-        } catch (IllegalStateException e) {
+        } catch (IllegalDomainStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
         }
     }

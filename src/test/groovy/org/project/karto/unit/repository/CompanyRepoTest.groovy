@@ -4,6 +4,7 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator
@@ -114,7 +115,7 @@ class CompanyRepoTest extends Specification{
         company.specifyCardUsageLimitations(card_limits)
 
         then: "verify failure"
-        thrown(IllegalArgumentException)
+        thrown(IllegalDomainArgumentException)
 
         where:
         company << (1..10).collect({TestDataGenerator.generateCompany()})

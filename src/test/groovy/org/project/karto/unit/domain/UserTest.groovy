@@ -1,6 +1,8 @@
 package org.project.karto.unit.domain
 
 import org.project.karto.domain.common.enumerations.Role
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.domain.common.value_objects.KeyAndCounter
 import org.project.karto.domain.common.value_objects.Phone
@@ -71,7 +73,7 @@ class UserTest extends Specification {
         User.fromRepository(id, personalData, false, false, keyAndCounter, cashbackStorage, creationDate, lastUpdated)
 
         then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == expectedMessage
 
         where:
@@ -109,8 +111,8 @@ class UserTest extends Specification {
         when: "registering null phone"
         user.registerPhoneForVerification(null)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Phone is null"
     }
 
@@ -122,8 +124,8 @@ class UserTest extends Specification {
         when: "trying to register another phone"
         user.registerPhoneForVerification(newPhone)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Phone number already registered."
     }
 
@@ -148,8 +150,8 @@ class UserTest extends Specification {
         when: "trying to enable again"
         user.enable()
 
-        then: "IllegalStateException is thrown"
-        def exception = thrown(IllegalStateException)
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
         exception.message == "You can`t active already verified user."
     }
 
@@ -160,8 +162,8 @@ class UserTest extends Specification {
         when: "trying to enable user"
         user.enable()
 
-        then: "IllegalStateException is thrown"
-        def exception = thrown(IllegalStateException)
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
         exception.message == "It is prohibited to activate an account that has not been verified."
     }
 
@@ -188,8 +190,8 @@ class UserTest extends Specification {
         when: "trying to enable 2FA"
         user.enable2FA()
 
-        then: "IllegalStateException is thrown"
-        def exception = thrown(IllegalStateException)
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
         exception.message == "You can`t enable 2FA on not verified account"
     }
 
@@ -204,8 +206,8 @@ class UserTest extends Specification {
         when: "trying to enable 2FA again"
         user.enable2FA()
 
-        then: "IllegalStateException is thrown"
-        def exception = thrown(IllegalStateException)
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
         exception.message == "You can`t activate 2FA twice"
     }
 
@@ -229,8 +231,8 @@ class UserTest extends Specification {
         when: "trying to disable already disabled user"
         user.disable()
 
-        then: "IllegalStateException is thrown"
-        def exception = thrown(IllegalStateException)
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
         exception.message == "You can't deactivate a user who is already deactivated."
     }
 
@@ -279,8 +281,8 @@ class UserTest extends Specification {
         when: "adding null amount"
         user.addCashback(null)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Amount can`t be null"
     }
 
@@ -292,8 +294,8 @@ class UserTest extends Specification {
         when: "adding cashback to unverified user"
         user.addCashback(amount)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Account is not verified"
     }
 
@@ -330,8 +332,8 @@ class UserTest extends Specification {
         when: "removing null amount"
         user.removeCashFromStorage(null)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Amount can`t be null"
     }
 
@@ -343,8 +345,8 @@ class UserTest extends Specification {
         when: "removing cash from unverified user"
         user.removeCashFromStorage(amount)
 
-        then: "IllegalArgumentException is thrown"
-        def exception = thrown(IllegalArgumentException)
+        then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
+        def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Account is not verified"
     }
 

@@ -1,5 +1,7 @@
 package org.project.karto.domain.common.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,12 +16,12 @@ public record Phone(String phoneNumber) {
     }
 
     public static void validate(String phoneNumber) {
-        if (phoneNumber == null) throw new IllegalArgumentException("Phone number can`t be null");
-        if (phoneNumber.isBlank()) throw new IllegalArgumentException("Phone number should`t be blank.");
-        if (phoneNumber.length() > MAX_SIZE) throw new IllegalArgumentException("Phone number is too long");
+        if (phoneNumber == null) throw new IllegalDomainArgumentException("Phone number can`t be null");
+        if (phoneNumber.isBlank()) throw new IllegalDomainArgumentException("Phone number should`t be blank.");
+        if (phoneNumber.length() > MAX_SIZE) throw new IllegalDomainArgumentException("Phone number is too long");
 
         Matcher matcher = PHONE_NUMBER_PATTERN.matcher(phoneNumber);
-        if (!matcher.matches()) throw new IllegalArgumentException("Invalid phone number.");
+        if (!matcher.matches()) throw new IllegalDomainArgumentException("Invalid phone number.");
     }
 
     @Override

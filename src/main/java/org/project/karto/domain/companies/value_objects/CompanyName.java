@@ -1,5 +1,7 @@
 package org.project.karto.domain.companies.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,13 +11,13 @@ public record CompanyName(String companyName) {
 
     public CompanyName {
         if (companyName == null || companyName.isBlank())
-            throw new IllegalArgumentException("Company name cannot be null or blank.");
+            throw new IllegalDomainArgumentException("Company name cannot be null or blank.");
         if (companyName.length() > 255)
-            throw new IllegalArgumentException("Company name is too long.");
+            throw new IllegalDomainArgumentException("Company name is too long.");
 
         Matcher matcher = COMPANY_NAME_PATTERN.matcher(companyName);
         if (!matcher.matches())
-            throw new IllegalArgumentException("Company name contains invalid characters.");
+            throw new IllegalDomainArgumentException("Company name contains invalid characters.");
     }
 
     @Override

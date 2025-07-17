@@ -1,5 +1,7 @@
 package org.project.karto.domain.common.value_objects;
 
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+
 import java.time.Period;
 import java.util.Objects;
 
@@ -12,16 +14,16 @@ public class CardUsageLimitations {
 
     private CardUsageLimitations(Period expirationPeriod, int maxUsageCount) {
         if (expirationPeriod == null || expirationPeriod.isZero() || expirationPeriod.isNegative())
-            throw new IllegalArgumentException("Expiration period must be a positive non-zero value.");
+            throw new IllegalDomainArgumentException("Expiration period must be a positive non-zero value.");
 
         if (expirationPeriod.getYears() != 0 || expirationPeriod.getMonths() != 0)
-            throw new IllegalArgumentException("Expiration period must be specified in days only.");
+            throw new IllegalDomainArgumentException("Expiration period must be specified in days only.");
 
         int days = expirationPeriod.getDays();
         if (days < MIN_DAYS || days > MAX_DAYS)
-            throw new IllegalArgumentException("Expiration period must be between 30 and 92 days.");
+            throw new IllegalDomainArgumentException("Expiration period must be between 30 and 92 days.");
 
-        if (maxUsageCount < 1 || maxUsageCount > 10) throw new IllegalArgumentException("Usage count must be between 1 and 10.");
+        if (maxUsageCount < 1 || maxUsageCount > 10) throw new IllegalDomainArgumentException("Usage count must be between 1 and 10.");
 
         this.expirationPeriod = expirationPeriod;
         this.maxUsageCount = maxUsageCount;
@@ -29,7 +31,7 @@ public class CardUsageLimitations {
 
     public static CardUsageLimitations of(int days, int maxUsageCount) {
         if (days < MIN_DAYS || days > MAX_DAYS)
-            throw new IllegalArgumentException("Expiration period must be between 30 and 92 days.");
+            throw new IllegalDomainArgumentException("Expiration period must be between 30 and 92 days.");
 
         return new CardUsageLimitations(Period.ofDays(days), maxUsageCount);
     }

@@ -5,6 +5,8 @@ import org.project.karto.domain.card.enumerations.PaymentType;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.math.BigDecimal;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.project.karto.domain.common.util.Utils.required;
 
 public class CardPurchaseIntent {
     private final UUID id;
@@ -54,10 +58,10 @@ public class CardPurchaseIntent {
             long orderID,
             Amount totalPayedAmount) {
 
-        if (id == null) throw new IllegalArgumentException("ID cannot be null");
-        if (buyerID == null) throw new IllegalArgumentException("BuyerID cannot be null");
-        if (totalPayedAmount == null) throw new IllegalArgumentException("Total payed amount cannot be null");
-        if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be negative or zero");
+        required("id", id);
+        required("buyerID", buyerID);
+        required("totalPayedAmount", totalPayedAmount);
+        if (orderID <= 0) throw new IllegalDomainArgumentException("OrderID cannot be negative or zero");
 
         return new CardPurchaseIntent(id, buyerID, storeID, orderID, totalPayedAmount,
                 LocalDateTime.now(), null, PurchaseStatus.PENDING, null);
@@ -120,16 +124,17 @@ public class CardPurchaseIntent {
     public Check markAsSuccess(Fee removedFee, Currency currency, PaymentType paymentType,
                                PaymentSystem paymentSystem, ExternalPayeeDescription description) {
 
-        if (removedFee == null) throw new IllegalArgumentException("Removed fee cannot be null");
-        if (currency == null) throw new IllegalArgumentException("Currency cannot be null");
-        if (paymentType == null) throw new IllegalArgumentException("Payment type cannot be null");
-        if (paymentSystem == null) throw new IllegalArgumentException("Payment system cannot be null");
-        if (description == null) throw new IllegalArgumentException("Description cannot be null");
+        required("removedFee", removedFee);
+        required("currency", currency);
+        required("paymentType", paymentType);
+        required("paymentSystem", paymentSystem);
+        required("description", description);
+
         isPendingCard();
 
         Amount feeAmount = removedFee.calculateFee(totalPayedAmount);
         if (feeAmount.value().compareTo(totalPayedAmount.value()) > 0)
-            throw new IllegalArgumentException("The commission cannot be greater than the total amount paid.");
+            throw new IllegalDomainArgumentException("The commission cannot be greater than the total amount paid.");
 
         this.resultDate = LocalDateTime.now();
         this.status = PurchaseStatus.SUCCESS;
@@ -140,7 +145,7 @@ public class CardPurchaseIntent {
 
     public Amount calculateNetAmount() {
         if (status != PurchaseStatus.SUCCESS)
-            throw new IllegalStateException("Cannot calculate net amount: status is not SUCCESS");
+            throw new IllegalDomainStateException("Cannot calculate net amount: status is not SUCCESS");
 
         Amount feeAmount = removedFee.calculateFee(totalPayedAmount);
         return new Amount(totalPayedAmount.value().subtract(feeAmount.value()));
@@ -161,7 +166,7 @@ public class CardPurchaseIntent {
     }
 
     private void isPendingCard() {
-        if (status != PurchaseStatus.PENDING) throw new IllegalStateException("Transaction cannot change it`s status twice.");
+        if (status != PurchaseStatus.PENDING) throw new IllegalDomainStateException("Transaction cannot change it`s status twice.");
     }
 
     @Override

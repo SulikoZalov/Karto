@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.auth.*;
+import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Password;
 import org.project.karto.domain.common.value_objects.Phone;
@@ -155,7 +156,7 @@ public class AuthService {
             userRepository.updateVerification(user)
                     .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                             "Unable to update your verification status at the moment. Please try again later."));
-        } catch (IllegalStateException e) {
+        } catch (IllegalDomainStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
         }
     }
@@ -235,7 +236,7 @@ public class AuthService {
                     .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                             "Unable to authenticate your account at the moment. Please try again later."));
             return tokens;
-        } catch (IllegalStateException e) {
+        } catch (IllegalDomainStateException e) {
             throw responseException(Response.Status.FORBIDDEN, e.getMessage());
         }
     }

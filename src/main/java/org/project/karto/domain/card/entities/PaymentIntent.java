@@ -3,6 +3,7 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.PurchaseStatus;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
+import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.common.value_objects.Amount;
 
 import java.time.LocalDateTime;
@@ -61,13 +62,13 @@ public class PaymentIntent {
             Amount totalAmount,
             InternalFeeAmount feeAmount) {
 
-        if (buyerID == null) throw new IllegalArgumentException("BuyerID cannot be null");
-        if (cardID == null) throw new IllegalArgumentException("CardID cannot be null");
-        if (totalAmount == null) throw new IllegalArgumentException("TotalAmount cannot be null");
-        if (orderID <= 0) throw new IllegalArgumentException("OrderID cannot be lower than or equal zero");
-        if (feeAmount == null) throw new IllegalArgumentException("Fee amount cannot be null");
+        if (buyerID == null) throw new IllegalDomainArgumentException("BuyerID cannot be null");
+        if (cardID == null) throw new IllegalDomainArgumentException("CardID cannot be null");
+        if (totalAmount == null) throw new IllegalDomainArgumentException("TotalAmount cannot be null");
+        if (orderID <= 0) throw new IllegalDomainArgumentException("OrderID cannot be lower than or equal zero");
+        if (feeAmount == null) throw new IllegalDomainArgumentException("Fee amount cannot be null");
         if (feeAmount.value().compareTo(totalAmount.value()) > 0)
-            throw new IllegalArgumentException("Fee amount cannot be more than total pay");
+            throw new IllegalDomainArgumentException("Fee amount cannot be more than total pay");
 
         return new PaymentIntent(UUID.randomUUID(), buyerID, cardID, storeID, orderID, totalAmount,
                 LocalDateTime.now(), null, PurchaseStatus.PENDING, false, null, feeAmount);
@@ -140,7 +141,7 @@ public class PaymentIntent {
     }
 
     public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
-        if (payeeDescription == null) throw new IllegalArgumentException("Description cannot be null");
+        if (payeeDescription == null) throw new IllegalDomainArgumentException("Description cannot be null");
         isStatusPending();
 
         this.status = PurchaseStatus.SUCCESS;
@@ -163,9 +164,9 @@ public class PaymentIntent {
     }
 
     void confirm() {
-        if (isConfirmed) throw new IllegalArgumentException("PaymentIntent is already confirmed");
+        if (isConfirmed) throw new IllegalDomainArgumentException("PaymentIntent is already confirmed");
         if (status == PurchaseStatus.PENDING)
-            throw new IllegalArgumentException("You can`t confirm payment intent with PENDING status");
+            throw new IllegalDomainArgumentException("You can`t confirm payment intent with PENDING status");
 
         this.isConfirmed = true;
     }
@@ -176,7 +177,7 @@ public class PaymentIntent {
 
     private void isStatusPending() {
         if (status != PurchaseStatus.PENDING)
-            throw new IllegalArgumentException("You can`t change status twice");
+            throw new IllegalDomainArgumentException("You can`t change status twice");
     }
 
     @Override
