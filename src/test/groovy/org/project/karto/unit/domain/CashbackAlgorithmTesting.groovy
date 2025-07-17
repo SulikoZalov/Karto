@@ -32,7 +32,7 @@ class CashbackAlgorithmTesting extends Specification {
         println "Transaction amount: $amount, activity: $snapshot, event: $event"
 
         where:
-        giftCard << (1..10).collect({generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(2200L)))})
+        giftCard << (1..25).collect({generateSelfBougthGiftCard(new Balance(BigDecimal.valueOf(2200L)))})
     }
 
     static CashbackEvent transaction(GiftCard giftCard, Amount amount, UserActivitySnapshot activitySnapshot) {
