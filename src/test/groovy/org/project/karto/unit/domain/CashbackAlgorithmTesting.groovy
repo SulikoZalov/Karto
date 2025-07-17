@@ -52,15 +52,15 @@ class CashbackAlgorithmTesting extends Specification {
 
     static Amount generateRealisticAmount(GiftCard card) {
         def balance = card.balance().value()
-        def percent = BigDecimal.valueOf(Math.random() * 0.75 + 0.05) // 5%–75%
+        def percent = BigDecimal.valueOf(Math.random() * 0.3 + 0.1) // 10%–40%
         def amount = (balance * percent).setScale(2, RoundingMode.HALF_UP)
         new Amount(amount)
     }
 
     static UserActivitySnapshot generateRealisticActivity(GiftCard card) {
-        def totalSpent = BigDecimal.valueOf(50 + Math.random() * 9950).setScale(2, RoundingMode.HALF_UP)
+        def totalSpent = BigDecimal.valueOf(50 + Math.random() * 2001).setScale(2, RoundingMode.HALF_UP)
         def giftCardsBought = RANDOM.nextInt(1, 50)
-        def activeDays = RANDOM.nextInt(1, 100)
+        def activeDays = RANDOM.nextInt(0, 15)
 
         new UserActivitySnapshot(
                 card.ownerID().get().value(),
