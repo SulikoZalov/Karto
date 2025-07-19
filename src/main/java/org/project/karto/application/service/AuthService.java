@@ -168,8 +168,8 @@ public class AuthService {
         User user = userRepository.findBy(phone)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-        if (!user.isVerified())
-            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+        if (!user.canLogin())
+            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
 
         final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
                 user.personalData().password().orElseThrow());
@@ -198,8 +198,8 @@ public class AuthService {
         User user = userRepository.findBy(phone)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-        if (!user.isVerified())
-            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+        if (!user.canLogin())
+            throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
 
         final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
                 user.personalData().password().orElseThrow());
@@ -220,8 +220,8 @@ public class AuthService {
             User user = userRepository.findBy(otp.userID())
                     .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
 
-            if (!user.isVerified())
-                throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
+            if (!user.canLogin())
+                throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
 
             if (!user.is2FAEnabled()) {
                 Log.info("Two factor authentication is enabled and verified for user.");
