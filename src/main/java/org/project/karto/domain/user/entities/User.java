@@ -20,6 +20,7 @@ public class User {
     private final Role role;
     private boolean isVerified;
     private boolean is2FAEnabled;
+    private boolean isBanned;
     private KeyAndCounter keyAndCounter;
     private CashbackStorage cashbackStorage;
     private final LocalDateTime creationDate;
@@ -30,6 +31,7 @@ public class User {
             PersonalData personalData,
             boolean isVerified,
             boolean is2FAEnabled,
+            boolean isBanned,
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
             LocalDateTime creationDate,
@@ -47,6 +49,7 @@ public class User {
         this.role = Role.CUSTOMER;
         this.isVerified = isVerified;
         this.is2FAEnabled = is2FAEnabled;
+        this.isBanned = isBanned;
         this.keyAndCounter = keyAndCounter;
         this.cashbackStorage = cashbackStorage;
         this.creationDate = creationDate;
@@ -56,6 +59,7 @@ public class User {
     public static User of(PersonalData personalData, String key) {
         return new User(UUID.randomUUID(),
                 personalData,
+                false,
                 false,
                 false,
                 new KeyAndCounter(key, 0),
@@ -69,6 +73,7 @@ public class User {
             PersonalData personalData,
             boolean isEnabled,
             boolean is2FAVerified,
+            boolean isBanned,
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
             LocalDateTime creationDate,
@@ -78,6 +83,7 @@ public class User {
                 personalData,
                 isEnabled,
                 is2FAVerified,
+                isBanned,
                 keyAndCounter,
                 cashbackStorage,
                 creationDate,
@@ -134,6 +140,15 @@ public class User {
             throw new IllegalDomainStateException("You can`t activate 2FA twice");
 
         this.is2FAEnabled = true;
+    }
+
+    public boolean canLogin() {
+        return isVerified && !isBanned;
+    }
+
+    public void ban() {
+        if (isBanned) throw new IllegalDomainStateException("User is already banned.");
+        this.isBanned = true;
     }
 
     public boolean is2FAEnabled() {
