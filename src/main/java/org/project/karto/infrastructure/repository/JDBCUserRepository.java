@@ -38,6 +38,7 @@ public class JDBCUserRepository implements UserRepository {
             .column("birth_date")
             .column("is_verified")
             .column("is_2fa_enabled")
+            .column("is_banned")
             .column("secret_key")
             .column("counter")
             .column("cashback_storage")
@@ -82,6 +83,12 @@ public class JDBCUserRepository implements UserRepository {
 
     static final String UPDATE_CASHBACK_STORAGE = update("user_account")
             .set("cashback_storage = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_BAN = update("user_account")
+            .set("is_banned")
             .where("id = ?")
             .build()
             .sql();
@@ -250,6 +257,7 @@ public class JDBCUserRepository implements UserRepository {
                 personalData,
                 rs.getBoolean("is_verified"),
                 rs.getBoolean("is_2fa_enabled"),
+                rs.getBoolean("is_banned"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
                 new CashbackStorage(rs.getBigDecimal("cashback_storage")),
                 rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
