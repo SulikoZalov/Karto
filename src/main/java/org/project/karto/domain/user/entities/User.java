@@ -6,6 +6,7 @@ import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
 import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.user.exceptions.BannedUserException;
 import org.project.karto.domain.user.values_objects.CashbackStorage;
 import org.project.karto.domain.user.values_objects.PersonalData;
 
@@ -35,7 +36,7 @@ public class User {
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
             LocalDateTime creationDate,
-            LocalDateTime lastUpdated) {
+            LocalDateTime lastUpdated) throws BannedUserException {
 
         if (id == null) throw new IllegalDomainArgumentException("id must not be null");
         if (personalData == null) throw new IllegalDomainArgumentException("personalData must not be null");
@@ -43,13 +44,13 @@ public class User {
         if (cashbackStorage == null) throw new IllegalDomainArgumentException("cashbackStorage must not be null");
         if (creationDate == null) throw new IllegalDomainArgumentException("creationDate must not be null");
         if (lastUpdated == null) throw new IllegalDomainArgumentException("lastUpdated must not be null");
+        if (isBanned) throw new BannedUserException("Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
 
         this.id = id;
         this.personalData = personalData;
         this.role = Role.CUSTOMER;
         this.isVerified = isVerified;
         this.is2FAEnabled = is2FAEnabled;
-        this.isBanned = isBanned;
         this.keyAndCounter = keyAndCounter;
         this.cashbackStorage = cashbackStorage;
         this.creationDate = creationDate;
@@ -77,7 +78,7 @@ public class User {
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
             LocalDateTime creationDate,
-            LocalDateTime lastUpdated) {
+            LocalDateTime lastUpdated) throws BannedUserException {
 
         return new User(id,
                 personalData,
