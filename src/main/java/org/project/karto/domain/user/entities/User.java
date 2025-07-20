@@ -104,6 +104,7 @@ public class User {
     }
 
     public void registerPhoneForVerification(Phone phone) {
+        verifyPotentialBan();
         if (phone == null)
             throw new IllegalDomainArgumentException("Phone is null");
 
@@ -120,11 +121,16 @@ public class User {
         );
     }
 
+    private void verifyPotentialBan() {
+        if (isBanned) throw new BannedUserException("Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
+    }
+
     public boolean isVerified() {
         return isVerified;
     }
 
     public void enable() {
+        verifyPotentialBan();
         if (isVerified)
             throw new IllegalDomainStateException("You can`t active already verified user.");
         if (keyAndCounter.counter() == 0)
@@ -133,6 +139,7 @@ public class User {
     }
 
     public void enable2FA() {
+        verifyPotentialBan();
         if (!isVerified)
             throw new IllegalDomainStateException("You can`t enable 2FA on not verified account");
         if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
@@ -161,6 +168,7 @@ public class User {
     }
 
     public void disable() {
+        verifyPotentialBan();
         if (!isVerified)
             throw new IllegalDomainStateException("You can't deactivate a user who is already deactivated.");
         this.isVerified = false;
@@ -171,6 +179,7 @@ public class User {
     }
 
     public void incrementCounter() {
+        verifyPotentialBan();
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
     }
 
@@ -179,6 +188,7 @@ public class User {
     }
 
     public void addCashback(Amount amount) {
+        verifyPotentialBan();
         if (amount == null)
             throw new IllegalDomainArgumentException("Amount can`t be null");
         if (!isVerified)
@@ -188,6 +198,7 @@ public class User {
     }
 
     public void removeCashFromStorage(Amount amount) {
+        verifyPotentialBan();
         if (amount == null)
             throw new IllegalDomainArgumentException("Amount can`t be null");
         if (!isVerified)
