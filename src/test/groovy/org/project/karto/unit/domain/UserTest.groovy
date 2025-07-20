@@ -7,6 +7,7 @@ import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.domain.common.value_objects.KeyAndCounter
 import org.project.karto.domain.common.value_objects.Phone
 import org.project.karto.domain.user.entities.User
+import org.project.karto.domain.user.exceptions.BannedUserException
 import org.project.karto.domain.user.values_objects.CashbackStorage
 import org.project.karto.domain.user.values_objects.PersonalData
 import org.project.karto.util.TestDataGenerator
@@ -115,6 +116,61 @@ class UserTest extends Specification {
         then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
         def exception = thrown(IllegalDomainArgumentException)
         exception.message == "Phone is null"
+    }
+
+    def "should ban user"() {
+        given:
+        def user = TestDataGenerator.generateUser()
+
+        when:
+        user.ban()
+
+        then:
+        notThrown(Exception)
+        user.isBanned()
+        !user.canLogin()
+    }
+
+    def "should throw an exception when trying to reach banned user methods"() {
+        given:
+        def user = TestDataGenerator.generateUser()
+
+        when:
+        user.ban()
+
+        then:
+        notThrown(Exception)
+        user.isBanned()
+        !user.canLogin()
+
+        when:
+        user.registerPhoneForVerification(TestDataGenerator.generatePhone())
+
+        then:
+        def e = thrown(BannedUserException)
+        e.getMessage() == "Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance."
+    }
+
+    def "should throw an exception when trying to create banned user"() {
+        given:
+        def id = UUID.randomUUID()
+        def personalData = createValidPersonalData()
+        def isEnabled = true
+        def is2FAVerified = true
+        def keyAndCounter = new KeyAndCounter("key", 5)
+        def cashbackStorage = new CashbackStorage(BigDecimal.valueOf(100))
+        def creationDate = LocalDateTime.now().minusDays(1)
+        def lastUpdated = LocalDateTime.now()
+
+        when: "creating user from repository"
+        def user = User.fromRepository(
+                id, personalData, isEnabled, is2FAVerified, true,
+                keyAndCounter, cashbackStorage, creationDate, lastUpdated
+        )
+
+        then:
+        def e = thrown(BannedUserException)
+        e.getMessage() == "Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance."
     }
 
     def "should throw exception when registering phone for user who already has phone"() {
