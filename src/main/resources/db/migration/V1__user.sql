@@ -8,6 +8,7 @@ CREATE TABLE user_account (
     birth_date TIMESTAMP NOT NULL,
     is_verified BOOLEAN NOT NULL,
     is_2fa_enabled BOOLEAN NOT NULL,
+    is_banned BOOLEAN NOT NULL,
     secret_key VARCHAR(28) NOT NULL,
     counter BIGINT NOT NULL,
     cashback_storage NUMERIC NOT NULL,
