@@ -152,6 +152,7 @@ public class JDBCUserRepository implements UserRepository {
                         personalData.birthDate(),
                         user.isVerified(),
                         user.is2FAEnabled(),
+                        user.isBanned(),
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
                         user.cashbackStorage(),
@@ -191,6 +192,11 @@ public class JDBCUserRepository implements UserRepository {
     @Override
     public Result<Integer, Throwable> updateCashbackStorage(User user) {
         return mapTransactionResult(jet.write(UPDATE_CASHBACK_STORAGE, user.cashbackStorage(), user.id()));
+    }
+
+    @Override
+    public Result<Integer, Throwable> updateBan(User user) {
+        return mapTransactionResult(jet.write(UPDATE_BAN, user.isBanned(), user.id()));
     }
 
     @Override

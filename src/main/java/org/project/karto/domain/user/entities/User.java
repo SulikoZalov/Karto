@@ -147,6 +147,10 @@ public class User {
         return isVerified && !isBanned;
     }
 
+    public boolean isBanned() {
+        return isBanned;
+    }
+
     public void ban() {
         if (isBanned) throw new IllegalDomainStateException("User is already banned.");
         this.isBanned = true;

@@ -24,6 +24,8 @@ public interface UserRepository {
 
     Result<Integer, Throwable> updateCashbackStorage(User user);
 
+    Result<Integer, Throwable> updateBan(User user);
+
     boolean isEmailExists(Email email);
 
     boolean isPhoneExists(Phone phone);

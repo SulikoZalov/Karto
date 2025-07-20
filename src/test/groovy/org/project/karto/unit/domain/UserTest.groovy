@@ -51,7 +51,7 @@ class UserTest extends Specification {
 
         when: "creating user from repository"
         def user = User.fromRepository(
-                id, personalData, isEnabled, is2FAVerified,
+                id, personalData, isEnabled, is2FAVerified, false,
                 keyAndCounter, cashbackStorage, creationDate, lastUpdated
         )
 
@@ -70,7 +70,8 @@ class UserTest extends Specification {
     @Unroll
     def "should throw IllegalArgumentException when creating user with null #parameter"() {
         when: "creating user with null parameter"
-        User.fromRepository(id, personalData, false, false, keyAndCounter, cashbackStorage, creationDate, lastUpdated)
+        User.fromRepository(id, personalData, false, false, false,
+                keyAndCounter, cashbackStorage, creationDate, lastUpdated)
 
         then: "IllegalArgumentException is thrown"
         def exception = thrown(IllegalDomainArgumentException)
@@ -360,7 +361,7 @@ class UserTest extends Specification {
         def lastUpdated = LocalDateTime.now().minusHours(2)
 
         def user = User.fromRepository(
-                id, personalData, true, false,
+                id, personalData, true, false, false,
                 keyAndCounter, cashbackStorage, creationDate, lastUpdated
         )
 
@@ -383,14 +384,14 @@ class UserTest extends Specification {
         def creationDate = LocalDateTime.now()
 
         def user1 = User.fromRepository(
-                id, personalData, true, false,
+                id, personalData, true, false, false,
                 new KeyAndCounter("key1", 1),
                 new CashbackStorage(BigDecimal.valueOf(10)),
                 creationDate, LocalDateTime.now()
         )
 
         def user2 = User.fromRepository(
-                id, personalData, true, false,
+                id, personalData, true, false, false,
                 new KeyAndCounter("key2", 2),
                 new CashbackStorage(BigDecimal.valueOf(20)),
                 creationDate, LocalDateTime.now().plusHours(1)
