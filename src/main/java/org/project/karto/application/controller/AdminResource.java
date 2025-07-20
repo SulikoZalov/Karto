@@ -4,6 +4,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.service.AdminService;
@@ -27,7 +28,7 @@ public class AdminResource {
 
     @PATCH
     @Path("/ban/user")
-    public Response banUser(String phone) {
+    public Response banUser(@QueryParam("phone") String phone) {
         adminService.banUser(phone);
         return Response.ok().build();
     }

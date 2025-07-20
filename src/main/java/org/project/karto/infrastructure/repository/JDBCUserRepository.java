@@ -88,7 +88,7 @@ public class JDBCUserRepository implements UserRepository {
             .sql();
 
     static final String UPDATE_BAN = update("user_account")
-            .set("is_banned")
+            .set("is_banned = ?")
             .where("id = ?")
             .build()
             .sql();

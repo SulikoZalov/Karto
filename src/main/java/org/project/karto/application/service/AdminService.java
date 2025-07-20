@@ -118,7 +118,8 @@ public class AdminService {
         User user = userRepository.findBy(phone).orElseThrow();
 
         user.ban();
-        userRepository.updateBan(user);
+        userRepository.updateBan(user)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Please try again later."));
     }
 
     private void generateAndResendPartnerOTP(Company company) {

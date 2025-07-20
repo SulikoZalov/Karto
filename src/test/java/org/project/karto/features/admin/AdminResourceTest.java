@@ -1,12 +1,16 @@
 package org.project.karto.features.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
+import org.project.karto.application.dto.auth.RegistrationForm;
 import org.project.karto.infrastructure.security.JWTUtility;
+import org.project.karto.util.DBManagementUtils;
 import org.project.karto.util.PostgresTestResource;
 import org.project.karto.util.TestDataGenerator;
 
@@ -23,6 +27,9 @@ class AdminResourceTest {
 
     @Inject
     ObjectMapper mapper;
+
+    @Inject
+    DBManagementUtils dbManagementUtils;
 
     @Test
     void successfulPartnerRegistration() throws Exception {
@@ -41,5 +48,22 @@ class AdminResourceTest {
                 .response();
 
         assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Test
+    void successfulUserBan() throws JsonProcessingException {
+        RegistrationForm form = TestDataGenerator.generateRegistrationForm();
+        dbManagementUtils.saveUser(form);
+
+        String adminToken = jwtUtility.generateAdministratorToken();
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .param("phone", form.phone())
+                .when()
+                .patch("karto/admin/ban/user")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 }
