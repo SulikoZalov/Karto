@@ -16,6 +16,8 @@ import org.project.karto.domain.companies.repository.CompanyRepository;
 import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
+import org.project.karto.domain.user.entities.User;
+import org.project.karto.domain.user.repository.UserRepository;
 import org.project.karto.infrastructure.communication.PhoneInteractionService;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 import org.project.karto.infrastructure.security.JWTUtility;
@@ -38,16 +40,19 @@ public class AdminService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserRepository userRepository;
+
     private final CompanyRepository companyRepository;
 
     private final PhoneInteractionService phoneInteractionService;
 
     private final PartnerVerificationOTPRepository otpRepository;
 
-    AdminService(JWTUtility jwtUtility, PasswordEncoder passwordEncoder,
+    AdminService(JWTUtility jwtUtility, PasswordEncoder passwordEncoder, UserRepository userRepository,
                  CompanyRepository companyRepository, PhoneInteractionService phoneInteractionService,
                  PartnerVerificationOTPRepository otpRepository) {
         this.jwtUtility = jwtUtility;
+        this.userRepository = userRepository;
         this.phoneInteractionService = phoneInteractionService;
         this.hotpGenerator = new HOTPGenerator();
         this.passwordEncoder = passwordEncoder;
@@ -106,6 +111,14 @@ public class AdminService {
                         "Unable to save company. Please try again later."));
 
         generateAndResendPartnerOTP(company);
+    }
+
+    public void banUser(String receivedPhone) {
+        Phone phone = new Phone(receivedPhone);
+        User user = userRepository.findBy(phone).orElseThrow();
+
+        user.ban();
+        userRepository.updateBan(user);
     }
 
     private void generateAndResendPartnerOTP(Company company) {

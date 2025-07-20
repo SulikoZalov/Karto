@@ -1,6 +1,7 @@
 package org.project.karto.application.controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
@@ -21,6 +22,13 @@ public class AdminResource {
     @Path("/register/partner")
     public Response partnerRegistration(CompanyRegistrationForm registrationForm) {
         adminService.registerPartner(registrationForm);
+        return Response.ok().build();
+    }
+
+    @PATCH
+    @Path("/ban/user")
+    public Response banUser(String phone) {
+        adminService.banUser(phone);
         return Response.ok().build();
     }
 }

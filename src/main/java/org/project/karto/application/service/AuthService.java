@@ -105,8 +105,7 @@ public class AuthService {
 
     public void resendOTP(String phoneNumber) {
         Phone phone = new Phone(phoneNumber);
-        User user = userRepository.findBy(phone)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(phone).orElseThrow();
         OTP otp = otpRepository.findBy(user.id())
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
 
@@ -121,8 +120,7 @@ public class AuthService {
         if (userRepository.isPhoneExists(phone))
             throw responseException(Response.Status.CONFLICT, "Phone already used.");
 
-        User user = userRepository.findBy(email)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(email).orElseThrow();
 
         user.registerPhoneForVerification(phone);
         userRepository.updatePhone(user)
@@ -138,8 +136,7 @@ public class AuthService {
             OTP.validate(receivedOTP);
             OTP otp = otpRepository.findBy(receivedOTP)
                     .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-            User user = userRepository.findBy(otp.userID())
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+            User user = userRepository.findBy(otp.userID()).orElseThrow();
 
             if (user.isVerified())
                 throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
@@ -164,9 +161,7 @@ public class AuthService {
     public Object login(LoginForm loginForm) {
         Password.validate(loginForm.password());
         Phone phone = new Phone(loginForm.phone());
-
-        User user = userRepository.findBy(phone)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(phone).orElseThrow();
 
         if (!user.canLogin())
             throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
@@ -194,9 +189,7 @@ public class AuthService {
 
         Password.validate(loginForm.password());
         Phone phone = new Phone(loginForm.phone());
-
-        User user = userRepository.findBy(phone)
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+        User user = userRepository.findBy(phone).orElseThrow();
 
         if (!user.canLogin())
             throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
@@ -217,8 +210,7 @@ public class AuthService {
             OTP.validate(receivedOTP);
             OTP otp = otpRepository.findBy(receivedOTP)
                     .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-            User user = userRepository.findBy(otp.userID())
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found."));
+            User user = userRepository.findBy(otp.userID()).orElseThrow();
 
             if (!user.canLogin())
                 throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
@@ -258,8 +250,7 @@ public class AuthService {
                 return tokens;
             }
 
-            User user = userRepository.findBy(email)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Unexpected. Registered user not found."));
+            User user = userRepository.findBy(email).orElseThrow();
             Tokens tokens = generateTokens(user);
             userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
                     .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
@@ -288,10 +279,7 @@ public class AuthService {
 
         final User user = userRepository
                 .findBy(foundedPairResult.userID())
-                .orElseThrow(() -> {
-                    Log.error("User is not found");
-                    return responseException(Response.Status.NOT_FOUND, "User not found.");
-                });
+                .orElseThrow();
 
         String token = jwtUtility.generateToken(user);
         return new Token(token);
