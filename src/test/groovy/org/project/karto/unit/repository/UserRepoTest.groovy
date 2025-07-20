@@ -6,6 +6,7 @@ import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.common.value_objects.Email
 import org.project.karto.domain.common.value_objects.Phone
+import org.project.karto.domain.user.entities.User
 import org.project.karto.domain.user.values_objects.RefreshToken
 import org.project.karto.infrastructure.repository.JDBCUserRepository
 import org.project.karto.infrastructure.security.JWTUtility
@@ -171,6 +172,17 @@ class UserRepoTest extends Specification{
         where:
         user << (1..10).collect({ TestDataGenerator.generateUser()})
         amount << (1..10).collect({TestDataGenerator.generateAmount(BigDecimal.valueOf(50))})
+    }
+
+    void "successfully update ban"() {
+        given:
+        User user = TestDataGenerator.generateUser()
+
+        when:
+        user.ban()
+
+        then:
+        repo.updateBan(user)
     }
 
     void "successful is email exists"() {
