@@ -2,6 +2,7 @@ package org.project.karto.domain.card.entities;
 
 import org.project.karto.domain.card.enumerations.*;
 import org.project.karto.domain.card.events.CashbackEvent;
+import org.project.karto.domain.card.exceptions.FailedPaymentIntentException;
 import org.project.karto.domain.card.value_objects.Currency;
 import org.project.karto.domain.card.value_objects.*;
 import org.project.karto.domain.common.annotations.Nullable;
@@ -309,7 +310,7 @@ public class GiftCard {
         if (intent.status() != PurchaseStatus.SUCCESS) {
             countOfUses--;
             incrementVersion();
-            throw new IllegalDomainStateException("Payment intent is not successful");
+            throw new FailedPaymentIntentException("Payment intent is not successful");
         }
 
         balance = calculateBalance(intent.totalAmount());
