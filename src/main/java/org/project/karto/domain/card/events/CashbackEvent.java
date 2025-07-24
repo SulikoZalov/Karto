@@ -7,7 +7,11 @@ import org.project.karto.domain.common.interfaces.KartoDomainEvent;
 
 import java.math.BigDecimal;
 
-public record CashbackEvent(CardID cardID, OwnerID ownerID, BigDecimal amount) implements KartoDomainEvent {
+public record CashbackEvent(
+        CardID cardID,
+        OwnerID ownerID,
+        BigDecimal amount,
+        boolean reachMaxCashbackRate) implements KartoDomainEvent {
 
     public CashbackEvent {
         if (cardID == null) throw new IllegalDomainArgumentException("Card id cannot be null");

@@ -9,6 +9,7 @@ import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.interfaces.KartoDomainEvent;
+import org.project.karto.domain.common.tuples.Pair;
 import org.project.karto.domain.common.value_objects.Amount;
 import org.project.karto.domain.common.value_objects.CardUsageLimitations;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
@@ -316,8 +317,8 @@ public class GiftCard {
         balance = calculateBalance(intent.totalAmount());
         lastUsage = LocalDateTime.now();
 
-        BigDecimal cashback = calculateCashback(intent.totalAmount().value(), activitySnapshot);
-        events.addFirst(new CashbackEvent(id, ownerID, cashback));
+        Pair<BigDecimal, Boolean> cashback = calculateCashback(intent.totalAmount().value(), activitySnapshot);
+        events.addFirst(new CashbackEvent(id, ownerID, cashback.getFirst(), cashback.getSecond()));
         incrementVersion();
 
         return Check.paymentCheck(intent.orderID(), intent.buyerID(), storeID, id, intent.totalAmount(), currency,
@@ -342,17 +343,21 @@ public class GiftCard {
         return amount.value().multiply(KARTO_COMMON_CARD_FEE_RATE);
     }
 
-    private BigDecimal calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
-        if (snapshot.lastUsageReachedMaximumCashbackRate()) return DEFAULT_CASHBACK;
+    private Pair<BigDecimal, Boolean> calculateCashback(BigDecimal spentAmount, UserActivitySnapshot snapshot) {
+        if (snapshot.lastUsageReachedMaximumCashbackRate()) return Pair.of(DEFAULT_CASHBACK, false);
 
         LoyaltyLevel level = LoyaltyLevel.determineLevel(snapshot);
         BigDecimal loyaltyBonus = level.cashbackBonus();
         BigDecimal activityBonus = BigDecimal.valueOf(snapshot.consecutiveActiveDays()).multiply(ACTIVITY_MULTIPLIER);
 
+        boolean reachedMaxCashbackRate = false;
         BigDecimal totalRate = DEFAULT_CASHBACK.add(loyaltyBonus).add(activityBonus);
-        if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) totalRate = MAX_CASHBACK_RATE;
+        if (totalRate.compareTo(MAX_CASHBACK_RATE) > 0) {
+            totalRate = MAX_CASHBACK_RATE;
+            reachedMaxCashbackRate = true;
+        }
 
-        return spentAmount.multiply(totalRate);
+        return Pair.of(spentAmount.multiply(totalRate), reachedMaxCashbackRate);
     }
 
     @Override
