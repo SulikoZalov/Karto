@@ -1,5 +1,6 @@
 package org.project.karto.application.publisher;
 
+import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -14,7 +15,8 @@ public class EventPublisher {
         this.eventBus = eventBus.get();
     }
 
-    public void publish(CashbackEvent event) {
-        eventBus.request("user.cashback", event);
+    public Uni<Void> publish(CashbackEvent event) {
+        return eventBus.<Void>request("user.cashback", event)
+                .replaceWithVoid();
     }
 }
