@@ -83,8 +83,8 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.internalFee(),
                 check.externalFee(),
                 check.paymentSystem(),
-                check.bankName(),
                 check.description(),
+                check.bankName(),
                 check.creationDate()
         ));
     }
