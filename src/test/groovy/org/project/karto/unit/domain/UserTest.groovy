@@ -53,7 +53,7 @@ class UserTest extends Specification {
         when: "creating user from repository"
         def user = User.fromRepository(
                 id, personalData, isEnabled, is2FAVerified, false,
-                keyAndCounter, cashbackStorage, creationDate, lastUpdated
+                keyAndCounter, cashbackStorage, false, creationDate, lastUpdated
         )
 
         then: "user is created with provided values"
@@ -72,7 +72,7 @@ class UserTest extends Specification {
     def "should throw IllegalArgumentException when creating user with null #parameter"() {
         when: "creating user with null parameter"
         User.fromRepository(id, personalData, false, false, false,
-                keyAndCounter, cashbackStorage, creationDate, lastUpdated)
+                keyAndCounter, cashbackStorage, false, creationDate, lastUpdated)
 
         then: "IllegalArgumentException is thrown"
         def exception = thrown(IllegalDomainArgumentException)
@@ -165,7 +165,7 @@ class UserTest extends Specification {
         when: "creating user from repository"
         def user = User.fromRepository(
                 id, personalData, isEnabled, is2FAVerified, true,
-                keyAndCounter, cashbackStorage, creationDate, lastUpdated
+                keyAndCounter, cashbackStorage, false, creationDate, lastUpdated
         )
 
         then:
@@ -418,7 +418,7 @@ class UserTest extends Specification {
 
         def user = User.fromRepository(
                 id, personalData, true, false, false,
-                keyAndCounter, cashbackStorage, creationDate, lastUpdated
+                keyAndCounter, cashbackStorage, false, creationDate, lastUpdated
         )
 
         expect: "all getters return correct values"
@@ -442,14 +442,14 @@ class UserTest extends Specification {
         def user1 = User.fromRepository(
                 id, personalData, true, false, false,
                 new KeyAndCounter("key1", 1),
-                new CashbackStorage(BigDecimal.valueOf(10)),
+                new CashbackStorage(BigDecimal.valueOf(10)), false,
                 creationDate, LocalDateTime.now()
         )
 
         def user2 = User.fromRepository(
                 id, personalData, true, false, false,
                 new KeyAndCounter("key2", 2),
-                new CashbackStorage(BigDecimal.valueOf(20)),
+                new CashbackStorage(BigDecimal.valueOf(20)), false,
                 creationDate, LocalDateTime.now().plusHours(1)
         )
 
