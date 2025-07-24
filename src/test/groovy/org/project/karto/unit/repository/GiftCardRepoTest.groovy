@@ -5,10 +5,7 @@ import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.enumerations.PaymentType
-import org.project.karto.domain.card.value_objects.Currency
-import org.project.karto.domain.card.value_objects.ExternalPayeeDescription
-import org.project.karto.domain.card.value_objects.PaymentSystem
-import org.project.karto.domain.card.value_objects.UserActivitySnapshot
+import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.util.PostgresTestResource
@@ -157,7 +154,7 @@ class GiftCardRepoTest extends Specification {
         def amount = new Amount(reloadedCard1.balance().value()
                 .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
         def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         repo.update(reloadedCard1)
 
         def reloadedCard2 = repo.findBy(reloadedCard1.id()).value()
@@ -173,7 +170,8 @@ class GiftCardRepoTest extends Specification {
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
         def updateResult = repo.update(reloadedCard2)
 
@@ -212,7 +210,7 @@ class GiftCardRepoTest extends Specification {
         def amount = new Amount(reloadedCard1.balance().value()
                 .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
         def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         repo.update(reloadedCard1)
 
         def reloadedCard2 = repo.findBy(reloadedCard1.id()).value()
@@ -228,7 +226,8 @@ class GiftCardRepoTest extends Specification {
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
         def transactionResult = repo.update(reloadedCard2)
 

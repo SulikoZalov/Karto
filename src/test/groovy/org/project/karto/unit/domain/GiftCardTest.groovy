@@ -395,7 +395,7 @@ class GiftCardTest extends Specification {
         giftCard.activate()
         def amount = new Amount(new BigDecimal("500"))
         def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         and: "User activity snapshot"
         def userID = giftCard.ownerID().get().value()
@@ -413,7 +413,8 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
 
         then: "The transaction should be applied successfully"
@@ -427,7 +428,7 @@ class GiftCardTest extends Specification {
         check.paymentType() == PaymentType.KARTO_PAYMENT
         check.internalFee() == paymentIntent.feeAmount()
         check.paymentSystem() == new PaymentSystem("UP")
-        check.description() == new ExternalPayeeDescription("desc")
+        check.description() == new PayeeDescription("desc")
 
         and: "The gift card balance should be updated"
         giftCard.balance().value() == new BigDecimal("1000").subtract(paymentIntent.totalAmount().value())
@@ -470,7 +471,8 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
 
         then: "An exception should be thrown"
@@ -493,7 +495,7 @@ class GiftCardTest extends Specification {
         giftCard.activate()
         def amount = new Amount(new BigDecimal("1000"))
         def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         and: "User activity snapshot with very high values to trigger max cashback"
         def userID = giftCard.ownerID().get().value()
@@ -511,7 +513,8 @@ class GiftCardTest extends Specification {
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
 
         and: "Getting cashback event"

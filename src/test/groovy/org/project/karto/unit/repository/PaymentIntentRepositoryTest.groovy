@@ -81,7 +81,7 @@ class PaymentIntentRepositoryTest extends Specification {
         saveResult.value() == 1
 
         when:
-        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
+        payment.markAsSuccess(new PayeeDescription("some description"))
         def updateResult = repo.update(payment)
 
         then:
@@ -107,7 +107,7 @@ class PaymentIntentRepositoryTest extends Specification {
         saveResult.value() == 1
 
         when:
-        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
+        payment.markAsSuccess(new PayeeDescription("some description"))
         def updateResult = repo.update(payment)
 
         then:

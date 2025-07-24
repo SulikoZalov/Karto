@@ -40,7 +40,7 @@ class CheckRepositoryTest extends Specification {
         def userID = util.generateActivateAndSaveUser()
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(userID), null, 1L, new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
-        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def result = repo.save(check)
@@ -76,7 +76,7 @@ class CheckRepositoryTest extends Specification {
         def reloadedCard1 = giftCardRepo.findBy(giftCard.id()).value()
         def amount = new Amount(reloadedCard1.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
         def paymentIntent = reloadedCard1.initializeTransaction(amount, orderID())
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         def giftCardTransactionInitializationUpdateRes = giftCardRepo.update(reloadedCard1)
 
         then: "Expect successful transaction initialization update"
@@ -96,7 +96,8 @@ class CheckRepositoryTest extends Specification {
                 ),
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
         def transactionResult = giftCardRepo.update(reloadedCard2)
 
@@ -119,7 +120,7 @@ class CheckRepositoryTest extends Specification {
         given:
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(util.generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
-        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def result = repo.save(check)
@@ -138,7 +139,7 @@ class CheckRepositoryTest extends Specification {
         given:
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(util.generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
-        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def result = repo.save(check)
@@ -183,7 +184,7 @@ class CheckRepositoryTest extends Specification {
         given:
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(util.generateActivateAndSaveUser()), null, orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
-        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def result = repo.save(check)
@@ -228,7 +229,7 @@ class CheckRepositoryTest extends Specification {
         given:
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(util.generateActivateAndSaveUser()), new StoreID(util.generateActivateAndSaveCompany()), orderID(), new Amount(100))
         def fee = TestDataGenerator.generateFee(BigDecimal.valueOf(0.05))
-        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+        def check = intent.markAsSuccess(fee, new Currency("AZN"), PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def result = repo.save(check)

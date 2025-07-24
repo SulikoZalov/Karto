@@ -37,14 +37,15 @@ class CashbackAlgorithmTesting extends Specification {
 
     static CashbackEvent transaction(GiftCard giftCard, Amount amount, UserActivitySnapshot activitySnapshot) {
         def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
-        paymentIntent.markAsSuccess(new ExternalPayeeDescription("desc"))
+        paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         giftCard.applyTransaction(
                 paymentIntent,
                 activitySnapshot,
                 Currency.getInstance("USD"),
                 PaymentType.KARTO_PAYMENT,
-                new PaymentSystem("UP")
+                new PaymentSystem("UP"),
+                new BankName("BANK")
         )
 
         giftCard.pullEvents().getFirst()

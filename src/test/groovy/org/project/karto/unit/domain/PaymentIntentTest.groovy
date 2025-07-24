@@ -148,7 +148,7 @@ class PaymentIntentTest extends Specification {
     def "should successfully change status from PENDING to SUCCESS"() {
         given:
         def payment = createValidPaymentIntent()
-        ExternalPayeeDescription description = new ExternalPayeeDescription("some description")
+        PayeeDescription description = new PayeeDescription("some description")
 
         when:
         payment.markAsSuccess(description)
@@ -185,7 +185,7 @@ class PaymentIntentTest extends Specification {
     def "should throw exception when trying to change status twice"() {
         given:
         def payment = createValidPaymentIntent()
-        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
+        payment.markAsSuccess(new PayeeDescription("some description"))
 
         when:
         payment.markAsCancel()
@@ -198,7 +198,7 @@ class PaymentIntentTest extends Specification {
     def "should successfully confirm PaymentIntent after status change via reflection"() {
         given:
         def payment = createValidPaymentIntent()
-        payment.markAsSuccess(new ExternalPayeeDescription("some description"))
+        payment.markAsSuccess(new PayeeDescription("some description"))
 
         and:
         Method confirmMethod = PaymentIntent.getDeclaredMethod("confirm")

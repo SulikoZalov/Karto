@@ -66,7 +66,7 @@ class CardPurchaseIntentTest extends Specification {
 
         when:
         intent.markAsSuccess(fee, new Currency("AZN"),
-                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         then:
         intent.status() == PurchaseStatus.SUCCESS
@@ -81,7 +81,7 @@ class CardPurchaseIntentTest extends Specification {
 
         when:
         intent.markAsSuccess(fee, new Currency("AZN"),
-                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         then:
         def ex = thrown(IllegalDomainArgumentException)
@@ -94,7 +94,7 @@ class CardPurchaseIntentTest extends Specification {
         def fee = new Fee(BigDecimal.valueOf(0.05))
 
         intent.markAsSuccess(fee, new Currency("AZN"),
-                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         when:
         def netAmount = intent.calculateNetAmount()
@@ -148,7 +148,7 @@ class CardPurchaseIntentTest extends Specification {
 
         when:
         intent.markAsSuccess(fee, new Currency("AZN"),
-                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new ExternalPayeeDescription("desc"))
+                PaymentType.FOREIGN_BANK, new PaymentSystem("UP"), new PayeeDescription("desc"), new BankName("BANK"))
 
         then:
         thrown(IllegalDomainStateException)
@@ -159,7 +159,7 @@ class CardPurchaseIntentTest extends Specification {
         def intent = CardPurchaseIntent.of(UUID.randomUUID(), new BuyerID(UUID.randomUUID()), null, 1L, new Amount(100))
 
         when:
-        intent.markAsSuccess(null, null, null, null, null)
+        intent.markAsSuccess(null, null, null, null, null, null)
 
         then:
         thrown(IllegalDomainArgumentException)
