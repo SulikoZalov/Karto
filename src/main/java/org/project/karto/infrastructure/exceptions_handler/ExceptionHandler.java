@@ -1,5 +1,6 @@
 package org.project.karto.infrastructure.exceptions_handler;
 
+import com.hadzhy.jetquerious.exceptions.NotFoundException;
 import io.quarkus.logging.Log;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -15,6 +16,10 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
     if (e instanceof DomainException) return Response
             .status(Response.Status.BAD_REQUEST)
             .entity(e.getMessage())
+            .build();
+
+    if (e instanceof NotFoundException) return Response
+            .status(Response.Status.NOT_FOUND)
             .build();
 
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
