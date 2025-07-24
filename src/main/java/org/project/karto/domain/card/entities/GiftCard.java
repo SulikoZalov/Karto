@@ -291,8 +291,8 @@ public class GiftCard {
         return PaymentIntent.of(buyerID, id, storeID, orderID, totalAmount, new InternalFeeAmount(fee));
     }
 
-    public synchronized Check applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot,
-                                               Currency currency, PaymentType paymentType, PaymentSystem paymentSystem) {
+    public synchronized Check applyTransaction(PaymentIntent intent, UserActivitySnapshot activitySnapshot, Currency currency,
+                                               PaymentType paymentType, PaymentSystem paymentSystem, BankName bankName) {
 
         required("paymentIntent", intent);
         required("userActivitySnapshot", activitySnapshot);
@@ -321,7 +321,7 @@ public class GiftCard {
         incrementVersion();
 
         return Check.paymentCheck(intent.orderID(), intent.buyerID(), storeID, id, intent.totalAmount(), currency,
-                paymentType, intent.feeAmount(), paymentSystem, intent.paymentDescription());
+                intent.feeAmount(), paymentSystem, intent.paymentDescription(), bankName);
     }
 
     private void incrementVersion() {

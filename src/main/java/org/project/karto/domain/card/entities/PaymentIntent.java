@@ -24,7 +24,7 @@ public class PaymentIntent {
     private @Nullable LocalDateTime resultDate;
     private PurchaseStatus status;
     private boolean isConfirmed;
-    private @Nullable ExternalPayeeDescription description;
+    private @Nullable PayeeDescription description;
 
     private PaymentIntent(
             UUID id,
@@ -37,7 +37,7 @@ public class PaymentIntent {
             LocalDateTime resultDate,
             PurchaseStatus status,
             boolean isConfirmed,
-            ExternalPayeeDescription description,
+            PayeeDescription description,
             InternalFeeAmount feeAmount) {
 
         this.id = id;
@@ -85,7 +85,7 @@ public class PaymentIntent {
             @Nullable LocalDateTime resultDate,
             PurchaseStatus status,
             boolean isConfirmed,
-            @Nullable ExternalPayeeDescription payeeDescription,
+            @Nullable PayeeDescription payeeDescription,
             InternalFeeAmount feeAmount) {
 
         return new PaymentIntent(id, buyerID, cardID, storeID, orderID, totalAmount,
@@ -132,7 +132,7 @@ public class PaymentIntent {
         return isConfirmed;
     }
 
-    public ExternalPayeeDescription paymentDescription() {
+    public PayeeDescription paymentDescription() {
         return description;
     }
 
@@ -140,7 +140,7 @@ public class PaymentIntent {
         return feeAmount;
     }
 
-    public void markAsSuccess(ExternalPayeeDescription payeeDescription) {
+    public void markAsSuccess(PayeeDescription payeeDescription) {
         if (payeeDescription == null) throw new IllegalDomainArgumentException("Description cannot be null");
         isStatusPending();
 

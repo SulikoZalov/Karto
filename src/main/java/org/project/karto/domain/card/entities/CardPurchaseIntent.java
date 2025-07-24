@@ -122,7 +122,7 @@ public class CardPurchaseIntent {
     }
 
     public Check markAsSuccess(Fee removedFee, Currency currency, PaymentType paymentType,
-                               PaymentSystem paymentSystem, ExternalPayeeDescription description) {
+                               PaymentSystem paymentSystem, PayeeDescription description, BankName bankName) {
 
         required("removedFee", removedFee);
         required("currency", currency);
@@ -140,7 +140,8 @@ public class CardPurchaseIntent {
         this.status = PurchaseStatus.SUCCESS;
         this.removedFee = removedFee;
         return Check.cardPurchaseCheck(orderID, buyerID, storeID, totalPayedAmount, currency, paymentType,
-                new InternalFeeAmount(BigDecimal.ZERO), new ExternalFeeAmount(feeAmount.value()), paymentSystem, description);
+                new InternalFeeAmount(BigDecimal.ZERO), new ExternalFeeAmount(feeAmount.value()),
+                paymentSystem, description, bankName);
     }
 
     public Amount calculateNetAmount() {

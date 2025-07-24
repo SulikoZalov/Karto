@@ -135,7 +135,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 resultDate == null ? null : resultDate.toLocalDateTime(),
                 PurchaseStatus.valueOf(rs.getString("status")),
                 rs.getBoolean("is_confirmed"),
-                description == null ? null : new ExternalPayeeDescription(description),
+                description == null ? null : new PayeeDescription(description),
                 new InternalFeeAmount(rs.getBigDecimal("fee"))
         );
     }

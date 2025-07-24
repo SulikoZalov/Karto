@@ -37,6 +37,7 @@ public class JDBCCheckRepository implements CheckRepository {
                     "external_fee",
                     "payment_system",
                     "description",
+                    "bank_name",
                     "creation_date")
             .values()
             .build()
@@ -82,6 +83,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.internalFee(),
                 check.externalFee(),
                 check.paymentSystem(),
+                check.bankName(),
                 check.description(),
                 check.creationDate()
         ));
@@ -121,7 +123,8 @@ public class JDBCCheckRepository implements CheckRepository {
                 new InternalFeeAmount(rs.getBigDecimal("internal_fee")),
                 new ExternalFeeAmount(rs.getBigDecimal("external_fee")),
                 new PaymentSystem(rs.getString("payment_system")),
-                new ExternalPayeeDescription(rs.getString("description")),
+                new PayeeDescription(rs.getString("description")),
+                new BankName(rs.getString("bank_name")),
                 rs.getTimestamp("creation_date").toLocalDateTime()
         );
     }

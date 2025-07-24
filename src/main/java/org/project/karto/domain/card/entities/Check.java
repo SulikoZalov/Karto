@@ -24,7 +24,8 @@ public class Check {
     private final InternalFeeAmount internalFee;
     private final ExternalFeeAmount externalFee;
     private final PaymentSystem paymentSystem;
-    private final ExternalPayeeDescription description;
+    private final PayeeDescription description;
+    private final BankName bankName;
     private final LocalDateTime creationDate;
 
     private Check(
@@ -39,7 +40,8 @@ public class Check {
             InternalFeeAmount internalFee,
             ExternalFeeAmount externalFee,
             PaymentSystem paymentSystem,
-            ExternalPayeeDescription description,
+            PayeeDescription description,
+            BankName bankName,
             LocalDateTime creationDate) {
 
         this.id = id;
@@ -54,6 +56,7 @@ public class Check {
         this.externalFee = externalFee;
         this.paymentSystem = paymentSystem;
         this.description = description;
+        this.bankName = bankName;
         this.creationDate = creationDate;
     }
 
@@ -67,11 +70,14 @@ public class Check {
             InternalFeeAmount internalFee,
             ExternalFeeAmount externalFee,
             PaymentSystem paymentSystem,
-            ExternalPayeeDescription description) {
+            PayeeDescription description,
+            BankName bankName) {
 
-        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, externalFee, paymentSystem, description);
+        validateInputs(orderID, buyerID, spentAmount, currency, paymentType,
+                internalFee, externalFee, paymentSystem, description);
+
         return new Check(UUID.randomUUID(), orderID, buyerID, storeID, null, spentAmount,
-                currency, paymentType, internalFee, externalFee, paymentSystem, description, LocalDateTime.now());
+                currency, paymentType, internalFee, externalFee, paymentSystem, description, bankName, LocalDateTime.now());
     }
 
     static Check paymentCheck(
@@ -81,17 +87,19 @@ public class Check {
             CardID cardID,
             Amount spentAmount,
             Currency currency,
-            PaymentType paymentType,
             InternalFeeAmount internalFee,
             PaymentSystem paymentSystem,
-            ExternalPayeeDescription description) {
+            PayeeDescription description,
+            BankName bankName) {
 
         ExternalFeeAmount zeroedFee = new ExternalFeeAmount(BigDecimal.ZERO);
         if (cardID == null) throw new IllegalDomainArgumentException("CardID can`t be null");
 
-        validateInputs(orderID, buyerID, spentAmount, currency, paymentType, internalFee, zeroedFee, paymentSystem, description);
-        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType,
-                internalFee, zeroedFee, paymentSystem, description, LocalDateTime.now());
+        validateInputs(orderID, buyerID, spentAmount, currency, PaymentType.KARTO_PAYMENT,
+                internalFee, zeroedFee, paymentSystem, description);
+
+        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency, PaymentType.KARTO_PAYMENT,
+                internalFee, zeroedFee, paymentSystem, description, bankName, LocalDateTime.now());
     }
 
     public static Check fromRepository(
@@ -106,11 +114,12 @@ public class Check {
             InternalFeeAmount internalFee,
             ExternalFeeAmount externalFee,
             PaymentSystem paymentSystem,
-            ExternalPayeeDescription description,
+            PayeeDescription description,
+            BankName bankName,
             LocalDateTime creationDate) {
 
         return new Check(checkID, orderID, buyerID, storeID, cardID, spentAmount, currency, paymentType, internalFee,
-                externalFee, paymentSystem, description, creationDate);
+                externalFee, paymentSystem, description, bankName, creationDate);
     }
 
     private static void validateInputs(
@@ -122,7 +131,7 @@ public class Check {
             InternalFeeAmount internalFee,
             ExternalFeeAmount externalFee,
             PaymentSystem paymentSystem,
-            ExternalPayeeDescription description) {
+            PayeeDescription description) {
 
         if (orderID <= 0) throw new IllegalDomainArgumentException("orderID must be positive");
         if (buyerID == null) throw new IllegalDomainArgumentException("buyerID must not be null");
@@ -179,11 +188,15 @@ public class Check {
         return paymentSystem;
     }
 
+    public BankName bankName() {
+        return bankName;
+    }
+
     public LocalDateTime creationDate() {
         return creationDate;
     }
 
-    public ExternalPayeeDescription description() {
+    public PayeeDescription description() {
         return description;
     }
 
