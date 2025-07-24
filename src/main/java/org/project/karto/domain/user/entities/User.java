@@ -24,6 +24,7 @@ public class User {
     private boolean isBanned;
     private KeyAndCounter keyAndCounter;
     private CashbackStorage cashbackStorage;
+    private boolean reachedMaxCashbackRate;
     private final LocalDateTime creationDate;
     private final LocalDateTime lastUpdated;
 
@@ -35,6 +36,7 @@ public class User {
             boolean isBanned,
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
+            boolean reachedMaxCashbackRate,
             LocalDateTime creationDate,
             LocalDateTime lastUpdated) throws BannedUserException {
 
@@ -53,6 +55,7 @@ public class User {
         this.is2FAEnabled = is2FAEnabled;
         this.keyAndCounter = keyAndCounter;
         this.cashbackStorage = cashbackStorage;
+        this.reachedMaxCashbackRate = reachedMaxCashbackRate;
         this.creationDate = creationDate;
         this.lastUpdated = lastUpdated;
     }
@@ -65,6 +68,7 @@ public class User {
                 false,
                 new KeyAndCounter(key, 0),
                 new CashbackStorage(BigDecimal.ZERO),
+                false,
                 LocalDateTime.now(),
                 LocalDateTime.now());
     }
@@ -77,6 +81,7 @@ public class User {
             boolean isBanned,
             KeyAndCounter keyAndCounter,
             CashbackStorage cashbackStorage,
+            boolean reachedMaxCashbackRate,
             LocalDateTime creationDate,
             LocalDateTime lastUpdated) throws BannedUserException {
 
@@ -87,6 +92,7 @@ public class User {
                 isBanned,
                 keyAndCounter,
                 cashbackStorage,
+                reachedMaxCashbackRate,
                 creationDate,
                 lastUpdated);
     }
@@ -187,7 +193,11 @@ public class User {
         return cashbackStorage;
     }
 
-    public void addCashback(Amount amount) {
+    public boolean reachedMaxCashbackRate() {
+        return reachedMaxCashbackRate;
+    }
+
+    public void addCashback(Amount amount, boolean reachedMaxCashbackRate) {
         verifyPotentialBan();
         if (amount == null)
             throw new IllegalDomainArgumentException("Amount can`t be null");
@@ -195,6 +205,7 @@ public class User {
             throw new IllegalDomainArgumentException("Account is not verified");
 
         cashbackStorage = new CashbackStorage(cashbackStorage.amount().add(amount.value()));
+        this.reachedMaxCashbackRate = reachedMaxCashbackRate;
     }
 
     public void removeCashFromStorage(Amount amount) {

@@ -19,7 +19,7 @@ public class EventConsumer {
         User user = userRepository.findBy(event.ownerID().value())
                 .orElseThrow();
 
-        user.addCashback(new Amount(event.amount()));
+        user.addCashback(new Amount(event.amount()), event.reachMaxCashbackRate());
         userRepository.updateCashbackStorage(user);
     }
 }

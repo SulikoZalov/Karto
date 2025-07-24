@@ -325,7 +325,7 @@ class UserTest extends Specification {
         def amountToAdd = new Amount(BigDecimal.valueOf(50))
 
         when: "adding cashback"
-        user.addCashback(amountToAdd)
+        user.addCashback(amountToAdd, false)
 
         then: "cashback is added to storage"
         user.cashbackStorage().amount() == initialAmount.add(amountToAdd.value())
@@ -336,7 +336,7 @@ class UserTest extends Specification {
         def user = createVerifiedUser()
 
         when: "adding null amount"
-        user.addCashback(null)
+        user.addCashback(null, false)
 
         then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
         def exception = thrown(IllegalDomainArgumentException)
@@ -349,7 +349,7 @@ class UserTest extends Specification {
         def amount = new Amount(BigDecimal.valueOf(50))
 
         when: "adding cashback to unverified user"
-        user.addCashback(amount)
+        user.addCashback(amount, false)
 
         then: "IllegalDomainArgumentException is org.project.karto.domain.common.exceptions.IllegalDomainArgumentException"
         def exception = thrown(IllegalDomainArgumentException)
@@ -510,7 +510,7 @@ class UserTest extends Specification {
 
         // 4. Add some cashback
         def cashbackAmount = new Amount(BigDecimal.valueOf(100))
-        user.addCashback(cashbackAmount)
+        user.addCashback(cashbackAmount, false)
 
         // 5. Increment counter again for 2FA
         user.incrementCounter()
@@ -567,7 +567,7 @@ class UserTest extends Specification {
 
     private static User createVerifiedUserWithCashback(BigDecimal amount) {
         def user = createVerifiedUser()
-        user.addCashback(new Amount(amount))
+        user.addCashback(new Amount(amount), false)
         return user
     }
 }

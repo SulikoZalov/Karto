@@ -12,6 +12,7 @@ CREATE TABLE user_account (
     secret_key VARCHAR(28) NOT NULL,
     counter BIGINT NOT NULL,
     cashback_storage NUMERIC NOT NULL,
+    reached_max_cashback_rate BOOLEAN NOT NULL,
     creation_date TIMESTAMP NOT NULL,
     last_updated TIMESTAMP NOT NULL,
     PRIMARY KEY (id)

@@ -42,6 +42,7 @@ public class JDBCUserRepository implements UserRepository {
             .column("secret_key")
             .column("counter")
             .column("cashback_storage")
+            .column("reached_max_cashback_rate")
             .column("creation_date")
             .column("last_updated")
             .values()
@@ -82,7 +83,10 @@ public class JDBCUserRepository implements UserRepository {
             .sql();
 
     static final String UPDATE_CASHBACK_STORAGE = update("user_account")
-            .set("cashback_storage = ?")
+            .set("""
+                cashback_storage = ?,
+                reached_max_cashback_rate = ?
+                """)
             .where("id = ?")
             .build()
             .sql();
@@ -156,6 +160,7 @@ public class JDBCUserRepository implements UserRepository {
                         user.keyAndCounter().key(),
                         user.keyAndCounter().counter(),
                         user.cashbackStorage(),
+                        user.reachedMaxCashbackRate(),
                         user.creationDate(),
                         user.lastUpdated()));
     }
@@ -191,7 +196,11 @@ public class JDBCUserRepository implements UserRepository {
 
     @Override
     public Result<Integer, Throwable> updateCashbackStorage(User user) {
-        return mapTransactionResult(jet.write(UPDATE_CASHBACK_STORAGE, user.cashbackStorage(), user.id()));
+        return mapTransactionResult(jet.write(UPDATE_CASHBACK_STORAGE,
+                user.cashbackStorage(),
+                user.reachedMaxCashbackRate(),
+                user.id()
+        ));
     }
 
     @Override
@@ -266,6 +275,7 @@ public class JDBCUserRepository implements UserRepository {
                 rs.getBoolean("is_banned"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
                 new CashbackStorage(rs.getBigDecimal("cashback_storage")),
+                rs.getBoolean("reached_max_cashback_rate"),
                 rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
                 rs.getObject("last_updated", Timestamp.class).toLocalDateTime());
     }

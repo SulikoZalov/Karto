@@ -160,7 +160,7 @@ class UserRepoTest extends Specification{
         when:
         user.incrementCounter()
         user.enable()
-        user.addCashback(amount)
+        user.addCashback(amount, false)
         def storageUpdateResult = repo.updateCashbackStorage(user)
 
         then:
