@@ -1,20 +1,17 @@
 package org.project.karto.application.controller;
 
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PATCH;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import java.io.InputStream;
-
 import org.project.karto.application.dto.auth.CompanyRegistrationForm;
 import org.project.karto.application.service.AdminService;
+import org.project.karto.domain.companies.value_objects.PictureOfCards;
+
+import java.io.InputStream;
+import java.util.Map;
+
 import static org.project.karto.application.util.RestUtil.responseException;
 
 @Path("/admin")
@@ -51,7 +48,11 @@ public class AdminResource {
     @GET
     @Path("/partner/cards/picture")
     public Response loadPicture(@QueryParam("companyName") String companyName) {
-        return Response.ok(adminService.loadProfilePicture(companyName)).build();
+        PictureOfCards pictureOfCards = adminService.loadProfilePicture(companyName);
+        return Response.ok(Map.of(
+                "profilePicture", pictureOfCards.profilePicture(),
+                "imageType", pictureOfCards.imageType()))
+                .build();
     }
 
     @PATCH
