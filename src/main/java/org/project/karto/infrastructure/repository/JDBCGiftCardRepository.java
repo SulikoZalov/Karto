@@ -128,7 +128,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
         return mapTransactionResult(jet.write(UPDATE_GIFT_CARD,
                     giftCard.giftCardStatus(),
                     giftCard.balance().value(),
-                    :giftCard.countOfUses(),
+                    giftCard.countOfUses(),
                     giftCard.keyAndCounter().counter(),
                     giftCard.lastUsage(),
                     giftCard.version(),

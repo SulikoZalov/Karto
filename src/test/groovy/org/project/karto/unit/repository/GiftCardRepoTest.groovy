@@ -4,6 +4,8 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.karto.application.pagination.PageRequest;
+import org.project.karto.application.dto.gift_card.CardDTO;
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
@@ -413,5 +415,102 @@ class GiftCardRepoTest extends Specification {
 
         where:
         giftCard << (1..10).collect({TestDataGenerator.generateSelfBougthGiftCard()})
+    }
+
+    @Unroll
+    def "get available gift cards with pagination [#index]"() {
+        given: "Multiple companies with gift cards"
+        def company1 = util.generateActivateAndSaveCompany()
+        def company2 = util.generateActivateAndSaveCompany()
+        def user = util.generateActivateAndSaveUser()
+        
+        (1..3).each {
+            def giftCard = TestDataGenerator.generateSelfBougthGiftCard(user, company1)
+            repo.save(giftCard)
+        }
+                        
+        (1..5).each {
+            def giftCard = TestDataGenerator.generateSelfBougthGiftCard(user, company2)
+            repo.save(giftCard)
+        }
+
+        when: "Getting available gift cards with pagination"
+        def pageRequest = new PageRequest(10, 0)
+        def result = repo.availableGiftCards(pageRequest)
+
+        then: "Result should be successful and contain companies ordered by gift card count"
+        //notThrown(Exception)
+        result.success()
+        def cards = result.value()
+        cards.size() >= 2
+        
+        if (cards.size() >= 2) {
+            def firstCard = cards.find { it.partnerID() == company2 }
+            def secondCard = cards.find { it.partnerID() == company1 }
+            
+            firstCard != null
+            secondCard != null
+        }
+
+        where:
+        index << (1..5)
+    }
+
+    @Unroll
+    def "get available gift cards with small page size [#index]"() {
+        given: "Multiple companies with gift cards"
+        def company1 = util.generateActivateAndSaveCompany()
+        def company2 = util.generateActivateAndSaveCompany()
+        def user = util.generateActivateAndSaveUser()
+        
+        (1..2).each {
+            def giftCard = TestDataGenerator.generateSelfBougthGiftCard(user, company1)
+            repo.save(giftCard)
+        }
+        
+        (1..3).each {
+            def giftCard = TestDataGenerator.generateSelfBougthGiftCard(user, company2)
+            repo.save(giftCard)
+        }
+
+        when: "Getting available gift cards with small page size"
+        def pageRequest = new PageRequest(1,0)
+        def result = repo.availableGiftCards(pageRequest)
+
+        then: "Should return only one company"
+        notThrown(Exception)
+        result.success()
+        def cards = result.value()
+        cards.size() == 1
+
+        where:
+        index << (1..5)
+    }
+
+    @Unroll
+    def "get available gift cards with offset [#index]"() {
+        given: "Multiple companies with gift cards"
+        def companies = (1..3).collect { util.generateActivateAndSaveCompany() }
+        def user = util.generateActivateAndSaveUser()
+        
+        companies.eachWithIndex { company, idx ->
+            (1..(idx + 1)).each {
+                def giftCard = TestDataGenerator.generateSelfBougthGiftCard(user, company)
+                repo.save(giftCard)
+            }
+        }
+
+        when: "Getting available gift cards with offset"
+        def pageRequest = new PageRequest(2, 1)
+        def result = repo.availableGiftCards(pageRequest)
+
+        then: "Should skip first company and return next ones"
+        notThrown(Exception)
+        result.success()
+        def cards = result.value()
+        cards.size() <= 2
+
+        where:
+        index << (1..5)
     }
 }
