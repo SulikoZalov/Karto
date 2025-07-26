@@ -35,7 +35,7 @@ public class AdminResource {
     }
 
     @PATCH
-    @Path("/patner/cards/picture")
+    @Path("/patner/cards/picture/put")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     public Response addPicture(
             InputStream inputStream,
