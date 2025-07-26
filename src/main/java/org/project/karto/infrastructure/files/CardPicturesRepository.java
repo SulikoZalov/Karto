@@ -1,8 +1,11 @@
 package org.project.karto.infrastructure.files;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Optional;
 
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.companies.entities.Company;
@@ -32,7 +35,7 @@ public class CardPicturesRepository {
     }
   }
 
-  public Optional<ProfilePicture> load(String path) {
+  public Optional<PictureOfCards> load(String path) {
     try {
       final Path profilePicturePath = Paths.get(path);
 
