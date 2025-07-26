@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.companies.entities.Company;
-import org.project.karto.domain.user.values_objects.PictureOfCards;
+import org.project.karto.domain.companies.value_objects.PictureOfCards;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;

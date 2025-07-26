@@ -1,7 +1,9 @@
-package org.project.karto.domain.user.values_objects;
+package org.project.karto.domain.companies.value_objects;
 
 import static org.project.karto.domain.common.util.Utils.required;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 

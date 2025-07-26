@@ -20,7 +20,7 @@ import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.repository.UserRepository;
-import org.project.karto.domain.user.values_objects.PictureOfCards;
+import org.project.karto.domain.companies.value_objects.PictureOfCards;
 import org.project.karto.infrastructure.communication.PhoneInteractionService;
 import org.project.karto.infrastructure.files.CardPicturesRepository;
 import org.project.karto.infrastructure.files.StreamUtils;

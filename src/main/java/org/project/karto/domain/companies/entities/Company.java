@@ -7,7 +7,7 @@ import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
-import org.project.karto.domain.user.values_objects.PictureOfCards;
+import org.project.karto.domain.companies.value_objects.PictureOfCards;
 
 import static org.project.karto.domain.common.util.Utils.required;
 
