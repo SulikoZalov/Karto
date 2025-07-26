@@ -1,14 +1,19 @@
 package org.project.karto.domain.companies.entities;
 
+import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.enumerations.CompanyStatus;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.domain.companies.value_objects.RegistrationNumber;
+import org.project.karto.domain.user.values_objects.PictureOfCards;
+
+import static org.project.karto.domain.common.util.Utils.required;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Company {
@@ -23,6 +28,7 @@ public class Company {
     private KeyAndCounter keyAndCounter;
     private CompanyStatus companyStatus;
     private CardUsageLimitations cardUsageLimitation;
+    private @Nullable PictureOfCards picture;
 
     private Company(
             UUID id,
@@ -37,17 +43,28 @@ public class Company {
             CompanyStatus companyStatus,
             CardUsageLimitations cardUsageLimitation) {
 
-        if (id == null) throw new IllegalDomainArgumentException("id must not be null");
-        if (registrationNumber == null) throw new IllegalDomainArgumentException("registrationNumber must not be null");
-        if (companyName == null) throw new IllegalDomainArgumentException("companyName must not be null");
-        if (email == null) throw new IllegalDomainArgumentException("email must not be null");
-        if (phone == null) throw new IllegalDomainArgumentException("phone must not be null");
-        if (creationDate == null) throw new IllegalDomainArgumentException("creationDate must not be null");
-        if (lastUpdated == null) throw new IllegalDomainArgumentException("lastUpdate must not be null");
-        if (password == null) throw new IllegalDomainArgumentException("password must not be null");
-        if (keyAndCounter == null) throw new IllegalDomainArgumentException("keyAndCounter must not be null");
-        if (companyStatus == null) throw new IllegalDomainArgumentException("companyStatus must not be null");
-        if (cardUsageLimitation == null) throw new IllegalDomainArgumentException("cardUsagesLimitation must not be null");
+        if (id == null)
+            throw new IllegalDomainArgumentException("id must not be null");
+        if (registrationNumber == null)
+            throw new IllegalDomainArgumentException("registrationNumber must not be null");
+        if (companyName == null)
+            throw new IllegalDomainArgumentException("companyName must not be null");
+        if (email == null)
+            throw new IllegalDomainArgumentException("email must not be null");
+        if (phone == null)
+            throw new IllegalDomainArgumentException("phone must not be null");
+        if (creationDate == null)
+            throw new IllegalDomainArgumentException("creationDate must not be null");
+        if (lastUpdated == null)
+            throw new IllegalDomainArgumentException("lastUpdate must not be null");
+        if (password == null)
+            throw new IllegalDomainArgumentException("password must not be null");
+        if (keyAndCounter == null)
+            throw new IllegalDomainArgumentException("keyAndCounter must not be null");
+        if (companyStatus == null)
+            throw new IllegalDomainArgumentException("companyStatus must not be null");
+        if (cardUsageLimitation == null)
+            throw new IllegalDomainArgumentException("cardUsagesLimitation must not be null");
 
         this.id = id;
         this.registrationNumber = registrationNumber;
@@ -133,6 +150,15 @@ public class Company {
         return companyStatus;
     }
 
+    public Optional<PictureOfCards> picture() {
+        return Optional.ofNullable(picture);
+    }
+
+    public void addPicture(PictureOfCards picture) {
+        required("picture", picture);
+        this.picture = picture;
+    }
+
     public boolean isActive() {
         return companyStatus == CompanyStatus.ACTIVE;
     }
@@ -141,7 +167,8 @@ public class Company {
         if (isActive())
             throw new IllegalDomainStateException("You can`t active already verified user.");
         if (keyAndCounter.counter() == 0)
-            throw new IllegalDomainStateException("It is prohibited to activate an account that has not been verified.");
+            throw new IllegalDomainStateException(
+                    "It is prohibited to activate an account that has not been verified.");
 
         this.companyStatus = CompanyStatus.ACTIVE;
         touch();
@@ -182,7 +209,8 @@ public class Company {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Company company = (Company) o;
         return Objects.equals(id, company.id);
     }
