@@ -154,8 +154,11 @@ public class Company {
         return Optional.ofNullable(picture);
     }
 
-    public void addPicture(PictureOfCards picture) {
+    public void changePicture(PictureOfCards picture) {
         required("picture", picture);
+        if (!isActive())
+            throw new IllegalDomainStateException("Company account must be verified.");
+
         this.picture = picture;
     }
 

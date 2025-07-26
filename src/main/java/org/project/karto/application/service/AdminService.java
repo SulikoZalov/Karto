@@ -135,7 +135,7 @@ public class AdminService {
                 .orElseThrow(() -> responseException(Status.BAD_REQUEST, "Invalid picture."));
 
         final PictureOfCards picture = PictureOfCards.of(pictureBytes, company);
-        company.addPicture(picture);
+        company.changePicture(picture);
 
         picturesRepository.put(company);
     }
