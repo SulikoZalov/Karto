@@ -1,11 +1,14 @@
 package org.project.karto.application.controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.gift_card.CardForm;
+import org.project.karto.application.pagination.PageRequest;
 import org.project.karto.application.service.GiftCardsService;
 import org.project.karto.domain.common.value_objects.Email;
 
@@ -35,5 +38,10 @@ public class GiftCardResource {
         giftCardsService.spend();
         return Response.accepted("Transaction successfully commited.").build();
     }
-}
 
+    @GET
+    @Path("/abailable/gift_cards")
+    public Response availableGiftCards(@QueryParam("limit") int limit, @QueryParam("offset") int offset) {
+        return Response.ok(giftCardsService.availableGiftCards(new PageRequest(offset, limit))).build();
+    }
+}
