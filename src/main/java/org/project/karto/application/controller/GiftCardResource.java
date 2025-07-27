@@ -40,7 +40,7 @@ public class GiftCardResource {
     }
 
     @GET
-    @Path("/abailable/gift_cards")
+    @Path("/available/gift_cards")
     public Response availableGiftCards(@QueryParam("limit") int limit, @QueryParam("offset") int offset) {
         return Response.ok(giftCardsService.availableGiftCards(new PageRequest(offset, limit))).build();
     }
