@@ -45,10 +45,10 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
 
   private static String errorMessage(String message) {
     try {
-    String result =OBJECT_MAPPER.writeValueAsString(new ErrorMessage(message));
+      String result = OBJECT_MAPPER.writeValueAsString(new ErrorMessage(message));
       return result;
     } catch (JsonProcessingException e) {
-      Log.error("Unexpected error. Cannot process json in exception mapper." e);
+      Log.error("Unexpected error. Cannot process json in exception mapper. " + e.getMessage());
       return null;
     }
   }
