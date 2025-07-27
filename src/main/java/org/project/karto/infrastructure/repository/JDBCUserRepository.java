@@ -3,6 +3,10 @@ package org.project.karto.infrastructure.repository;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
+
+import org.project.karto.application.dto.gift_card.GiftCardDTO;
+import org.project.karto.application.pagination.PageRequest;
+import org.project.karto.domain.card.enumerations.GiftCardStatus;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.KeyAndCounter;
@@ -16,11 +20,11 @@ import org.project.karto.domain.user.values_objects.RefreshToken;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
 import static org.project.karto.infrastructure.repository.JDBCCompanyRepository.mapTransactionResult;
-
 
 @ApplicationScoped
 public class JDBCUserRepository implements UserRepository {
@@ -84,9 +88,9 @@ public class JDBCUserRepository implements UserRepository {
 
     static final String UPDATE_CASHBACK_STORAGE = update("user_account")
             .set("""
-                cashback_storage = ?,
-                reached_max_cashback_rate = ?
-                """)
+                    cashback_storage = ?,
+                    reached_max_cashback_rate = ?
+                    """)
             .where("id = ?")
             .build()
             .sql();
@@ -139,6 +143,23 @@ public class JDBCUserRepository implements UserRepository {
             .build()
             .sql();
 
+    static final String USER_CARDS = select()
+            .column("u.id").as("user_id")
+            .column("gc.id").as("gift_card_id")
+            .column("gc.store_id").as("store_id")
+            .column("c.company_name").as("company_name")
+            .column("gc.max_count_of_uses").as("max_count_of_uses")
+            .column("gc.count_of_uses").as("count_of_uses")
+            .column("gc.gift_card_status").as("status")
+            .column("gc.balance").as("balance")
+            .column("gc.expiration_date").as("expiration_date")
+            .from("user_account u")
+            .leftJoin("gift_card gc", "gc.owner_id = u.id")
+            .leftJoin("companies c", "c.id = gc.store_id")
+            .where("u.email = ?")
+            .limitAndOffset()
+            .sql();
+
     public JDBCUserRepository() {
         jet = JetQuerious.instance();
     }
@@ -147,41 +168,43 @@ public class JDBCUserRepository implements UserRepository {
     public Result<Integer, Throwable> save(User user) {
         PersonalData personalData = user.personalData();
         return mapTransactionResult(jet.write(SAVE_USER,
-                        user.id().toString(),
-                        personalData.firstname(),
-                        personalData.surname(),
-                        personalData.phone().orElse(null),
-                        personalData.email(),
-                        personalData.password().orElse(null),
-                        personalData.birthDate(),
-                        user.isVerified(),
-                        user.is2FAEnabled(),
-                        user.isBanned(),
-                        user.keyAndCounter().key(),
-                        user.keyAndCounter().counter(),
-                        user.cashbackStorage(),
-                        user.reachedMaxCashbackRate(),
-                        user.creationDate(),
-                        user.lastUpdated()));
+                user.id().toString(),
+                personalData.firstname(),
+                personalData.surname(),
+                personalData.phone().orElse(null),
+                personalData.email(),
+                personalData.password().orElse(null),
+                personalData.birthDate(),
+                user.isVerified(),
+                user.is2FAEnabled(),
+                user.isBanned(),
+                user.keyAndCounter().key(),
+                user.keyAndCounter().counter(),
+                user.cashbackStorage(),
+                user.reachedMaxCashbackRate(),
+                user.creationDate(),
+                user.lastUpdated()));
     }
 
     @Override
     public Result<Integer, Throwable> saveRefreshToken(RefreshToken refreshToken) {
         return mapTransactionResult(jet.write(SAVE_REFRESH_TOKEN,
-                        refreshToken.userID().toString(),
-                        refreshToken.refreshToken(),
-                        refreshToken.refreshToken())
-        );
+                refreshToken.userID().toString(),
+                refreshToken.refreshToken(),
+                refreshToken.refreshToken()));
     }
 
     @Override
     public Result<Integer, Throwable> updatePhone(User user) {
-        return mapTransactionResult(jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString()));
+        return mapTransactionResult(
+                jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(),
+                        user.id().toString()));
     }
 
     @Override
     public Result<Integer, Throwable> updateCounter(User user) {
-        return mapTransactionResult(jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString()));
+        return mapTransactionResult(
+                jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString()));
     }
 
     @Override
@@ -199,8 +222,7 @@ public class JDBCUserRepository implements UserRepository {
         return mapTransactionResult(jet.write(UPDATE_CASHBACK_STORAGE,
                 user.cashbackStorage(),
                 user.reachedMaxCashbackRate(),
-                user.id()
-        ));
+                user.id()));
     }
 
     @Override
@@ -252,8 +274,31 @@ public class JDBCUserRepository implements UserRepository {
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
+    @Override
+    public Result<List<GiftCardDTO>, Throwable> userCards(PageRequest page, Email email) {
+        var result = jet.readListOf(USER_CARDS, this::giftCardMapper, email, page.limit(), page.offset());
+        return new Result<>(result.value(), result.throwable(), result.success());
+    }
+
     private RefreshToken refreshTokenMapper(ResultSet rs) throws SQLException {
         return new RefreshToken(UUID.fromString(rs.getString("user_id")), rs.getString("token"));
+    }
+
+    private GiftCardDTO giftCardMapper(ResultSet rs) throws SQLException {
+        return new GiftCardDTO(
+                rs.getString("gift_card_id"),
+                getNullableString(rs, "store_id"),
+                getNullableString(rs, "company_name"),
+                rs.getBigDecimal("balance"),
+                GiftCardStatus.valueOf(rs.getString("status")),
+                rs.getInt("max_count_of_uses"),
+                rs.getInt("count_of_uses"),
+                rs.getTimestamp("expiration_date").toLocalDateTime());
+    }
+
+    private String getNullableString(ResultSet rs, String columnName) throws SQLException {
+        String value = rs.getString(columnName);
+        return value == null ? null : value;
     }
 
     private User userMapper(ResultSet rs) throws SQLException {

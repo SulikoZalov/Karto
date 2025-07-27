@@ -1,11 +1,14 @@
 package org.project.karto.domain.user.repository;
 
+import org.project.karto.application.dto.gift_card.GiftCardDTO;
+import org.project.karto.application.pagination.PageRequest;
 import org.project.karto.domain.common.containers.Result;
 import org.project.karto.domain.common.value_objects.Email;
 import org.project.karto.domain.common.value_objects.Phone;
 import org.project.karto.domain.user.entities.User;
 import org.project.karto.domain.user.values_objects.RefreshToken;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository {
@@ -37,4 +40,6 @@ public interface UserRepository {
     Result<User, Throwable> findBy(Phone phone);
 
     Result<RefreshToken, Throwable> findRefreshToken(String refreshToken);
+
+    Result<List<GiftCardDTO>, Throwable> userCards(PageRequest page, Email email);
 }
