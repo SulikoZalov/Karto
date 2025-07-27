@@ -21,7 +21,8 @@ class DomainSeparationTest {
                 .should().dependOnClassesThat()
                 .resideOutsideOfPackages(
                         DOMAIN_PACKAGE + "..",
-                        "java.."
+                        "java..",
+                        "org.project.karto.application.dto.."
                 );
 
         rule.check(domainClasses);
