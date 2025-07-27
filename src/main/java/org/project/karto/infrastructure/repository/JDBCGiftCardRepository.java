@@ -1,7 +1,7 @@
 package org.project.karto.infrastructure.repository;
 
 import org.project.karto.application.dto.gift_card.CardDTO;
-import org.project.karto.application.pagination.PageRequest;
+import org.project.karto.domain.common.interfaces.Pageable;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.QueryForge;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -161,7 +161,7 @@ public class JDBCGiftCardRepository implements GiftCardRepository {
     }
 
     @Override
-    public Result<List<CardDTO>, Throwable> availableGiftCards(PageRequest page) {
+    public Result<List<CardDTO>, Throwable> availableGiftCards(Pageable page) {
         var result = jet.readListOf(FIND_ALL_AVAILABLE_CARDS, this::mapCardDTO, page.limit(), page.offset());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
