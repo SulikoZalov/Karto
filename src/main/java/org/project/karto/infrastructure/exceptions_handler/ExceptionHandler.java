@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.exceptions.NotFoundException;
 import io.quarkus.logging.Log;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -25,21 +26,25 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
       return Response
           .status(Status.FORBIDDEN)
           .entity(errorMessage(e.getMessage()))
+          .type(MediaType.APPLICATION_JSON)
           .build();
 
     if (e instanceof DomainException)
       return Response
           .status(Response.Status.BAD_REQUEST)
           .entity(errorMessage(e.getMessage()))
+          .type(MediaType.APPLICATION_JSON)
           .build();
 
     if (e instanceof NotFoundException)
       return Response
           .status(Response.Status.NOT_FOUND)
+          .type(MediaType.APPLICATION_JSON)
           .build();
 
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
         .entity(errorMessage("Unexpected error occurred. Please contact support."))
+        .type(MediaType.APPLICATION_JSON)
         .build();
   }
 
