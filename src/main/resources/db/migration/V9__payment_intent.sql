@@ -2,7 +2,7 @@ CREATE TABLE payment_intent (
     id CHAR(36) NOT NULL,
     buyer_id CHAR(36) NOT NULL,
     card_id CHAR(36) NOT NULL,
-    store_id CHAR(36),
+    store_id CHAR(36) NOT NULL,
     order_id BIGINT NOT NULL,
     total_amount NUMERIC NOT NULL,
     creation_date TIMESTAMP NOT NULL,
