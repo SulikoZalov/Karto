@@ -44,10 +44,10 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
 
     static final String UPDATE_STATUS = QueryForge.update("payment_intent")
             .set("""
-                result_date = ?,
-                status = ?,
-                description = ?
-            """)
+                        result_date = ?,
+                        status = ?,
+                        description = ?
+                    """)
             .where("id = ?")
             .build()
             .sql();
@@ -82,7 +82,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.id(),
                 paymentIntent.buyerID(),
                 paymentIntent.cardID(),
-                paymentIntent.storeID().orElse(null),
+                paymentIntent.storeID(),
                 paymentIntent.orderID(),
                 paymentIntent.totalAmount(),
                 paymentIntent.creationDate(),
@@ -90,8 +90,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.status(),
                 paymentIntent.isConfirmed(),
                 paymentIntent.paymentDescription(),
-                paymentIntent.feeAmount()
-        ));
+                paymentIntent.feeAmount()));
     }
 
     @Override
@@ -100,8 +99,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 paymentIntent.resultDate().orElse(null),
                 paymentIntent.status(),
                 paymentIntent.paymentDescription(),
-                paymentIntent.id()
-        ));
+                paymentIntent.id()));
     }
 
     @Override
@@ -128,7 +126,7 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 UUID.fromString(rs.getString("id")),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 CardID.fromString(rs.getString("card_id")),
-                storeID == null ? null : StoreID.fromString(storeID),
+                StoreID.fromString(storeID),
                 rs.getLong("order_id"),
                 new Amount(rs.getBigDecimal("total_amount")),
                 rs.getTimestamp("creation_date").toLocalDateTime(),
@@ -136,11 +134,11 @@ public class JDBCPaymentIntentRepository implements PaymentIntentRepository {
                 PurchaseStatus.valueOf(rs.getString("status")),
                 rs.getBoolean("is_confirmed"),
                 description == null ? null : new PayeeDescription(description),
-                new InternalFeeAmount(rs.getBigDecimal("fee"))
-        );
+                new InternalFeeAmount(rs.getBigDecimal("fee")));
     }
 
-    private static Result<PaymentIntent, Throwable> mapResult(com.hadzhy.jetquerious.util.Result<PaymentIntent, Throwable> res) {
+    private static Result<PaymentIntent, Throwable> mapResult(
+            com.hadzhy.jetquerious.util.Result<PaymentIntent, Throwable> res) {
         return new Result<>(res.value(), res.throwable(), res.success());
     }
 }

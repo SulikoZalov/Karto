@@ -3,6 +3,7 @@ package org.project.karto.infrastructure.repository;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.project.karto.domain.card.entities.Check;
+import org.project.karto.domain.card.enumerations.CheckType;
 import org.project.karto.domain.card.enumerations.PaymentType;
 import org.project.karto.domain.card.repositories.CheckRepository;
 import org.project.karto.domain.card.value_objects.*;
@@ -23,8 +24,7 @@ public class JDBCCheckRepository implements CheckRepository {
 
     private final JetQuerious jet;
 
-    static final String SAVE_CHECK = insert().
-            into("chck")
+    static final String SAVE_CHECK = insert().into("chck")
             .columns("id",
                     "order_id",
                     "buyer_id",
@@ -38,7 +38,8 @@ public class JDBCCheckRepository implements CheckRepository {
                     "payment_system",
                     "description",
                     "bank_name",
-                    "creation_date")
+                    "creation_date",
+                    "check_type")
             .values()
             .build()
             .sql();
@@ -68,7 +69,6 @@ public class JDBCCheckRepository implements CheckRepository {
         this.jet = JetQuerious.instance();
     }
 
-
     @Override
     public Result<Integer, Throwable> save(Check check) {
         return mapTransactionResult(jet.write(SAVE_CHECK,
@@ -76,7 +76,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.orderID(),
                 check.buyerID(),
                 check.storeID().orElse(null),
-                check.cardID().orElse(null),
+                check.cardID(),
                 check.totalAmount(),
                 check.currency(),
                 check.paymentType(),
@@ -85,8 +85,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.paymentSystem(),
                 check.description(),
                 check.bankName(),
-                check.creationDate()
-        ));
+                check.creationDate()));
     }
 
     @Override
@@ -103,7 +102,7 @@ public class JDBCCheckRepository implements CheckRepository {
 
     @Override
     public Result<List<Check>, Throwable> findBy(StoreID storeID) {
-        var result = jet.readListOf(FIND_BY_STORE_ID,  this::mapCheck, storeID.value().toString());
+        var result = jet.readListOf(FIND_BY_STORE_ID, this::mapCheck, storeID.value().toString());
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 
@@ -116,7 +115,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 rs.getLong("order_id"),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 storeID != null ? StoreID.fromString(storeID) : null,
-                cardID != null ? CardID.fromString(cardID) : null,
+                CardID.fromString(cardID),
                 new Amount(rs.getBigDecimal("total_amount")),
                 new Currency(rs.getString("currency")),
                 PaymentType.valueOf(rs.getString("payment_type")),
@@ -125,7 +124,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 new PaymentSystem(rs.getString("payment_system")),
                 new PayeeDescription(rs.getString("description")),
                 new BankName(rs.getString("bank_name")),
-                rs.getTimestamp("creation_date").toLocalDateTime()
-        );
+                rs.getTimestamp("creation_date").toLocalDateTime(),
+                CheckType.valueOf(rs.getString("check_type")));
     }
 }
