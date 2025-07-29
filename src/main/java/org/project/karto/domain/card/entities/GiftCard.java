@@ -304,7 +304,7 @@ public class GiftCard {
             throw new IllegalDomainStateException("Card is not activated");
         if (countOfUses >= maxCountOfUses)
             throw new IllegalDomainArgumentException("Card reached max count of uses");
-        if (this.storeID != null && this.storeID != storeID)
+        if (this.storeID != null && !this.storeID.equals(storeID))
             throw new IllegalDomainArgumentException("StoreID specified wrong.");
 
         BigDecimal fee = calculateInternalFee(amount);
