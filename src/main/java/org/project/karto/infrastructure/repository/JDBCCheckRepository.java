@@ -85,7 +85,8 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.paymentSystem(),
                 check.description(),
                 check.bankName(),
-                check.creationDate()));
+                check.creationDate(),
+                check.checkType()));
     }
 
     @Override
