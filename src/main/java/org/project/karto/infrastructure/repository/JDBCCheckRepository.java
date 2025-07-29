@@ -76,7 +76,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 check.orderID(),
                 check.buyerID(),
                 check.storeID().orElse(null),
-                check.cardID(),
+                check.cardID().orElse(null),
                 check.totalAmount(),
                 check.currency(),
                 check.paymentType(),
