@@ -5,6 +5,7 @@ import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.entities.CardPurchaseIntent
+import org.project.karto.domain.card.entities.GiftCard
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.value_objects.*
 import org.project.karto.domain.common.value_objects.Amount
@@ -75,7 +76,7 @@ class CheckRepositoryTest extends Specification {
         when: "Performing a transaction"
         def reloadedCard1 = giftCardRepo.findBy(giftCard.id()).value()
         def amount = new Amount(reloadedCard1.balance().value().divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
-        def paymentIntent = reloadedCard1.initializeTransaction(amount, orderID())
+        def paymentIntent = reloadedCard1.initializeTransaction(amount, orderID(), storeID(giftCard))
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         def giftCardTransactionInitializationUpdateRes = giftCardRepo.update(reloadedCard1)
 
@@ -268,5 +269,9 @@ class CheckRepositoryTest extends Specification {
             found_check.cardID() == check.cardID()
         }
 
+    }
+
+    StoreID storeID(GiftCard giftCard) {
+        giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
     }
 }
