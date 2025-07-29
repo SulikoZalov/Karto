@@ -36,7 +36,7 @@ class CashbackAlgorithmTesting extends Specification {
     }
 
     static CashbackEvent transaction(GiftCard giftCard, Amount amount, UserActivitySnapshot activitySnapshot) {
-        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID())
+        def paymentIntent = giftCard.initializeTransaction(amount, TestDataGenerator.orderID(), storeID(giftCard))
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         giftCard.applyTransaction(
@@ -52,7 +52,7 @@ class CashbackAlgorithmTesting extends Specification {
     }
 
     static Amount generateRealisticAmount(GiftCard card) {
-        def balance = card.balance().value()
+        BigDecimal balance = card.balance().value()
         def percent = BigDecimal.valueOf(Math.random() * 0.3 + 0.1) // 10%–40%
         def amount = (balance * percent).setScale(2, RoundingMode.HALF_UP)
         new Amount(amount)
@@ -70,5 +70,9 @@ class CashbackAlgorithmTesting extends Specification {
                 LocalDateTime.now(),
                 activeDays, false
         )
+    }
+
+    static StoreID storeID(GiftCard giftCard) {
+        giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
     }
 }

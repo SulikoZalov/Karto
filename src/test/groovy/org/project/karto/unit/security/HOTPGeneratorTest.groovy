@@ -2,6 +2,7 @@ package org.project.karto.unit.security
 
 import org.project.karto.infrastructure.security.HOTPGenerator
 import spock.lang.Specification
+import java.util.Base64
 
 class HOTPGeneratorTest extends Specification {
 

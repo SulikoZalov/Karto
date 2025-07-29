@@ -3,7 +3,7 @@ package org.project.karto.unit.domain
 import org.project.karto.domain.card.value_objects.Fee
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException
-import org.project.karto.domain.common.value_objects.Amount
+import org.project.karto.domain.common.value_objects.*
 import spock.lang.Specification
 import spock.lang.Unroll
 
