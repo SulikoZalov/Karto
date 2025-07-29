@@ -7,6 +7,7 @@ import jakarta.inject.Inject
 import org.project.karto.domain.card.entities.PaymentIntent
 import org.project.karto.domain.card.enumerations.PurchaseStatus
 import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.common.containers.Result
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCPaymentIntentRepository
 import org.project.karto.util.PostgresTestResource
@@ -45,7 +46,7 @@ class PaymentIntentRepositoryTest extends Specification {
             id() == payment.id()
             buyerID() == payment.buyerID()
             cardID() == payment.cardID()
-            storeID().orElse(null) == payment.storeID().orElse(null)
+            storeID() == payment.storeID()
             orderID() == payment.orderID()
             totalAmount() == payment.totalAmount()
             status() == payment.status()
