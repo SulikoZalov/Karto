@@ -45,7 +45,7 @@ public class UPPaymentProcessor {
                 .indefinitely();
     }
 
-    public Result<URI, Throwable> initiateManualPayment(TransactionDTO dto) {
+    public Result<URI, Throwable> initiatePayment(TransactionDTO dto) {
         try {
             var response = webClient.postAbs(checkoutURL)
                     .putHeader("Content-Type", "application/json")
