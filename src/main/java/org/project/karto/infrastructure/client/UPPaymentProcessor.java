@@ -1,5 +1,6 @@
 package org.project.karto.infrastructure.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.core.Vertx;
@@ -9,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.net.URI;
 import java.util.Base64;
+import java.util.UUID;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.project.karto.application.dto.gift_card.TransactionDTO;
@@ -31,6 +33,9 @@ public class UPPaymentProcessor {
 
     @ConfigProperty(name = "up.checkout")
     String checkoutURL;
+
+    @ConfigProperty(name = "up.detailed_status")
+    String detailedStatusURL;
 
     private String authToken;
 
@@ -61,6 +66,28 @@ public class UPPaymentProcessor {
             return Result.success(paymentURI);
         } catch (Throwable t) {
             return Result.failure(t);
+        }
+    }
+
+    public Result<String, Throwable> statusByOrderIdDetailed(UUID id) {
+        try {
+            var response = webClient.postAbs(detailedStatusURL)
+                    .putHeader("Authorization", "Bearer " + authToken)
+                    .sendJsonObject(JsonObject.of("clientOrderId", id.toString()))
+                    .await()
+                    .indefinitely();
+
+            if (response.statusCode() != 200) {
+                return Result.failure(new IllegalStateException("Can't get the order's status"));
+            }
+
+            byte[] rawData = Base64.getDecoder().decode(response.bodyAsString());
+            JsonNode jsonNode = objectMapper.reader().readTree(rawData);
+            String status = jsonNode.get("status").asText();
+
+            return Result.success(status);
+        } catch (Exception e) {
+            return Result.failure(e);
         }
     }
 
