@@ -8,6 +8,7 @@ import org.project.karto.application.pagination.PageRequest;
 import org.project.karto.application.dto.gift_card.CardDTO;
 import org.project.karto.domain.card.enumerations.PaymentType
 import org.project.karto.domain.card.value_objects.*
+import org.project.karto.domain.card.entities.GiftCard
 import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.util.PostgresTestResource
@@ -155,7 +156,7 @@ class GiftCardRepoTest extends Specification {
         def reloadedCard1 = repo.findBy(giftCard.id()).value()
         def amount = new Amount(reloadedCard1.balance().value()
                 .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
-        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
+        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID(), storeID(giftCard))
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         repo.update(reloadedCard1)
 
@@ -211,7 +212,7 @@ class GiftCardRepoTest extends Specification {
         def reloadedCard1 = repo.findBy(giftCard.id()).value()
         def amount = new Amount(reloadedCard1.balance().value()
                 .divide(BigDecimal.valueOf(10), RoundingMode.HALF_UP))
-        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID())
+        def paymentIntent = reloadedCard1.initializeTransaction(amount, TestDataGenerator.orderID(), storeID(giftCard))
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
         repo.update(reloadedCard1)
 
@@ -512,5 +513,9 @@ class GiftCardRepoTest extends Specification {
 
         where:
         index << (1..5)
+    }
+
+    StoreID storeID(GiftCard giftCard) {
+        giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(util.generateActivateAndSaveCompany())
     }
 }
