@@ -116,7 +116,7 @@ public class JDBCCheckRepository implements CheckRepository {
                 rs.getLong("order_id"),
                 BuyerID.fromString(rs.getString("buyer_id")),
                 storeID != null ? StoreID.fromString(storeID) : null,
-                CardID.fromString(cardID),
+                cardID == null ? null : CardID.fromString(cardID),
                 new Amount(rs.getBigDecimal("total_amount")),
                 new Currency(rs.getString("currency")),
                 PaymentType.valueOf(rs.getString("payment_type")),
