@@ -5,6 +5,7 @@ import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException
+import org.project.karto.domain.companies.entities.Company
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.util.PostgresTestResource
 import org.project.karto.util.TestDataGenerator

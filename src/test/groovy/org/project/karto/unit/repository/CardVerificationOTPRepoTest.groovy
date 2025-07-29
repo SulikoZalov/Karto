@@ -5,6 +5,7 @@ import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.card.entities.CardVerificationOTP
+import org.project.karto.domain.card.entities.GiftCard
 import org.project.karto.infrastructure.repository.JDBCCardVerificationOTPRepository
 import org.project.karto.infrastructure.repository.JDBCGiftCardRepository
 import org.project.karto.infrastructure.security.HOTPGenerator
@@ -36,7 +37,7 @@ class CardVerificationOTPRepoTest extends Specification {
     @Unroll
     def "successfully save card otp [#index]"() {
         given:
-        def card = TestDataGenerator.generateSelfBougthGiftCard(
+        GiftCard card = TestDataGenerator.generateSelfBougthGiftCard(
                 util.generateActivateAndSaveUser(),
                 util.generateActivateAndSaveCompany()
         )
