@@ -20,7 +20,7 @@ public class Check {
     private final long orderID;
     private final BuyerID buyerID;
     private final @Nullable StoreID storeID;
-    private final CardID cardID;
+    private final @Nullable CardID cardID;
     private final Amount totalAmount;
     private final Currency currency;
     private final PaymentType paymentType;
@@ -37,7 +37,7 @@ public class Check {
             long orderID,
             BuyerID buyerID,
             @Nullable StoreID storeID,
-            CardID cardID,
+            @Nullable CardID cardID,
             Amount totalAmount,
             Currency currency,
             PaymentType paymentType,
@@ -70,7 +70,6 @@ public class Check {
             long orderID,
             BuyerID buyerID,
             @Nullable StoreID storeID,
-            CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -81,9 +80,9 @@ public class Check {
             BankName bankName) {
 
         validateInputs(orderID, buyerID, spentAmount, currency, paymentType,
-                internalFee, externalFee, paymentSystem, description, cardID);
+                internalFee, externalFee, paymentSystem, description);
 
-        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount,
+        return new Check(UUID.randomUUID(), orderID, buyerID, storeID, null, spentAmount,
                 currency, paymentType, internalFee, externalFee, paymentSystem, description, bankName,
                 LocalDateTime.now(), CheckType.CARD_PURCHASE);
     }
@@ -103,8 +102,9 @@ public class Check {
         ExternalFeeAmount zeroedFee = new ExternalFeeAmount(BigDecimal.ZERO);
 
         required("storeID", storeID);
+        required("cardID", cardID);
         validateInputs(orderID, buyerID, spentAmount, currency, PaymentType.KARTO_PAYMENT,
-                internalFee, zeroedFee, paymentSystem, description, cardID);
+                internalFee, zeroedFee, paymentSystem, description);
 
         return new Check(UUID.randomUUID(), orderID, buyerID, storeID, cardID, spentAmount, currency,
                 PaymentType.KARTO_PAYMENT, internalFee, zeroedFee,
@@ -116,7 +116,7 @@ public class Check {
             long orderID,
             BuyerID buyerID,
             @Nullable StoreID storeID,
-            CardID cardID,
+            @Nullable CardID cardID,
             Amount spentAmount,
             Currency currency,
             PaymentType paymentType,
@@ -141,8 +141,7 @@ public class Check {
             InternalFeeAmount internalFee,
             ExternalFeeAmount externalFee,
             PaymentSystem paymentSystem,
-            PayeeDescription description,
-            CardID cardID) {
+            PayeeDescription description) {
 
         if (orderID <= 0)
             throw new IllegalDomainArgumentException("orderID must be positive");
@@ -154,7 +153,6 @@ public class Check {
         required("externalFee", externalFee);
         required("paymentSystem", paymentSystem);
         required("description", description);
-        required("cardID", cardID);
     }
 
     public UUID id() {
@@ -169,8 +167,8 @@ public class Check {
         return buyerID;
     }
 
-    public CardID cardID() {
-        return cardID;
+    public Optional<CardID> cardID() {
+        return Optional.ofNullable(cardID);
     }
 
     public Optional<StoreID> storeID() {

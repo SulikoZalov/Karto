@@ -121,8 +121,8 @@ public class CardPurchaseIntent {
         return Optional.ofNullable(removedFee);
     }
 
-    public Check markAsSuccess(Fee removedFee, Currency currency, PaymentType paymentType, PaymentSystem paymentSystem,
-                               PayeeDescription description, CardID cardID, BankName bankName) {
+    public Check markAsSuccess(Fee removedFee, Currency currency, PaymentType paymentType,
+                               PaymentSystem paymentSystem, PayeeDescription description, BankName bankName) {
 
         required("removedFee", removedFee);
         required("currency", currency);
@@ -139,7 +139,7 @@ public class CardPurchaseIntent {
         this.resultDate = LocalDateTime.now();
         this.status = PurchaseStatus.SUCCESS;
         this.removedFee = removedFee;
-        return Check.cardPurchaseCheck(orderID, buyerID, storeID, cardID, totalPayedAmount, currency, paymentType,
+        return Check.cardPurchaseCheck(orderID, buyerID, storeID, totalPayedAmount, currency, paymentType,
                 new InternalFeeAmount(BigDecimal.ZERO), new ExternalFeeAmount(feeAmount.value()),
                 paymentSystem, description, bankName);
     }
