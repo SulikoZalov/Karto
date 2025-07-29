@@ -68,7 +68,7 @@ class AdminServiceTest extends Specification {
 
     void "fail registration: form is null"() {
         given:
-        CompanyRegistrationForm form = null;
+        CompanyRegistrationForm form = null
 
         when:
         service.registerPartner(form)

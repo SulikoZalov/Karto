@@ -284,7 +284,7 @@ public class TestDataGenerator {
 
     public static GiftCard generateSelfBougthGiftCard(UUID userID) {
         return GiftCard.selfBoughtCard(
-                new BuyerID(UUID.randomUUID()),
+                new BuyerID(userID),
                 generateBalance(),
                 new StoreID(UUID.randomUUID()),
                 generateSecretKey(),

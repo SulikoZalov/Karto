@@ -32,7 +32,7 @@ class PaymentIntentTest extends Specification {
         intent.id() != null
         intent.buyerID() == buyerID
         intent.cardID() == cardID
-        intent.storeID().get() == storeID
+        intent.storeID() == storeID
         intent.orderID() == orderID
         intent.totalAmount() == amount
         intent.creationDate() != null
@@ -58,7 +58,7 @@ class PaymentIntentTest extends Specification {
         then:
         def ex = thrown(InvocationTargetException)
         ex.cause instanceof IllegalDomainArgumentException
-        ex.cause.message == "BuyerID cannot be null"
+        ex.cause.message == "buyerID must not be null"
     }
 
     def "should fail when creating PaymentIntent with null CardID"() {
@@ -79,7 +79,7 @@ class PaymentIntentTest extends Specification {
         then:
         def ex = thrown(InvocationTargetException)
         ex.cause instanceof IllegalDomainArgumentException
-        ex.cause.message == "CardID cannot be null"
+        ex.cause.message == "cardID must not be null"
     }
 
     def "should fail when creating PaymentIntent with null Amount"() {
@@ -100,7 +100,7 @@ class PaymentIntentTest extends Specification {
         then:
         def ex = thrown(InvocationTargetException)
         ex.cause instanceof IllegalDomainArgumentException
-        ex.cause.message == "TotalAmount cannot be null"
+        ex.cause.message == "totalAmount must not be null"
     }
 
     def "should fail when creating PaymentIntent with non-positive orderID"() {
@@ -142,7 +142,7 @@ class PaymentIntentTest extends Specification {
         then:
         def ex = thrown(InvocationTargetException)
         ex.cause instanceof IllegalDomainArgumentException
-        ex.cause.message == "Fee amount cannot be null"
+        ex.cause.message == "feeAmount must not be null"
     }
 
     def "should successfully change status from PENDING to SUCCESS"() {

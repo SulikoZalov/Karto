@@ -335,18 +335,19 @@ class GiftCardTest extends Specification {
     def "should initialize transaction successfully when conditions are met"() {
         given: "An active gift card with sufficient balance"
         def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
         giftCard.activate()
         def amount = new Amount(new BigDecimal("500"))
         def orderID = 12345L
 
         when: "Initializing a transaction"
-        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID, storeID)
 
         then: "A payment intent should be created"
         paymentIntent != null
         paymentIntent.cardID() == giftCard.id()
         paymentIntent.buyerID() == giftCard.buyerID()
-        paymentIntent.storeID().get() == giftCard.storeID().get()
+        if (giftCard.storeID().isPresent()) paymentIntent.storeID() == giftCard.storeID()
         paymentIntent.orderID() == orderID
         paymentIntent.totalAmount().value() == amount.value().add(amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE)
         paymentIntent.feeAmount().value() == amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE
@@ -359,9 +360,10 @@ class GiftCardTest extends Specification {
     def "should throw exception when initializing transaction with invalid conditions: #scenario"() {
         given: "A gift card in specific state"
         def giftCard = initialCard.call()
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
 
         when: "Initializing a transaction"
-        giftCard.initializeTransaction(amount, 12345L)
+        giftCard.initializeTransaction(amount, 12345L, storeID)
 
         then: "An exception should be thrown"
         thrown(expectedException)
@@ -378,8 +380,9 @@ class GiftCardTest extends Specification {
         }                                                                 | new Amount(BigDecimal.TEN) | IllegalDomainStateException
         "max uses reached"                    | {
             def c = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")), 1)
+            def s = c.storeID().isPresent() ? c.storeID().get() : new StoreID(UUID.randomUUID())
             c.activate()
-            c.initializeTransaction(new Amount(new BigDecimal("500")), 1)
+            c.initializeTransaction(new Amount(new BigDecimal("500")), 1, s)
             return c
         }                                                                 | new Amount(new BigDecimal("500")) | IllegalDomainArgumentException
         "insufficient balance"                | {
@@ -394,7 +397,8 @@ class GiftCardTest extends Specification {
         def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
         giftCard.activate()
         def amount = new Amount(new BigDecimal("500"))
-        def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
+        def paymentIntent = giftCard.initializeTransaction(amount, 12345L, storeID)
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         and: "User activity snapshot"
@@ -422,7 +426,7 @@ class GiftCardTest extends Specification {
         check.orderID() == 12345L
         check.buyerID() == giftCard.buyerID()
         check.storeID().get() == giftCard.storeID().get()
-        check.cardID().get() == giftCard.id()
+        check.cardID().orElseThrow() == giftCard.id()
         check.totalAmount() == paymentIntent.totalAmount()
         check.currency() == new Currency("USD")
         check.paymentType() == PaymentType.KARTO_PAYMENT
@@ -450,10 +454,11 @@ class GiftCardTest extends Specification {
     def "should throw exception when applying transaction with invalid conditions"() {
         given: "An active gift card"
         def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
         giftCard.activate()
 
         and: "A payment intent"
-        def paymentIntent = giftCard.initializeTransaction(new Amount(new BigDecimal("500")), 12345L)
+        def paymentIntent = giftCard.initializeTransaction(new Amount(new BigDecimal("500")), 12345L, storeID)
 
         and: "User activity snapshot"
         def userID = giftCard.ownerID().get().value()
@@ -484,7 +489,7 @@ class GiftCardTest extends Specification {
         "intent for different card"          | { g, p ->
             def otherCard = TestDataGenerator.generateSelfBougthGiftCard()
             otherCard.activate()
-            otherCard.initializeTransaction(new Amount(new BigDecimal("100")), 54321)
+            otherCard.initializeTransaction(new Amount(new BigDecimal("100")), 54321, new StoreID(UUID.randomUUID()))
         }                                                                   | IllegalDomainArgumentException
         "userID mismatch"                    | { g, p -> p }                                                                 | IllegalDomainArgumentException
     }
@@ -492,9 +497,10 @@ class GiftCardTest extends Specification {
     def "should calculate cashback correctly with maximum cap"() {
         given: "An active gift card with payment intent"
         def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("10000")))
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
         giftCard.activate()
         def amount = new Amount(new BigDecimal("1000"))
-        def paymentIntent = giftCard.initializeTransaction(amount, 12345L)
+        def paymentIntent = giftCard.initializeTransaction(amount, 12345L, storeID)
         paymentIntent.markAsSuccess(new PayeeDescription("desc"))
 
         and: "User activity snapshot with very high values to trigger max cashback"
@@ -528,12 +534,13 @@ class GiftCardTest extends Specification {
     def "should not charge fee for common gift cards"() {
         given: "An active common gift card"
         def giftCard = TestDataGenerator.generateSelfBoughtCommonGiftCard(new Balance(new BigDecimal("1000")))
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
         giftCard.activate()
         def amount = new Amount(new BigDecimal("500"))
         def orderID = 12345L
 
         when: "Initializing a transaction"
-        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID, storeID)
 
         then: "No fee should be charged"
         paymentIntent.feeAmount().value() == BigDecimal.ZERO
@@ -543,12 +550,13 @@ class GiftCardTest extends Specification {
     def "should charge fee for store-specific gift cards"() {
         given: "An active store-specific gift card"
         def giftCard = TestDataGenerator.generateSelfBougthGiftCard(new Balance(new BigDecimal("1000")))
+        def storeID = giftCard.storeID().isPresent() ? giftCard.storeID().get() : new StoreID(UUID.randomUUID())
         giftCard.activate()
         def amount = new Amount(new BigDecimal("500"))
         def orderID = 12345L
 
         when: "Initializing a transaction"
-        def paymentIntent = giftCard.initializeTransaction(amount, orderID)
+        def paymentIntent = giftCard.initializeTransaction(amount, orderID, storeID)
 
         then: "Fee should be charged"
         paymentIntent.feeAmount().value() == amount.value() * GiftCard.KARTO_COMMON_CARD_FEE_RATE
