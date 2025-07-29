@@ -4,6 +4,8 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.karto.domain.common.containers.Result
+import org.project.karto.domain.common.value_objects.Amount
 import org.project.karto.domain.common.value_objects.Email
 import org.project.karto.domain.common.value_objects.Phone
 import org.project.karto.domain.user.entities.User

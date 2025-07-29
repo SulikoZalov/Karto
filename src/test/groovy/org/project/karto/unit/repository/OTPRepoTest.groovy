@@ -5,6 +5,7 @@ import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
 import org.project.karto.domain.user.entities.OTP
+import org.project.karto.domain.user.entities.User
 import org.project.karto.infrastructure.repository.JDBCOTPRepository
 import org.project.karto.infrastructure.repository.JDBCUserRepository
 import org.project.karto.infrastructure.security.HOTPGenerator

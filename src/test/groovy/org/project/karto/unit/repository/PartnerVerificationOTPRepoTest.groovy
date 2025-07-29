@@ -4,6 +4,8 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.karto.domain.companies.entities.Company
+import org.project.karto.domain.companies.entities.PartnerVerificationOTP
 import org.project.karto.infrastructure.repository.JDBCCompanyRepository
 import org.project.karto.infrastructure.repository.JDBCPartnerVerificationOTPRepository
 import org.project.karto.util.PostgresTestResource
