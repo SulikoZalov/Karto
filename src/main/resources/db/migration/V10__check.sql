@@ -3,7 +3,7 @@ CREATE TABLE chck (
     order_id BIGINT NOT NULL,
     buyer_id CHAR(36) NOT NULL,
     store_id CHAR(36),
-    card_id CHAR(36) NOT NULL,
+    card_id CHAR(36),
     total_amount NUMERIC NOT NULL,
     currency CHAR(3) NOT NULL,
     payment_type VARCHAR(13) NOT NULL CHECK ( payment_type in ('GOOGLE_PAY', 'APPLE_PAY', 'NATIVE_BANK', 'FOREIGN_BANK', 'KARTO_PAYMENT')),
