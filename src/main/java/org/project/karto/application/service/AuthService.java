@@ -3,6 +3,8 @@ package org.project.karto.application.service;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.auth.*;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
@@ -90,8 +92,7 @@ public class AuthService {
                 registrationForm.phone(),
                 encodedPassword,
                 registrationForm.email(),
-                registrationForm.birthDate()
-        );
+                registrationForm.birthDate());
         String secretKey = HOTPGenerator.generateSecretKey();
 
         User user = User.of(personalData, secretKey);
@@ -107,7 +108,8 @@ public class AuthService {
         Phone phone = new Phone(phoneNumber);
         User user = userRepository.findBy(phone).orElseThrow();
         OTP otp = otpRepository.findBy(user.id())
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND,
+                        "OTP not exists. Old one must be for resend."));
 
         otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t delete otp.", throwable));
         generateAndSendOTP(user);
@@ -159,6 +161,9 @@ public class AuthService {
     }
 
     public Object login(LoginForm loginForm) {
+        if (loginForm == null)
+            throw responseException(Status.BAD_REQUEST, "Login form is required.");
+
         Password.validate(loginForm.password());
         Phone phone = new Phone(loginForm.phone());
         User user = userRepository.findBy(phone).orElseThrow();
@@ -213,7 +218,8 @@ public class AuthService {
             User user = userRepository.findBy(otp.userID()).orElseThrow();
 
             if (!user.canLogin())
-                throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
+                throw responseException(Response.Status.FORBIDDEN,
+                        "You can`t login with unverified or banned account.");
 
             if (!user.is2FAEnabled()) {
                 Log.info("Two factor authentication is enabled and verified for user.");
@@ -269,7 +275,8 @@ public class AuthService {
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "This refresh token is not found."));
 
         long tokenExpirationDate = jwtUtility.parse(foundedPairResult.refreshToken())
-                .orElseThrow(() -> responseException(Response.Status.BAD_REQUEST, "Something went wrong, try again later."))
+                .orElseThrow(
+                        () -> responseException(Response.Status.BAD_REQUEST, "Something went wrong, try again later."))
                 .getExpirationTime();
 
         var tokenExpiration = LocalDateTime.ofEpochSecond(tokenExpirationDate, 0, ZoneOffset.UTC);
@@ -310,8 +317,7 @@ public class AuthService {
                 null,
                 null,
                 email.email(),
-                birthDate
-        );
+                birthDate);
     }
 
     private Tokens generateTokens(User user) {
