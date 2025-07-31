@@ -6,9 +6,7 @@ import jakarta.ws.rs.core.Response;
 import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.Token;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
-import org.project.karto.domain.common.value_objects.CardUsageLimitations;
-import org.project.karto.domain.common.value_objects.Password;
-import org.project.karto.domain.common.value_objects.Phone;
+import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.entities.Company;
 import org.project.karto.domain.companies.entities.PartnerVerificationOTP;
 import org.project.karto.domain.companies.repository.CompanyRepository;
@@ -117,6 +115,14 @@ public class CompanyService {
         companyRepository.updatePassword(company)
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                         "Unable to change password. Please try again later."));
+    }
+
+    public Object statisticOf(CompanyName companyName) {
+        return null; // TODO
+    }
+
+    public Object paymentQR(Amount amount, Email email) {
+        return null; // TODO
     }
 
     public void changeCardLimitations(int days, int maxUsageCount, String receivedCompanyName) {

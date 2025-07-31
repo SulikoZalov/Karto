@@ -157,6 +157,14 @@ public class AdminService {
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Please try again later."));
     }
 
+    public Object statisticAll() {
+        return null; // TODO
+    }
+
+    public Object statisticOfCommonCards() {
+        return null; // TODO
+    }
+
     private void generateAndResendPartnerOTP(Company company) {
         PartnerVerificationOTP otp = PartnerVerificationOTP
                 .of(company,

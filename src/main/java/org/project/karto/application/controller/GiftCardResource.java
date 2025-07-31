@@ -9,9 +9,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.gift_card.CardForm;
+import org.project.karto.application.dto.gift_card.SpendRequest;
 import org.project.karto.application.pagination.PageRequest;
 import org.project.karto.application.service.GiftCardsService;
 import org.project.karto.domain.common.value_objects.Amount;
@@ -47,8 +49,8 @@ public class GiftCardResource {
 
     @POST
     @Path("/spend/manual")
-    public Response spend(@QueryParam("amount") BigDecimal amount, @QueryParam("language") String language) {
-        giftCardsService.spend(new Amount(amount), new Language(language), new Email(jwt.getName()));
+    public Response spend(SpendRequest spendRequest) {
+        giftCardsService.spend(spendRequest, new Email(jwt.getName()));
         return Response.accepted("Transaction successfully commited.").build();
     }
 
