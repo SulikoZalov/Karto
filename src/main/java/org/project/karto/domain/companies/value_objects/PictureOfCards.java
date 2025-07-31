@@ -5,15 +5,15 @@ import static org.project.karto.domain.common.util.Utils.required;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.companies.entities.Company;
 
-public class PictureOfCards {
+public final class PictureOfCards {
   private final String path;
   private final String imageType;
   private final byte[] profilePicture;
+
   private static final int MAX_SIZE = 2_097_152;
   private static final String PATH_FORMAT = "src/main/resources/static/profile/photos/%s";
 
@@ -28,7 +28,7 @@ public class PictureOfCards {
 
   private PictureOfCards(String path, byte[] profilePicture, String imageType) {
     this.path = path;
-    this.profilePicture = profilePicture;
+    this.profilePicture = profilePicture.clone();
     this.imageType = imageType;
   }
 
@@ -37,14 +37,16 @@ public class PictureOfCards {
     required("company", company);
 
     String path = profilePicturePath(company.id().toString());
-    String typeOfImage = validate(path, profilePicture)
-        .orElseThrow(() -> new IllegalDomainArgumentException("Invalid profile picture type: %s."));
+    String typeOfImage = validate(profilePicture)
+        .orElseThrow(() -> new IllegalDomainArgumentException("Invalid profile picture type."));
 
     return new PictureOfCards(path, profilePicture, typeOfImage);
   }
 
   public static PictureOfCards fromRepository(String path, byte[] profilePicture) {
-    return new PictureOfCards(path, profilePicture, checkImageExtension(profilePicture).orElseThrow());
+    return new PictureOfCards(path, profilePicture,
+        checkImageExtension(profilePicture).orElseThrow(
+            () -> new IllegalDomainArgumentException("Invalid profile picture type.")));
   }
 
   public static String profilePicturePath(String id) {
@@ -56,38 +58,31 @@ public class PictureOfCards {
   }
 
   public byte[] profilePicture() {
-    byte[] copy = new byte[profilePicture.length];
-    System.arraycopy(profilePicture, 0, copy, 0, profilePicture.length);
-    return copy;
+    return profilePicture.clone();
   }
 
   public String imageType() {
     return imageType;
   }
 
-  private static Optional<String> validate(String path, byte[] profilePicture) {
+  private static Optional<String> validate(byte[] profilePicture) {
     if (profilePicture.length > MAX_SIZE)
       return Optional.empty();
     return checkImageExtension(profilePicture);
   }
 
   private static Optional<String> checkImageExtension(byte[] profilePicture) {
-    for (int i = 0, imageSignaturesLength = IMAGE_SIGNATURES.length; i < imageSignaturesLength; i++) {
+    for (int i = 0; i < IMAGE_SIGNATURES.length; i++) {
       byte[] imageSignature = IMAGE_SIGNATURES[i];
-      if (matchesSignature(profilePicture, imageSignature)) {
-        if (i == 0 || i == 1)
-          return Optional.of(IMAGE_EXTENSIONS[0]);
-        return Optional.of(IMAGE_EXTENSIONS[1]);
-      }
+      if (matchesSignature(profilePicture, imageSignature))
+        return Optional.of(IMAGE_EXTENSIONS[i]);
     }
-
     return Optional.empty();
   }
 
   private static boolean matchesSignature(byte[] file, byte[] signature) {
     if (file.length < signature.length)
       return false;
-
     for (int i = 0; i < signature.length; i++) {
       if (file[i] != signature[i])
         return false;
@@ -106,20 +101,8 @@ public class PictureOfCards {
 
   @Override
   public int hashCode() {
-    int result = Objects.hashCode(path);
-    result = 31 * result + Objects.hashCode(imageType);
+    int result = Objects.hash(path, imageType);
     result = 31 * result + Arrays.hashCode(profilePicture);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("""
-        {
-        Path: %s,
-        ProfilePicture: %s,
-        File extension: %s
-        }
-        """, this.path, Arrays.toString(this.profilePicture), this.imageType);
   }
 }
