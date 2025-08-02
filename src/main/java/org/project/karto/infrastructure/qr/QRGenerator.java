@@ -11,6 +11,7 @@ import org.project.karto.application.dto.gift_card.PaymentQRDTO;
 import org.project.karto.domain.common.containers.Result;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 
 @ApplicationScoped
 public class QRGenerator {
@@ -29,7 +30,8 @@ public class QRGenerator {
 
       try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
         MatrixToImageWriter.writeToStream(matrix, IMAGE_FORMAT, baos);
-        return Result.success(new QR(baos.toByteArray()));
+        String base64 = Base64.getEncoder().encodeToString(baos.toByteArray());
+        return Result.success(new QR(base64));
       }
 
     } catch (Exception e) {
