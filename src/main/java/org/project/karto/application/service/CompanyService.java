@@ -3,8 +3,12 @@ package org.project.karto.application.service;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
 import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.Token;
+import org.project.karto.application.dto.common.QR;
+import org.project.karto.application.dto.gift_card.PaymentQRDTO;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
 import org.project.karto.domain.common.value_objects.*;
 import org.project.karto.domain.companies.entities.Company;
@@ -13,6 +17,7 @@ import org.project.karto.domain.companies.repository.CompanyRepository;
 import org.project.karto.domain.companies.repository.PartnerVerificationOTPRepository;
 import org.project.karto.domain.companies.value_objects.CompanyName;
 import org.project.karto.infrastructure.communication.PhoneInteractionService;
+import org.project.karto.infrastructure.qr.QRGenerator;
 import org.project.karto.infrastructure.security.HOTPGenerator;
 import org.project.karto.infrastructure.security.JWTUtility;
 import org.project.karto.infrastructure.security.PasswordEncoder;
@@ -24,6 +29,8 @@ public class CompanyService {
 
     private final JWTUtility jwtUtility;
 
+    private final QRGenerator qrGenerator;
+
     private final HOTPGenerator hotpGenerator;
 
     private final PasswordEncoder passwordEncoder;
@@ -34,12 +41,15 @@ public class CompanyService {
 
     private final PartnerVerificationOTPRepository otpRepository;
 
-    CompanyService(JWTUtility jwtUtility, PasswordEncoder passwordEncoder,
-                   CompanyRepository companyRepository,
-                   PhoneInteractionService phoneInteractionService,
-                   PartnerVerificationOTPRepository otpRepository) {
+    CompanyService(JWTUtility jwtUtility,
+            QRGenerator qrGenerator,
+            PasswordEncoder passwordEncoder,
+            CompanyRepository companyRepository,
+            PhoneInteractionService phoneInteractionService,
+            PartnerVerificationOTPRepository otpRepository) {
 
         this.jwtUtility = jwtUtility;
+        this.qrGenerator = qrGenerator;
         this.passwordEncoder = passwordEncoder;
         this.phoneInteractionService = phoneInteractionService;
         this.hotpGenerator = new HOTPGenerator();
@@ -52,7 +62,8 @@ public class CompanyService {
         Company company = companyRepository.findBy(phone)
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Company not found."));
         PartnerVerificationOTP otp = otpRepository.findBy(company.id())
-                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not exists. Old one must be for resend."));
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND,
+                        "OTP not exists. Old one must be for resend."));
 
         otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t delete otp.", throwable));
         generateAndResendPartnerOTP(company);
@@ -96,7 +107,8 @@ public class CompanyService {
         if (!company.isActive())
             throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified account.");
 
-        final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(), company.password().password());
+        final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
+                company.password().password());
         if (!isValidPasswordProvided)
             throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
 
@@ -121,8 +133,13 @@ public class CompanyService {
         return null; // TODO
     }
 
-    public Object paymentQR(Amount amount, Email email) {
-        return null; // TODO
+    public QR paymentQR(Amount amount, Email email) {
+        Company company = companyRepository.findBy(email)
+                .orElseThrow(() -> responseException(Status.NOT_FOUND, "This partner not found."));
+
+        return qrGenerator.generate(new PaymentQRDTO(company.companyName().companyName(), amount.value()))
+                .orElseThrow(() -> responseException(Status.INTERNAL_SERVER_ERROR,
+                        "Unable to generate QR at the moment. Please try again later or process manual transaction."));
     }
 
     public void changeCardLimitations(int days, int maxUsageCount, String receivedCompanyName) {
@@ -141,7 +158,8 @@ public class CompanyService {
 
     private void generateAndResendPartnerOTP(Company company) {
         PartnerVerificationOTP otp = PartnerVerificationOTP
-                .of(company, hotpGenerator.generateHOTP(company.keyAndCounter().key(), company.keyAndCounter().counter()));
+                .of(company,
+                        hotpGenerator.generateHOTP(company.keyAndCounter().key(), company.keyAndCounter().counter()));
 
         otpRepository.save(otp)
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
