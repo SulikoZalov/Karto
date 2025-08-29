@@ -3,8 +3,8 @@ package org.project.karto.domain.card.entities;
 import org.project.karto.domain.card.enumerations.*;
 import org.project.karto.domain.card.events.CashbackEvent;
 import org.project.karto.domain.card.exceptions.FailedPaymentIntentException;
-import org.project.karto.domain.card.value_objects.Currency;
 import org.project.karto.domain.card.value_objects.*;
+import org.project.karto.domain.card.value_objects.Currency;
 import org.project.karto.domain.common.annotations.Nullable;
 import org.project.karto.domain.common.exceptions.IllegalDomainArgumentException;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
@@ -40,8 +40,7 @@ public class GiftCard {
     public static final BigDecimal KARTO_COMMON_CARD_FEE_RATE = BigDecimal.valueOf(0.02);
     public static final BigDecimal DEFAULT_CASHBACK = BigDecimal.valueOf(0.01); // 1%
     public static final BigDecimal MAX_CASHBACK_RATE = BigDecimal.valueOf(0.035); // 3.5%
-    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.001); // 0.01% for every consecutive usage
-                                                                                    // day
+    public static final BigDecimal ACTIVITY_MULTIPLIER = BigDecimal.valueOf(0.001); // 0.01% for every consecutive usage day
 
     private GiftCard(
             CardID id,
