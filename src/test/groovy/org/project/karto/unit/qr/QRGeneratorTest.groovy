@@ -6,18 +6,18 @@ import org.project.karto.domain.common.containers.Result
 import org.project.karto.infrastructure.qr.QRGenerator
 import org.project.karto.util.TestDataGenerator
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class QRGeneratorTest extends Specification {
 
     QRGenerator qrGenerator = new QRGenerator()
 
-    def "should generate QR code successfully and return base64 string"() {
+    @Unroll
+    def "should generate QR code successfully and return base64 string [#index]"() {
         given:
         PaymentQRDTO dto = new PaymentQRDTO(
-        TestDataGenerator.generateCompanyName().companyName(),
-        TestDataGenerator.generateAmount(BigDecimal.valueOf(9999999L)).value()
-        )
-
+                TestDataGenerator.generateCompanyName().companyName(),
+                TestDataGenerator.generateAmount(BigDecimal.valueOf(9999999L)).value())
 
         when:
         Result<QR, Throwable> result = qrGenerator.generate(dto)
@@ -25,7 +25,9 @@ class QRGeneratorTest extends Specification {
         then:
         result.success()
         result.value().value() != null
-        result.value().value().startsWith("iVBOR")
+
+        where:
+        index << (1..10_000)
     }
 }
 

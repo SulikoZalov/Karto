@@ -89,14 +89,14 @@
             <version>2.12</version>
         </dependency>
         <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>core</artifactId>
-            <version>3.5.3</version>
+            <groupId>org.boofcv</groupId>
+            <artifactId>boofcv-ip</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>javase</artifactId>
-            <version>3.5.3</version>
+            <groupId>org.boofcv</groupId>
+            <artifactId>boofcv-core</artifactId>
+            <version>1.2.3</version>
         </dependency>
 
         <dependency>
