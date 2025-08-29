@@ -1,19 +1,19 @@
 package org.project.karto.unit.qr
 
-import org.project.karto.infrastructure.qr.QRGenerator
-import spock.lang.Specification
-import org.project.karto.application.dto.gift_card.PaymentQRDTO
 import org.project.karto.application.dto.common.QR
+import org.project.karto.application.dto.gift_card.PaymentQRDTO
 import org.project.karto.domain.common.containers.Result
+import org.project.karto.infrastructure.qr.QRGenerator
 import org.project.karto.util.TestDataGenerator
+import spock.lang.Specification
 
 class QRGeneratorTest extends Specification {
 
-    def qrGenerator = new QRGenerator()
+    QRGenerator qrGenerator = new QRGenerator()
 
     def "should generate QR code successfully and return base64 string"() {
         given:
-        def dto = new PaymentQRDTO(
+        PaymentQRDTO dto = new PaymentQRDTO(
         TestDataGenerator.generateCompanyName().companyName(),
         TestDataGenerator.generateAmount(BigDecimal.valueOf(9999999L)).value()
         )
