@@ -1,0 +1,595 @@
+---
+openapi: 3.1.0
+components:
+  schemas:
+    CardDTO:
+      type: object
+      properties:
+        partnerID:
+          $ref: "#/components/schemas/UUID"
+        expirationPeriodInDays:
+          type: integer
+          format: int32
+        maxUsageCount:
+          type: integer
+          format: int32
+    CompanyRegistrationForm:
+      type: object
+      properties:
+        registrationCountryCode:
+          type: string
+        registrationNumber:
+          type: string
+        companyName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        rawPassword:
+          type: string
+        cardExpirationDays:
+          type: integer
+          format: int32
+        cardMaxUsageCount:
+          type: integer
+          format: int32
+    GiftCardDTO:
+      type: object
+      properties:
+        giftCardID:
+          type: string
+        storeID:
+          type: string
+        storeName:
+          type: string
+        amount:
+          type: number
+        status:
+          $ref: "#/components/schemas/GiftCardStatus"
+        maxCountOfUsage:
+          type: integer
+          format: int32
+        countOfUses:
+          type: integer
+          format: int32
+        expirationDate:
+          $ref: "#/components/schemas/LocalDateTime"
+    GiftCardStatus:
+      type: string
+      enum:
+      - PENDING
+      - ACTIVE
+      - EXPIRED
+      - USED_UP
+    Info:
+      type: object
+      properties:
+        info:
+          type: string
+    LateVerificationForm:
+      type: object
+      properties:
+        email:
+          type: string
+        phone:
+          type: string
+    LocalDate:
+      type: string
+      format: date
+      examples:
+      - 2022-03-10
+    LocalDateTime:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T12:15:50
+    LoginForm:
+      type: object
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+    ProfilePicture:
+      type: object
+      properties:
+        profilePicture:
+          type: string
+          format: binary
+        imageType:
+          type: string
+    RegistrationForm:
+      type: object
+      properties:
+        firstname:
+          type: string
+        surname:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        passwordConfirmation:
+          type: string
+        birthDate:
+          $ref: "#/components/schemas/LocalDate"
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+    Tokens:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+    UUID:
+      type: string
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+    UserDTO:
+      type: object
+      properties:
+        firstname:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        birthDate:
+          $ref: "#/components/schemas/LocalDate"
+        isVerified:
+          type: boolean
+        is2FAEnabled:
+          type: boolean
+        storedCashback:
+          type: number
+  securitySchemes:
+    SecurityScheme:
+      type: openIdConnect
+      openIdConnectUrl: http://localhost:7080/realms/karto-realm/.well-known/openid-configuration
+      description: Authentication
+paths:
+  /karto/admin/auth/login:
+    post:
+      parameters:
+      - name: X-VERIFICATION-KEY
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+      summary: Login
+      tags:
+      - Admin Auth Resource
+  /karto/admin/ban/user:
+    patch:
+      parameters:
+      - name: phone
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Ban User
+      tags:
+      - Admin Resource
+      security:
+      - SecurityScheme:
+        - ADMIN
+  /karto/admin/partner/cards/picture:
+    get:
+      parameters:
+      - name: companyName
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePicture"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Load Picture
+      tags:
+      - Admin Resource
+      security:
+      - SecurityScheme:
+        - ADMIN
+  /karto/admin/partner/cards/picture/put:
+    patch:
+      parameters:
+      - name: companyName
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Add Picture
+      tags:
+      - Admin Resource
+      security:
+      - SecurityScheme:
+        - ADMIN
+  /karto/admin/register/partner:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyRegistrationForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Partner Registration
+      tags:
+      - Admin Resource
+      security:
+      - SecurityScheme:
+        - ADMIN
+  /karto/auth/2FA/enable:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Info"
+        "400":
+          description: Bad Request
+      summary: Enable 2 FA
+      tags:
+      - Auth Resource
+  /karto/auth/2FA/verify:
+    patch:
+      parameters:
+      - name: otp
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tokens"
+      summary: Verify 2 FA
+      tags:
+      - Auth Resource
+  /karto/auth/late-verification:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LateVerificationForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Late Verification
+      tags:
+      - Auth Resource
+  /karto/auth/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Bad Request
+      summary: Login
+      tags:
+      - Auth Resource
+  /karto/auth/oidc:
+    post:
+      parameters:
+      - name: X-ID-TOKEN
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tokens"
+      summary: Oidc Auth
+      tags:
+      - Auth Resource
+  /karto/auth/refresh-token:
+    patch:
+      parameters:
+      - name: Refresh-Token
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+      summary: Refresh
+      tags:
+      - Auth Resource
+  /karto/auth/registration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Registration
+      tags:
+      - Auth Resource
+  /karto/auth/resend-otp:
+    get:
+      parameters:
+      - name: phoneNumber
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Resend OTP
+      tags:
+      - Auth Resource
+  /karto/auth/verification:
+    patch:
+      parameters:
+      - name: otp
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Verification
+      tags:
+      - Auth Resource
+  /karto/gift-card/available/gift_cards:
+    get:
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CardDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Available Gift Cards
+      tags:
+      - Gift Card Resource
+      security:
+      - SecurityScheme:
+        - CUSTOMER
+  /karto/partner/card/limitations:
+    patch:
+      parameters:
+      - name: expiration
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: maxUsageCount
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Change Card Limitations
+      tags:
+      - Partner Resource
+      security:
+      - SecurityScheme:
+        - PARTNER
+  /karto/partner/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "400":
+          description: Bad Request
+      summary: Login
+      tags:
+      - Partner Resource
+  /karto/partner/otp/resend:
+    get:
+      parameters:
+      - name: phoneNumber
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Resend OTP
+      tags:
+      - Partner Resource
+  /karto/partner/password/change:
+    patch:
+      parameters:
+      - name: newPassword
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Change Password
+      tags:
+      - Partner Resource
+      security:
+      - SecurityScheme:
+        - PARTNER
+  /karto/partner/verification:
+    patch:
+      parameters:
+      - name: otp
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Verify Partner Account
+      tags:
+      - Partner Resource
+  /karto/user/profile:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: User Profile
+      tags:
+      - User Profile Resource
+      security:
+      - SecurityScheme: []
+  /karto/user/profile/gift_cards:
+    get:
+      parameters:
+      - name: pageNumber
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GiftCardDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: User Cards
+      tags:
+      - User Profile Resource
+      security:
+      - SecurityScheme: []
+info:
+  title: Karto API
+  version: 1.0.0-SNAPSHOT
