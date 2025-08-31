@@ -1,23 +1,21 @@
 package org.project.karto.infrastructure.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import java.net.URI;
-import java.util.Base64;
-import java.util.UUID;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.project.karto.application.dto.gift_card.TransactionDTO;
 import org.project.karto.domain.common.containers.Result;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.util.Base64;
+import java.util.UUID;
 
 @ApplicationScoped
 public class UPPaymentProcessor {
@@ -34,7 +32,7 @@ public class UPPaymentProcessor {
     @ConfigProperty(name = "up.checkout")
     String checkoutURL;
 
-    @ConfigProperty(name = "up.detailed_status")
+    @ConfigProperty(name = "up.transaction.status")
     String detailedStatusURL;
 
     private String authToken;

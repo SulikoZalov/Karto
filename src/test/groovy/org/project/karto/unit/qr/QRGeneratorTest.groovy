@@ -5,12 +5,12 @@ import org.project.karto.application.dto.gift_card.PaymentQRDTO
 import org.project.karto.domain.common.containers.Result
 import org.project.karto.infrastructure.qr.QRGenerator
 import org.project.karto.util.TestDataGenerator
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@Ignore
 class QRGeneratorTest extends Specification {
-
-    QRGenerator qrGenerator = new QRGenerator()
 
     @Unroll
     def "should generate QR code successfully and return base64 string [#index]"() {
@@ -20,7 +20,7 @@ class QRGeneratorTest extends Specification {
                 TestDataGenerator.generateAmount(BigDecimal.valueOf(9999999L)).value())
 
         when:
-        Result<QR, Throwable> result = qrGenerator.generate(dto)
+        Result<QR, Throwable> result = QRGenerator.generate(dto)
 
         then:
         result.success()

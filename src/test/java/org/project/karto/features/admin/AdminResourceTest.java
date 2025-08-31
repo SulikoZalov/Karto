@@ -40,7 +40,7 @@ class AdminResourceTest {
     @Inject
     DBManagementUtils dbManagementUtils;
 
-    static final String ADD_IMAGE = "karto/admin/patner/cards/picture/put";
+    static final String ADD_IMAGE = "karto/admin/partner/cards/picture/put";
 
     static final String GET_IMAGE = "karto/admin/partner/cards/picture";
 

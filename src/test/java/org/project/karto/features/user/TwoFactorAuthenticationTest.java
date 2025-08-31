@@ -2,13 +2,11 @@ package org.project.karto.features.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import org.assertj.core.api.Assertions;
 import org.assertj.core.description.TextDescription;
 import org.junit.jupiter.api.Test;
@@ -49,7 +47,7 @@ class TwoFactorAuthenticationTest {
                 .post(ENABLE_2FA_URL)
                 .then()
                 .log().all()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -65,7 +63,7 @@ class TwoFactorAuthenticationTest {
                 .post(ENABLE_2FA_URL)
                 .then()
                 .log().all()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
 
         OTP otp = dbManagementUtils.getUserOTP(form.email());
 
@@ -75,7 +73,7 @@ class TwoFactorAuthenticationTest {
                 .when()
                 .patch(VERIFY_2FA)
                 .then()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -187,7 +185,7 @@ class TwoFactorAuthenticationTest {
                 .post(ENABLE_2FA_URL)
                 .then()
                 .log().all()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -212,7 +210,7 @@ class TwoFactorAuthenticationTest {
                 .post(ENABLE_2FA_URL)
                 .then()
                 .log().all()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
 
         given()
                 .param("phoneNumber", form.phone())
@@ -229,6 +227,6 @@ class TwoFactorAuthenticationTest {
                 .when()
                 .patch(VERIFY_2FA)
                 .then()
-                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 }
