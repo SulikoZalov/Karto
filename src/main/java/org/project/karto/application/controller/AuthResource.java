@@ -2,9 +2,8 @@ package org.project.karto.application.controller;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.project.karto.application.dto.auth.LateVerificationForm;
-import org.project.karto.application.dto.auth.LoginForm;
-import org.project.karto.application.dto.auth.RegistrationForm;
+import org.project.karto.application.dto.auth.*;
+import org.project.karto.application.dto.common.Info;
 import org.project.karto.application.service.AuthService;
 
 @Path("/auth")
@@ -25,8 +24,8 @@ public class AuthResource {
 
     @POST
     @Path("/oidc")
-    public Response oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
-        return Response.ok(authService.oidcAuth(idToken)).build();
+    public Tokens oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
+        return authService.oidcAuth(idToken);
     }
 
     @GET
@@ -52,27 +51,26 @@ public class AuthResource {
 
     @POST
     @Path("/2FA/enable")
-    public Response enable2FA(LoginForm loginForm) {
+    public Info enable2FA(LoginForm loginForm) {
         authService.enable2FA(loginForm);
-        return Response.accepted("Confirm the OTP sent to you via SMS to complete the two-factor authentication confirmation")
-                .build();
+        return new Info("Confirm the OTP sent to you via SMS to complete the two-factor authentication confirmation");
     }
 
     @PATCH
     @Path("/2FA/verify")
-    public Response verify2FA(@QueryParam("otp") String otp) {
-        return Response.accepted(authService.twoFactorAuth(otp)).build();
+    public Tokens verify2FA(@QueryParam("otp") String otp) {
+        return authService.twoFactorAuth(otp);
     }
 
     @POST
     @Path("/login")
-    public Response login(LoginForm loginForm) {
-        return Response.ok(authService.login(loginForm)).build();
+    public LoginResponse login(LoginForm loginForm) {
+        return authService.login(loginForm);
     }
 
     @PATCH
     @Path("/refresh-token")
-    public Response refresh(@HeaderParam("Refresh-Token") String refreshToken) {
-        return Response.ok(authService.refreshToken(refreshToken)).build();
+    public Token refresh(@HeaderParam("Refresh-Token") String refreshToken) {
+        return authService.refreshToken(refreshToken);
     }
 }

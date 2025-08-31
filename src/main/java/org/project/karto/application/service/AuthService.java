@@ -4,7 +4,6 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.auth.*;
 import org.project.karto.domain.common.exceptions.IllegalDomainStateException;
@@ -160,7 +159,7 @@ public class AuthService {
         }
     }
 
-    public Object login(LoginForm loginForm) {
+    public LoginResponse login(LoginForm loginForm) {
         if (loginForm == null)
             throw responseException(Status.BAD_REQUEST, "Login form is required.");
 

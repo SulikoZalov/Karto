@@ -1,17 +1,13 @@
 package org.project.karto.application.controller;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-
-import java.math.BigDecimal;
-
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.karto.application.dto.auth.LoginForm;
+import org.project.karto.application.dto.auth.Token;
 import org.project.karto.application.service.CompanyService;
-import org.project.karto.domain.common.value_objects.Amount;
-import org.project.karto.domain.common.value_objects.Email;
-import org.project.karto.domain.companies.value_objects.CompanyName;
 
 @Path("/partner")
 public class PartnerResource {
@@ -20,8 +16,8 @@ public class PartnerResource {
 
     private final CompanyService companyService;
 
-    PartnerResource(JsonWebToken jwt, CompanyService companyService) {
-        this.jwt = jwt;
+    PartnerResource(Instance<JsonWebToken> jwt, CompanyService companyService) {
+        this.jwt = jwt.get();
         this.companyService = companyService;
     }
 
@@ -41,8 +37,8 @@ public class PartnerResource {
 
     @POST
     @Path("/login")
-    public Response login(LoginForm loginForm) {
-        return Response.ok(companyService.login(loginForm)).build();
+    public Token login(LoginForm loginForm) {
+        return companyService.login(loginForm);
     }
 
     @PATCH
@@ -60,17 +56,5 @@ public class PartnerResource {
             @QueryParam("maxUsageCount") int maxUsageCount) {
         companyService.changeCardLimitations(days, maxUsageCount, jwt.getName());
         return Response.accepted().build();
-    }
-
-    @GET
-    @Path("/payment/QR/")
-    public Response paymentQR(@QueryParam("amount") BigDecimal amount) {
-        return Response.ok(companyService.paymentQR(new Amount(amount), new Email(jwt.getName()))).build();
-    }
-
-    @GET
-    @Path("/statistic/cards/")
-    public Response getStatistic() {
-        return Response.ok(companyService.statisticOf(new CompanyName(jwt.getName()))).build();
     }
 }

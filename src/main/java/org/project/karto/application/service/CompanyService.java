@@ -4,7 +4,6 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
 import org.project.karto.application.dto.auth.LoginForm;
 import org.project.karto.application.dto.auth.Token;
 import org.project.karto.application.dto.common.QR;
@@ -29,8 +28,6 @@ public class CompanyService {
 
     private final JWTUtility jwtUtility;
 
-    private final QRGenerator qrGenerator;
-
     private final HOTPGenerator hotpGenerator;
 
     private final PasswordEncoder passwordEncoder;
@@ -41,15 +38,14 @@ public class CompanyService {
 
     private final PartnerVerificationOTPRepository otpRepository;
 
-    CompanyService(JWTUtility jwtUtility,
-            QRGenerator qrGenerator,
+    CompanyService(
+            JWTUtility jwtUtility,
             PasswordEncoder passwordEncoder,
             CompanyRepository companyRepository,
             PhoneInteractionService phoneInteractionService,
             PartnerVerificationOTPRepository otpRepository) {
 
         this.jwtUtility = jwtUtility;
-        this.qrGenerator = qrGenerator;
         this.passwordEncoder = passwordEncoder;
         this.phoneInteractionService = phoneInteractionService;
         this.hotpGenerator = new HOTPGenerator();
@@ -137,7 +133,7 @@ public class CompanyService {
         Company company = companyRepository.findBy(email)
                 .orElseThrow(() -> responseException(Status.NOT_FOUND, "This partner not found."));
 
-        return qrGenerator.generate(new PaymentQRDTO(company.companyName().companyName(), amount.value()))
+        return QRGenerator.generate(new PaymentQRDTO(company.companyName().companyName(), amount.value()))
                 .orElseThrow(() -> responseException(Status.INTERNAL_SERVER_ERROR,
                         "Unable to generate QR at the moment. Please try again later or process manual transaction."));
     }

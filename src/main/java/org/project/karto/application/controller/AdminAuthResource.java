@@ -4,7 +4,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Response;
+import org.project.karto.application.dto.auth.Token;
 import org.project.karto.application.service.AdminService;
 
 @Path("/admin/auth")
@@ -19,7 +19,7 @@ public class AdminAuthResource {
     @POST
     @PermitAll
     @Path("/login")
-    public Response login(@HeaderParam("X-VERIFICATION-KEY") String verificationKey) {
-        return Response.ok(adminService.auth(verificationKey)).build();
+    public Token login(@HeaderParam("X-VERIFICATION-KEY") String verificationKey) {
+        return adminService.auth(verificationKey);
     }
 }
